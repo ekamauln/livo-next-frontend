@@ -18,6 +18,7 @@ import { Eye, EyeOff, LogIn } from "lucide-react";
 import { useState } from "react";
 import { Slideshow } from "@/components/custom-ui/slideshow";
 import { useAuth } from "@/contexts/auth-context";
+import { BorderBeam } from "@/components/ui/border-beam";
 import * as z from "zod";
 
 const loginSchema = z.object({
@@ -53,7 +54,7 @@ export function LoginForm() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card className="overflow-hidden p-0">
+      <Card className="relative overflow-hidden p-0">
         <CardContent className="grid p-0 md:grid-cols-2">
           <Form {...form}>
             <form className="p-6 md:p-8" onSubmit={form.handleSubmit(onSubmit)}>
@@ -159,6 +160,7 @@ export function LoginForm() {
             <Slideshow className="absolute inset-0 h-full w-full" />
           </div>
         </CardContent>
+        <BorderBeam duration={8} size={100} />
       </Card>
       <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4">
         By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
