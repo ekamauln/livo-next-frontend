@@ -75,13 +75,13 @@ export default function AppNavbar() {
             {/* Admin menus */}
             <MenubarMenu>
               <MenubarTrigger className="cursor-pointer">
-                Superadmin Menu
+                Coordinator Menu
               </MenubarTrigger>
               <MenubarContent>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/superadmin/users-list">
+                  <Link href="/coordinator/users">
                     <SquareUser className="h-4 w-4" />
-                    Users List
+                    Users
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
