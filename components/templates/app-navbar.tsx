@@ -85,9 +85,9 @@ export default function AppNavbar() {
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/superadmin/products-list">
+                  <Link href="/coordinator/products">
                     <Package className="h-4 w-4" />
-                    Products List
+                    Products
                   </Link>
                 </MenubarItem>
               </MenubarContent>

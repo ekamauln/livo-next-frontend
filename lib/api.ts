@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
   Role,
 } from "@/types/auth";
+import { Product } from "@/types/product";
 
 const API_BASE_URL = "http://192.168.31.136:8000/api";
 
@@ -173,6 +174,51 @@ export const adminApi = {
     return apiRequest<ApiResponse<void>>(`/admin/users/${id}/roles`, {
       method: "DELETE",
       body: JSON.stringify(roleData),
+    });
+  },
+};
+
+export const productApi = {
+  getProducts: async (
+    page: number = 1,
+    limit: number = 10,
+    search?: string
+  ): Promise<PaginatedResponse<Product>> => {
+    const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
+    return apiRequest<PaginatedResponse<Product>>(
+      `/products?page=${page}&limit=${limit}${searchParam}`
+    );
+  },
+
+  getProductById: async (id: number): Promise<ApiResponse<Product>> => {
+    return apiRequest<ApiResponse<Product>>(`/products/${id}`);
+  },
+
+  createProduct: async (productData: {
+    sku: string;
+    name: string;
+    image?: string;
+    variant: string;
+    location: string;
+    barcode: string;
+  }): Promise<ApiResponse<Product>> => {
+    return apiRequest<ApiResponse<Product>>("/products", {
+      method: "POST",
+      body: JSON.stringify(productData),
+    });
+  },
+
+  updateProduct: async (
+    id: number,
+    productData: {
+      name: string;
+      variant: string;
+      image: string;
+    }
+  ): Promise<ApiResponse<Product>> => {
+    return apiRequest<ApiResponse<Product>>(`/products/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(productData),
     });
   },
 };
