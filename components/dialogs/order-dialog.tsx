@@ -40,7 +40,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -478,16 +478,16 @@ export function OrderDialog({
                                     {detail.product_name}
                                   </CardTitle>
                                   <div className="flex items-center gap-2">
-                                    <Button
+                                    <RippleButton
                                       variant="outline"
                                       size="sm"
                                       onClick={() => handleEditDetail(detail)}
                                       disabled={!isOperationAllowed()}
-                                      className="h-8 w-8 p-0 cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
+                                      className="h-8 w-8 p-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                       <Edit className="h-3 w-3" />
-                                    </Button>
-                                    <Button
+                                    </RippleButton>
+                                    <RippleButton
                                       variant={
                                         deleteConfirmingId === detail.id
                                           ? "destructive"
@@ -502,7 +502,7 @@ export function OrderDialog({
                                         updating || !isOperationAllowed()
                                       }
                                       className={cn(
-                                        "h-8 w-8 p-0 cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50",
+                                        "h-8 w-8 p-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
                                         deleteConfirmingId === detail.id &&
                                           "animate-pulse border-red-500 bg-red-500 text-white"
                                       )}
@@ -513,7 +513,7 @@ export function OrderDialog({
                                       }
                                     >
                                       <Trash2 className="h-3 w-3" />
-                                    </Button>
+                                    </RippleButton>
                                   </div>
                                 </div>
                                 <Separator
@@ -596,7 +596,7 @@ export function OrderDialog({
                                   onOpenChange={setProductSearchOpen}
                                 >
                                   <PopoverTrigger asChild>
-                                    <Button
+                                    <RippleButton
                                       variant="outline"
                                       role="combobox"
                                       aria-expanded={productSearchOpen}
@@ -607,7 +607,7 @@ export function OrderDialog({
                                         Search products to auto-fill details...
                                       </div>
                                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </Button>
+                                    </RippleButton>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-full p-0">
                                     <Command>
@@ -738,24 +738,24 @@ export function OrderDialog({
                               </div>
 
                               <div className="flex justify-end gap-2">
-                                <Button
+                                <RippleButton
                                   type="button"
                                   variant="destructive"
                                   onClick={() => form.reset()}
-                                  className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
+                                  className="cursor-pointer"
                                 >
                                   Reset Form
-                                </Button>
-                                <Button
+                                </RippleButton>
+                                <RippleButton
                                   type="submit"
                                   disabled={updating || !isOperationAllowed()}
-                                  className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {updating && (
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                   )}
                                   Add Detail
-                                </Button>
+                                </RippleButton>
                               </div>
                             </form>
                           </Form>
@@ -868,7 +868,7 @@ export function OrderDialog({
                                 </div>
 
                                 <div className="flex justify-end gap-2">
-                                  <Button
+                                  <RippleButton
                                     type="button"
                                     variant="destructive"
                                     onClick={() => {
@@ -876,20 +876,20 @@ export function OrderDialog({
                                       setEditingDetailId(null);
                                       setActiveTab("details");
                                     }}
-                                    className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
+                                    className="cursor-pointer"
                                   >
                                     Cancel
-                                  </Button>
-                                  <Button
+                                  </RippleButton>
+                                  <RippleButton
                                     type="submit"
                                     disabled={updating || !isOperationAllowed()}
-                                    className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                                   >
                                     {updating && (
                                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
                                     Update Detail
-                                  </Button>
+                                  </RippleButton>
                                 </div>
                               </form>
                             </Form>
