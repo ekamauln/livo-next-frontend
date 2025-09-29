@@ -15,7 +15,7 @@ import UsersTable from "@/components/tables/users-table";
 
 export default function Users() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator"]}>
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
@@ -41,8 +41,8 @@ export default function Users() {
           </div>
         </header>
 
-        <div className="w-full p-10 pt-0">
-          <Card className="relative p-6 space-y-2">
+        <div className="w-full p-4 pt-0">
+          <Card className="p-6 space-y-2">
             <h1 className="text-2xl font-semibold">Users Data List</h1>
             <Separator className="mt-0" />
             <UsersTable />

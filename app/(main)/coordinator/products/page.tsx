@@ -41,8 +41,8 @@ export default function Products() {
           </div>
         </header>
 
-        <div className="w-full p-10 pt-0">
-          <Card className="relative p-6 space-y-2">
+        <div className="w-full p-4 pt-0">
+          <Card className="p-6 space-y-2">
             <h1 className="text-2xl font-semibold">Products Data List</h1>
             <Separator className="mt-0" />
             <ProductsTable />

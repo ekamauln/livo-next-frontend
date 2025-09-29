@@ -526,28 +526,28 @@ export function OrderDialog({
                                   <Table>
                                     <TableHeader>
                                       <TableRow>
-                                        <TableHead className="font-mono">
+                                        <TableHead className="text-center font-mono max-w-[100px]">
                                           SKU
                                         </TableHead>
-                                        <TableHead className="font-mono">
+                                        <TableHead className="text-center font-mono">
                                           Quantity
                                         </TableHead>
-                                        <TableHead className="font-mono">
+                                        <TableHead className="text-center font-mono">
                                           Variant
                                         </TableHead>
                                       </TableRow>
                                     </TableHeader>
                                     <TableBody>
                                       <TableRow>
-                                        <TableCell className="font-mono text-wrap">
+                                        <TableCell className="font-mono min-w-[150px] max-w-[150px] truncate">
                                           {detail.sku || "N/A"}
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-center">
                                           <Badge variant="outline">
                                             {detail.quantity}
                                           </Badge>
                                         </TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-center">
                                           {detail.variant || "N/A"}
                                         </TableCell>
                                       </TableRow>
@@ -740,7 +740,7 @@ export function OrderDialog({
                               <div className="flex justify-end gap-2">
                                 <RippleButton
                                   type="button"
-                                  variant="destructive"
+                                  variant="outline"
                                   onClick={() => form.reset()}
                                   className="cursor-pointer"
                                 >
@@ -870,7 +870,7 @@ export function OrderDialog({
                                 <div className="flex justify-end gap-2">
                                   <RippleButton
                                     type="button"
-                                    variant="destructive"
+                                    variant="outline"
                                     onClick={() => {
                                       form.reset();
                                       setEditingDetailId(null);
