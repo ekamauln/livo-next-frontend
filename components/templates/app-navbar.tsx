@@ -18,7 +18,8 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -98,13 +99,13 @@ export default function AppNavbar() {
               <MenubarTrigger className="cursor-pointer">Orders</MenubarTrigger>
               <MenubarContent>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/orders/orders-list">
+                  <Link href="/orders/orders">
                     <ListOrdered className="h-4 w-4" />
-                    Orders List
+                    Orders
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/orders/order-imports">
+                  <Link href="/orders/orders-import">
                     <FolderUp className="h-4 w-4" />
                     Orders Import
                   </Link>
@@ -159,15 +160,15 @@ export default function AppNavbar() {
           orientation="vertical"
           className="data-[orientation=vertical]:h-6"
         />
-        <Button
+        <RippleButton
           onClick={handleLogout}
           variant="destructive"
           size="sm"
-          className="flex items-center gap-2 cursor-pointer hover:translate-y-[-4px] all duration-300 ease-in-out"
+          className="flex items-center gap-2 cursor-pointer"
         >
           <LogOut className="size-4" />
           <span>Logout</span>
-        </Button>
+        </RippleButton>
       </div>
     </header>
   );
