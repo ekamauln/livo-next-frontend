@@ -7,7 +7,8 @@ import {
   LoginCredentials,
   RegisterCredentials,
 } from "@/types/auth";
-import { authApi, ApiError } from "@/lib/api";
+import { authApi } from "@/lib/api/authApi";
+import { ApiError } from "@/lib/api/types";
 import { toast } from "sonner";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,16 +34,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           );
         } catch (error) {
           console.error("Error verifying token:", error);
-          // Token might be expired, clear storage
+          // Token might be expired, clear storage and redirect to login
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
           localStorage.removeItem("user_data");
+          setUser(null);
+          // The automatic refresh in apiRequest will handle this
         }
       }
       setIsLoading(false);
     };
 
     initAuth();
+
+    // Listen for storage changes to handle token updates from automatic refresh
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "user_data") {
+        if (e.newValue) {
+          try {
+            const newUser = JSON.parse(e.newValue);
+            setUser(newUser);
+          } catch (error) {
+            console.error("Error parsing user data from storage:", error);
+          }
+        } else {
+          setUser(null);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = async (credentials: LoginCredentials) => {

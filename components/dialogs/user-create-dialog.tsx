@@ -31,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { User, Role } from "@/types/auth";
-import { adminApi } from "@/lib/api";
+import { adminApi } from "@/lib/api/adminApi";
 import { Separator } from "@/components/ui/separator";
 
 // Zod form schema

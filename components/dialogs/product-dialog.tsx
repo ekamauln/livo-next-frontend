@@ -42,7 +42,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { productApi } from "@/lib/api";
+import { productApi } from "@/lib/api/productApi";
 import { Product } from "@/types/product";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

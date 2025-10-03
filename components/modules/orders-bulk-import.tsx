@@ -15,7 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Upload, Send, Copy, FileSpreadsheet } from "lucide-react";
-import { orderApi } from "@/lib/api";
+import { orderApi } from "@/lib/api/orderApi";
 
 // Define types locally to avoid import issues
 type JsonValue =

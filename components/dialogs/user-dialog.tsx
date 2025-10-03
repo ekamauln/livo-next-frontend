@@ -47,7 +47,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { adminApi, ApiError } from "@/lib/api";
+import { adminApi } from "@/lib/api/adminApi";
+import { ApiError } from "@/lib/api/types";
 import { User, Role } from "@/types/auth";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {

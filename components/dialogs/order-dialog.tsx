@@ -55,7 +55,8 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { orderApi, productApi } from "@/lib/api";
+import { orderApi } from "@/lib/api/orderApi";
+import { productApi } from "@/lib/api/productApi";
 import type { OrderDetail } from "@/types/order";
 import type { Product } from "@/types/product";
 import { Separator } from "@/components/ui/separator";

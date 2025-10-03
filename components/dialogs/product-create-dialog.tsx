@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Product } from "@/types/product";
-import { productApi } from "@/lib/api";
+import { productApi } from "@/lib/api/productApi";
 import { Separator } from "@/components/ui/separator";
 
 // Zod form schema

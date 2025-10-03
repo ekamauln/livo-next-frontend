@@ -12,25 +12,32 @@ import { ProtectedRoute } from "@/contexts/protected-route";
 import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Highlighter } from "@/components/ui/highlighter";
 
 // Role-specific badge styling
 const getRoleBadgeStyle = (roleName: string) => {
   const roleStyles: Record<string, string> = {
-    "superadmin": "bg-purple-600 text-white hover:bg-purple-700 border-purple-600",
-    "coordinator": "bg-blue-600 text-white hover:bg-blue-700 border-blue-600",
-    "admin": "bg-red-600 text-white hover:bg-red-700 border-red-600",
-    "finance": "bg-green-600 text-white hover:bg-green-700 border-green-600",
-    "picker": "bg-orange-500 text-white hover:bg-orange-600 border-orange-500",
-    "outbound": "bg-cyan-500 text-white hover:bg-cyan-600 border-cyan-500",
-    "qc-ribbon": "bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500",
-    "qc-online": "bg-violet-500 text-white hover:bg-violet-600 border-violet-500",
+    superadmin:
+      "bg-purple-600 text-white hover:bg-purple-700 border-purple-600",
+    coordinator: "bg-blue-600 text-white hover:bg-blue-700 border-blue-600",
+    admin: "bg-red-600 text-white hover:bg-red-700 border-red-600",
+    finance: "bg-green-600 text-white hover:bg-green-700 border-green-600",
+    picker: "bg-orange-500 text-white hover:bg-orange-600 border-orange-500",
+    outbound: "bg-cyan-500 text-white hover:bg-cyan-600 border-cyan-500",
+    "qc-ribbon":
+      "bg-indigo-500 text-white hover:bg-indigo-600 border-indigo-500",
+    "qc-online":
+      "bg-violet-500 text-white hover:bg-violet-600 border-violet-500",
     "mb-ribbon": "bg-pink-500 text-white hover:bg-pink-600 border-pink-500",
     "mb-online": "bg-rose-500 text-white hover:bg-rose-600 border-rose-500",
-    "packing": "bg-amber-500 text-white hover:bg-amber-600 border-amber-500",
-    "guest": "bg-gray-500 text-white hover:bg-gray-600 border-gray-500",
+    packing: "bg-amber-500 text-white hover:bg-amber-600 border-amber-500",
+    guest: "bg-gray-500 text-white hover:bg-gray-600 border-gray-500",
   };
-  
-  return roleStyles[roleName.toLowerCase()] || "bg-gray-500 text-white hover:bg-gray-600 border-gray-500";
+
+  return (
+    roleStyles[roleName.toLowerCase()] ||
+    "bg-gray-500 text-white hover:bg-gray-600 border-gray-500"
+  );
 };
 
 export default function Page() {
@@ -60,8 +67,11 @@ export default function Page() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <p className="text-muted-foreground mt-2">
-            Welcome back, {user?.full_name || user?.username}
+          <p className="mt-2">
+            Welcome back,{" "}
+            <Highlighter action="underline" color="#FF9800">
+              {user?.full_name || user?.username}
+            </Highlighter>
           </p>
         </div>
 
@@ -120,7 +130,7 @@ export default function Page() {
                           {role.description}
                         </p>
                       </div>
-                      <Badge 
+                      <Badge
                         variant="secondary"
                         className={`font-bold ${getRoleBadgeStyle(role.name)}`}
                       >
@@ -131,10 +141,6 @@ export default function Page() {
                 </div>
               </CardContent>
             </Card>
-
-            {/* <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" /> */}
           </div>
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>

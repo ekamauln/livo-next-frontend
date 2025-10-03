@@ -24,8 +24,6 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
-  KeyRound,
-  BookUser,
   UserPlus,
 } from "lucide-react";
 import {
@@ -48,22 +46,18 @@ import { toast } from "sonner";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { Badge } from "@/components/ui/badge";
-import { Product } from "@/types/product";
-import { productApi } from "@/lib/api/productApi";
-import { ProductCreateDialog } from "@/components/dialogs/product-create-dialog";
-import { ProductDialog } from "@/components/dialogs/product-dialog";
+import { Box } from "@/types/box";
+import { boxApi } from "@/lib/api/boxApi";
+import { BoxCreateDialog } from "@/components/dialogs/box-create-dialog";
+import { BoxDialog } from "@/components/dialogs/box-dialog";
 import React from "react";
-import Image from "next/image";
 
-export default function ProductsTable() {
-  const [data, setData] = useState<Product[]>([]);
+export default function BoxesTable() {
+  const [data, setData] = useState<Box[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     updated_at: false,
-    barcode: false,
-    location: false,
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [pagination, setPagination] = useState({
@@ -72,32 +66,24 @@ export default function ProductsTable() {
     total: 0,
   });
 
-  // Dialog State
-  const [selectedProductId, setSelectedProductId] = useState<number | null>(
-    null
-  );
+  // Dialog states
+  const [selectedBoxId, setSelectedBoxId] = useState<number | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [productDialogOpen, setProductDialogOpen] = useState(false);
-  const [dialogTab, setDialogTab] = useState<
-    "detail" | "profile" | "barcode1d" | "barcode2d"
-  >("detail");
+  const [boxDialogOpen, setBoxDialogOpen] = useState(false);
+  const [dialogTab, setDialogTab] = useState<"detail" | "profile">("detail");
 
-  // Fetch products data
+  // Fetch boxes data
   const fetchData = useCallback(
     async (page: number = 1, search: string = "") => {
       try {
         setIsLoading(true);
-        const response = await productApi.getProducts(
-          page,
-          pagination.limit,
-          search
-        );
-        // Extract products array from the response data
-        const products = response.data.products as Product[];
-        setData(products);
+        const response = await boxApi.getBoxes(page, pagination.limit, search);
+        // Extract boxes array from the response data
+        const boxes = response.data.boxes as Box[];
+        setData(boxes);
         setPagination(response.data.pagination);
       } catch {
-        toast.error("Failed to fetch products. Please try again.");
+        toast.error("Failed to fetch boxes. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +113,7 @@ export default function ProductsTable() {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  const columns: ColumnDef<Product>[] = [
+  const columns: ColumnDef<Box>[] = [
     {
       accessorKey: "id",
       header: () => <div className="text-sm text-center font-semibold">ID</div>,
@@ -138,71 +124,23 @@ export default function ProductsTable() {
       ),
     },
     {
-      accessorKey: "image",
+      accessorKey: "code",
       header: () => (
-        <div className="flex justify-center items-center">Image</div>
+        <div className="text-sm text-center font-semibold">Code</div>
       ),
       cell: ({ row }) => (
-        <div className="flex justify-center items-center">
-          <Image
-            width={32}
-            height={32}
-            src={row.getValue("image")}
-            alt={row.getValue("name")}
-            className="h-8 w-8 rounded"
-          />
+        <div className="font-mono text-sm text-center">
+          {row.getValue("code")}
         </div>
-      ),
-    },
-    {
-      accessorKey: "sku",
-      header: () => (
-        <div className="text-sm text-center font-semibold">SKU</div>
-      ),
-      cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("sku")}</div>
       ),
     },
     {
       accessorKey: "name",
       header: () => (
-        <div className="text-sm text-center font-semibold min-w-[300px] max-w-[500px]">
-          Name
-        </div>
+        <div className="text-sm text-center font-semibold">Name</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm min-w-[300px] max-w-[500px] text-wrap">
-          {row.getValue("name")}
-        </div>
-      ),
-    },
-    {
-      accessorKey: "variant",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Variant</div>
-      ),
-      cell: ({ row }) => (
-        <div className="font-mono text-sm">
-          <Badge variant="secondary">{row.getValue("variant")}</Badge>
-        </div>
-      ),
-    },
-    {
-      accessorKey: "location",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Location</div>
-      ),
-      cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("location")}</div>
-      ),
-    },
-    {
-      accessorKey: "barcode",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Barcode</div>
-      ),
-      cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("barcode")}</div>
+        <div className="font-mono text-sm">{row.getValue("name")}</div>
       ),
     },
     {
@@ -223,9 +161,7 @@ export default function ProductsTable() {
     },
     {
       accessorKey: "updated_at",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Updated</div>
-      ),
+      header: () => <div className="text-sm font-semibold">Updated</div>,
       cell: ({ row }) => {
         const date = new Date(row.getValue("updated_at"));
         return (
@@ -240,7 +176,7 @@ export default function ProductsTable() {
     {
       id: "actions",
       cell: ({ row }) => {
-        const product = row.original;
+        const box = row.original;
         return (
           <div className="flex justify-end text-right">
             <DropdownMenu>
@@ -252,9 +188,9 @@ export default function ProductsTable() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => {
-                    setSelectedProductId(product.id);
+                    setSelectedBoxId(box.id);
                     setDialogTab("detail");
-                    setProductDialogOpen(true);
+                    setBoxDialogOpen(true);
                   }}
                 >
                   <Eye className="mr-2 h-4 w-4" />
@@ -263,33 +199,13 @@ export default function ProductsTable() {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => {
-                    setSelectedProductId(product.id);
+                    setSelectedBoxId(box.id);
                     setDialogTab("profile");
-                    setProductDialogOpen(true);
+                    setBoxDialogOpen(true);
                   }}
                 >
                   <Edit className="mr-2 h-4 w-4" />
-                  Edit Product
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedProductId(product.id);
-                    setDialogTab("barcode1d");
-                    setProductDialogOpen(true);
-                  }}
-                >
-                  <BookUser className="mr-2 h-4 w-4" />
-                  Generate 1D Barcode
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedProductId(product.id);
-                    setDialogTab("barcode2d");
-                    setProductDialogOpen(true);
-                  }}
-                >
-                  <KeyRound className="mr-2 h-4 w-4" />
-                  Generate 2D Barcode
+                  Edit Box
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -317,7 +233,7 @@ export default function ProductsTable() {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
-        {/* Create New Product Button */}
+        {/* Create New Box Button */}
         <RippleButton
           variant="default"
           size="sm"
@@ -325,7 +241,7 @@ export default function ProductsTable() {
           onClick={() => setCreateDialogOpen(true)}
         >
           <div className="flex items-center gap-2 justify-center">
-            <UserPlus className="w-4 h-4" /> <span>Create New Product</span>
+            <UserPlus className="w-4 h-4" /> <span>Create New Box</span>
           </div>
         </RippleButton>
         {/* Column visibility */}
@@ -366,7 +282,7 @@ export default function ProductsTable() {
           className="flex flex-1 gap-2 items-center"
         >
           <Input
-            placeholder="Search products..."
+            placeholder="Search boxes..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="max-w-sm"
@@ -421,7 +337,7 @@ export default function ProductsTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading products...
+                    Loading boxes...
                   </div>
                 </TableCell>
               </TableRow>
@@ -446,7 +362,7 @@ export default function ProductsTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No products found.
+                  No boxes found.
                 </TableCell>
               </TableRow>
             )}
@@ -459,7 +375,7 @@ export default function ProductsTable() {
         <div className="text-sm text-muted-foreground">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} products
+          {pagination.total} boxes
         </div>
         <div className="flex items-center gap-2">
           <RippleButton
@@ -521,26 +437,26 @@ export default function ProductsTable() {
         </div>
       </div>
 
-      {/* Product Dialog */}
-      <ProductDialog
-        productId={selectedProductId}
-        open={productDialogOpen}
-        onOpenChange={setProductDialogOpen}
+      {/* Box Dialog */}
+      <BoxDialog
+        boxId={selectedBoxId}
+        open={boxDialogOpen}
+        onOpenChange={setBoxDialogOpen}
         initialTab={dialogTab}
-        onProductUpdate={() => {
+        onBoxUpdate={() => {
           // Refresh the data to show any updates
           fetchData(pagination.page, searchQuery);
         }}
       />
 
-      {/* Create Product Dialog */}
-      <ProductCreateDialog
+      {/* Create Box Dialog */}
+      <BoxCreateDialog
         isOpen={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        onProductCreated={(product) => {
-          // Refresh the data to show the new product
+        onBoxCreated={(box) => {
+          // Refresh the data to show the new box
           fetchData(pagination.page, searchQuery);
-          toast.success(`Product ${product.name} created successfully!`);
+          toast.success(`Box ${box.name} created successfully!`);
         }}
       />
     </div>

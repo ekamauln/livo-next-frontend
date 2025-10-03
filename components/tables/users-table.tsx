@@ -52,7 +52,7 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { User, Role } from "@/types/auth";
-import { adminApi } from "@/lib/api";
+import { adminApi } from "@/lib/api/adminApi";
 import { UserCreateDialog } from "@/components/dialogs/user-create-dialog";
 import { UserDialog } from "@/components/dialogs/user-dialog";
 import React from "react";
