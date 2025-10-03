@@ -30,65 +30,65 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { boxApi } from "@/lib/api/boxApi";
-import { Box } from "@/types/box";
+import { channelApi } from "@/lib/api/channelApi";
+import { Channel } from "@/types/channel";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 // Form schemas
-const boxSchema = z.object({
-  code: z.string().min(1, "Box code is required"),
-  name: z.string().min(1, "Box name is required"),
+const channelSchema = z.object({
+  code: z.string().min(1, "Channel code is required"),
+  name: z.string().min(1, "Channel name is required"),
 });
 
-type BoxFormData = z.infer<typeof boxSchema>;
+type ChannelFormData = z.infer<typeof channelSchema>;
 
-interface BoxDialogProps {
-  boxId: number | null;
+interface ChannelDialogProps {
+  channelId: number | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialTab?: "detail" | "profile";
-  onBoxUpdate?: () => void;
+  onChannelUpdate?: () => void;
 }
 
-export function BoxDialog({
-  boxId,
+export function ChannelDialog({
+  channelId,
   open,
   onOpenChange,
   initialTab = "detail",
-  onBoxUpdate,
-}: BoxDialogProps) {
-  const [box, setBox] = useState<Box | null>(null);
+  onChannelUpdate,
+}: ChannelDialogProps) {
+  const [channel, setChannel] = useState<Channel | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [updating, setUpdating] = useState(false);
 
-  // Box form
-  const boxForm = useForm<BoxFormData>({
-    resolver: zodResolver(boxSchema),
+  // Channel form
+  const channelForm = useForm<ChannelFormData>({
+    resolver: zodResolver(channelSchema),
     defaultValues: {
       code: "",
       name: "",
     },
   });
 
-  // Fetch box details
-  const fetchBoxDetail = useCallback(
+  // Fetch channel details
+  const fetchChannelDetail = useCallback(
     async (id: number) => {
       try {
         setLoading(true);
-        const response = await boxApi.getBoxById(id);
-        const boxData = response.data;
-        setBox(boxData);
-        // Update box form with data
-        boxForm.reset({
-          code: boxData.code,
-          name: boxData.name,
+        const response = await channelApi.getChannelById(id);
+        const channelData = response.data;
+        setChannel(channelData);
+        // Update channel form with data
+        channelForm.reset({
+          code: channelData.code,
+          name: channelData.name,
         });
       } catch (error) {
-        console.error("Error fetching box details:", error);
-        toast.error("Failed to fetch box details.", {
+        console.error("Error fetching channel details:", error);
+        toast.error("Failed to fetch channel details.", {
           description:
             error instanceof Error ? error.message : "Unknown error occurred",
         });
@@ -96,32 +96,32 @@ export function BoxDialog({
         setLoading(false);
       }
     },
-    [boxForm]
+    [channelForm]
   );
 
-  // Update box
-  const updateBox = async (data: BoxFormData) => {
-    if (!boxId) return;
+  // Update channel
+  const updateChannel = async (data: ChannelFormData) => {
+    if (!channelId) return;
 
     try {
       setUpdating(true);
-      const response = await boxApi.updateBox(boxId, {
+      const response = await channelApi.updateChannel(channelId, {
         code: data.code,
         name: data.name,
       });
 
-      toast.success("Box updated successfully");
-      // Update local box state with the returned data
-      setBox(response.data);
+      toast.success("Channel updated successfully");
+      // Update local channel state with the returned data
+      setChannel(response.data);
       // Also update the form with the new data
-      boxForm.reset({
+      channelForm.reset({
         code: response.data.code,
         name: response.data.name,
       });
-      onBoxUpdate?.();
+      onChannelUpdate?.();
     } catch (error) {
-      console.error("Error updating box:", error);
-      toast.error("Failed to update box", {
+      console.error("Error updating channel:", error);
+      toast.error("Failed to update channel", {
         description:
           error instanceof Error ? error.message : "Unknown error occurred",
       });
@@ -132,27 +132,27 @@ export function BoxDialog({
 
   // Effects
   useEffect(() => {
-    if (open && boxId) {
-      fetchBoxDetail(boxId);
+    if (open && channelId) {
+      fetchChannelDetail(channelId);
       setActiveTab(initialTab);
     } else {
-      setBox(null);
-      boxForm.reset({
+      setChannel(null);
+      channelForm.reset({
         code: "",
         name: "",
       });
     }
-  }, [open, boxId, initialTab, fetchBoxDetail, boxForm]);
+  }, [open, channelId, initialTab, fetchChannelDetail, channelForm]);
 
-  // Update form when box data changes
+  // Update form when channel data changes
   useEffect(() => {
-    if (box) {
-      boxForm.reset({
-        code: box.code,
-        name: box.name,
+    if (channel) {
+      channelForm.reset({
+        code: channel.code,
+        name: channel.name,
       });
     }
-  }, [box, boxForm]);
+  }, [channel, channelForm]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -160,21 +160,25 @@ export function BoxDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 truncate">
             <Package className="h-5 w-5" />
-            {loading ? "Loading..." : box ? `${box.name}` : "Box Details"}
+            {loading
+              ? "Loading..."
+              : channel
+              ? `${channel.name}`
+              : "Channel Details"}
           </DialogTitle>
           <DialogDescription>
-            {box
-              ? `Manage box details for ${box.code}`
-              : "View and manage box information"}
+            {channel
+              ? `Manage channel details for ${channel.code}`
+              : "View and manage channel information"}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            Loading box details...
+            Loading channel details...
           </div>
-        ) : box ? (
+        ) : channel ? (
           <Tabs
             value={activeTab}
             onValueChange={(value) =>
@@ -189,13 +193,13 @@ export function BoxDialog({
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <Settings className="h-4 w-4" />
-                Edit Box
+                Edit Channel
               </TabsTrigger>
             </TabsList>
 
             <div>
               <TabsContents className="flex-1 overflow-y-auto">
-                {/* Box Details Tab */}
+                {/* Channel Details Tab */}
                 <TabsContent value="detail" className="space-y-6">
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
@@ -213,21 +217,23 @@ export function BoxDialog({
                         <Table>
                           <TableBody>
                             <TableRow>
-                              <TableCell className="w-1/4">Box ID</TableCell>
+                              <TableCell className="w-1/4">
+                                Channel ID
+                              </TableCell>
                               <TableCell className="font-mono">
-                                {box.id}
+                                {channel.id}
                               </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableCell className="w-1/4">Code</TableCell>
                               <TableCell className="font-mono">
-                                {box.code}
+                                {channel.code}
                               </TableCell>
                             </TableRow>
                             <TableRow>
                               <TableCell className="w-1/4">Name</TableCell>
                               <TableCell className="text-wrap">
-                                {box.name}
+                                {channel.name}
                               </TableCell>
                             </TableRow>
                           </TableBody>
@@ -237,13 +243,13 @@ export function BoxDialog({
                   </Card>
                 </TabsContent>
 
-                {/* Edit Box Tab */}
+                {/* Edit Channel Tab */}
                 <TabsContent value="profile">
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 truncate">
                         <PackageOpen className="h-5 w-5" />
-                        Edit Box Information
+                        Edit Channel Information
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -251,20 +257,20 @@ export function BoxDialog({
                       />
                     </CardHeader>
                     <CardContent>
-                      <Form {...boxForm}>
+                      <Form {...channelForm}>
                         <form
-                          onSubmit={boxForm.handleSubmit(updateBox)}
+                          onSubmit={channelForm.handleSubmit(updateChannel)}
                           className="space-y-6"
                         >
                           <FormField
-                            control={boxForm.control}
+                            control={channelForm.control}
                             name="code"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Box Code</FormLabel>
+                                <FormLabel>Channel Code</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="Enter box code"
+                                    placeholder="Enter channel code"
                                     {...field}
                                   />
                                 </FormControl>
@@ -274,14 +280,14 @@ export function BoxDialog({
                           />
 
                           <FormField
-                            control={boxForm.control}
+                            control={channelForm.control}
                             name="name"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Box Name</FormLabel>
+                                <FormLabel>Channel Name</FormLabel>
                                 <FormControl>
                                   <Input
-                                    placeholder="Enter box name"
+                                    placeholder="Enter channel name"
                                     {...field}
                                   />
                                 </FormControl>
@@ -320,7 +326,7 @@ export function BoxDialog({
           </Tabs>
         ) : (
           <div className="text-center py-8 text-muted-foreground">
-            No box selected or box not found.
+            No channel selected or channel not found.
           </div>
         )}
       </DialogContent>
