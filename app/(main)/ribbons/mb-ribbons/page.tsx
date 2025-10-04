@@ -33,6 +33,10 @@ export default function MbRibbons() {
                   <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="#">Ribbons</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
                   MB Ribbons
                 </BreadcrumbPage>

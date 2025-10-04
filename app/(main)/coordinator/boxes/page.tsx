@@ -33,6 +33,10 @@ export default function Boxes() {
                   <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
+                <BreadcrumbItem>
+                  <BreadcrumbLink href="#">Coordinator Menu</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
                   Boxes
                 </BreadcrumbPage>
