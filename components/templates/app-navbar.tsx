@@ -9,17 +9,20 @@ import {
 } from "@/components/ui/menubar";
 import {
   FolderUp,
-  ListOrdered,
   LogOut,
   Package,
+  PackageOpen,
+  ScrollText,
+  ShoppingBag,
   SquareUser,
+  Store,
+  Tv,
   User,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
-// import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -117,6 +120,24 @@ export default function AppNavbar() {
                     Products
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/channels">
+                    <Tv className="h-4 w-4" />
+                    Channels
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/stores">
+                    <Store className="h-4 w-4" />
+                    Stores
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/boxes">
+                    <PackageOpen className="h-4 w-4" />
+                    Boxes
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
 
@@ -126,7 +147,7 @@ export default function AppNavbar() {
               <MenubarContent>
                 <MenubarItem asChild className="cursor-pointer">
                   <Link href="/orders/orders">
-                    <ListOrdered className="h-4 w-4" />
+                    <ScrollText className="h-4 w-4" />
                     Orders
                   </Link>
                 </MenubarItem>
@@ -134,6 +155,21 @@ export default function AppNavbar() {
                   <Link href="/orders/orders-import">
                     <FolderUp className="h-4 w-4" />
                     Orders Import
+                  </Link>
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            {/* Ribbons menu */}
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer">
+                Ribbons
+              </MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/ribbons/mb-ribbons">
+                    <ShoppingBag className="h-4 w-4" />
+                    MB Ribbons
                   </Link>
                 </MenubarItem>
               </MenubarContent>
