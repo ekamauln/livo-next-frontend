@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2 } from "lucide-react";
 import { mbRibbonApi } from "@/lib/api/mbRibbonApi";
+import { ApiError } from "@/lib/api/types";
 
 interface MbRibbonFormProps {
   onMbRibbonCreated?: () => void;
@@ -78,7 +79,8 @@ export function MbRibbonForm({
     // Validation
     if (!tracking.trim()) {
       setError("Tracking number is required");
-      // Focus back to input after validation error
+      // Clear input and focus back after validation error
+      setTracking("");
       setTimeout(() => {
         focusTrackingInput();
       }, 100);
@@ -93,7 +95,8 @@ export function MbRibbonForm({
         tracking: tracking.trim(),
       });
 
-      if (response.success) {
+      // Check if response exists and has expected structure
+      if (response && response.success) {
         toast.success("MB-Ribbon created successfully!");
         setTracking("");
         onMbRibbonCreated?.();
@@ -104,17 +107,59 @@ export function MbRibbonForm({
           focusTrackingInput();
         }, 100);
       } else {
-        throw new Error(response.message || "Failed to create MB-Ribbon");
+        // Handle cases where success is false or response is malformed
+        const errorMsg = response?.message || "Failed to create MB-Ribbon";
+        throw new Error(errorMsg);
       }
     } catch (error) {
-      console.error("Error creating MB-Ribbon:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Unknown error occurred";
+      // Only log unexpected errors to console to reduce noise
+      if (error instanceof ApiError) {
+        // For expected API errors, log at debug level
+        if (error.status === 404 && error.message.toLowerCase().includes("order not found")) {
+          console.debug("Order not found for tracking number:", tracking.trim());
+        } else if (error.status >= 400 && error.status < 500) {
+          console.debug("Client error:", error.message, "Status:", error.status);
+        } else {
+          console.error("Unexpected API error:", error);
+        }
+      } else {
+        console.error("Error creating MB-Ribbon:", error);
+      }
+      
+      let errorMessage = "Unknown error occurred";
+      let toastDescription = "Please try again";
+      
+      if (error instanceof ApiError) {
+        errorMessage = error.message;
+        // Provide more specific descriptions based on status code and message
+        if (error.status === 400) {
+          toastDescription = "Please check your input and try again";
+        } else if (error.status === 401) {
+          toastDescription = "Your session has expired. Please login again";
+        } else if (error.status === 404) {
+          if (error.message.toLowerCase().includes("order not found")) {
+            errorMessage = "This tracking number is not associated with any order";
+            toastDescription = "Please check the tracking number and try again";
+          } else {
+            toastDescription = "Resource not found. Please try again";
+          }
+        } else if (error.status === 422) {
+          toastDescription = "The tracking number format is invalid";
+        } else if (error.status >= 500) {
+          toastDescription = "Server error. Please try again later";
+        } else if (error.status === 0) {
+          toastDescription = "Network error. Please check your connection";
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
       setError(errorMessage);
+      // Clear input and focus back after API error
+      setTracking("");
       toast.error("Failed to create MB-Ribbon", {
-        description: errorMessage,
+        description: toastDescription,
       });
-      // Focus back to input after API error
       setTimeout(() => {
         focusTrackingInput();
       }, 100);
@@ -167,7 +212,7 @@ export function MbRibbonForm({
             onFocus={handleInputFocus}
             disabled={isSubmitting}
           />
-          {error && <p className="text-sm text-red-600">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </div>
 
         <Button

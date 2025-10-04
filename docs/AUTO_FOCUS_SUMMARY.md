@@ -19,13 +19,14 @@ The MB-Ribbon form now includes comprehensive auto-focus functionality for optim
    - 100ms delay to ensure form state is properly updated
 
 3. **Validation Error**
-   - Automatically focuses back to the input after validation error
-   - Helps user quickly correct the input
+
+   - Clears the input and automatically focuses back after validation error
+   - Helps user start fresh with correct input
    - 100ms delay for smooth user experience
 
 4. **API Error**
-   - Automatically focuses back to the input after API failure
-   - Allows user to retry immediately
+   - Clears the input and automatically focuses back after API failure
+   - Allows user to retry with fresh input
    - 100ms delay for consistent behavior
 
 ### 🛠 **Technical Implementation**
@@ -62,7 +63,8 @@ useEffect(() => {
 2. **Rapid Data Entry**: Focus returns to input after each submission
 3. **Keyboard Efficiency**: Simplified keyboard shortcuts for power users
 4. **Consistent Behavior**: Predictable focus management across all interactions
-5. **Error Recovery**: Focus returns to input after both validation and API errors
+5. **Error Recovery**: Input is cleared and focused after both validation and API errors
+6. **Fresh Start**: Invalid data is automatically cleared, preventing confusion
 
 ### 📋 **Usage Scenarios**
 

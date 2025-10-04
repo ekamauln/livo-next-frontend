@@ -38,6 +38,7 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { MbRibbon } from "@/types/mb-ribbon";
 import { mbRibbonApi } from "@/lib/api/mbRibbonApi";
+import { ApiError } from "@/lib/api/types";
 import { MbRibbonForm } from "@/components/forms/mb-ribbon-form";
 import { MbRibbonStatus } from "@/components/status/mb-ribbon-status";
 import React from "react";
@@ -73,8 +74,31 @@ export default function MbRibbonsTable() {
         const mbRibbons = response.data.mb_ribbons as MbRibbon[];
         setData(mbRibbons);
         setPagination(response.data.pagination);
-      } catch {
-        toast.error("Failed to fetch mb-ribbons. Please try again.");
+      } catch (error) {
+        // Only log unexpected errors to console to reduce noise
+        if (error instanceof ApiError) {
+          if (error.status >= 500 || error.status === 0) {
+            console.error("Server/Network error fetching mb-ribbons:", error);
+          } else {
+            console.debug("Client error fetching mb-ribbons:", error.message, "Status:", error.status);
+          }
+        } else {
+          console.error("Unexpected error fetching mb-ribbons:", error);
+        }
+        
+        let errorMessage = "Failed to fetch mb-ribbons. Please try again.";
+        
+        if (error instanceof ApiError) {
+          if (error.status === 401) {
+            errorMessage = "Session expired. Please login again.";
+          } else if (error.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          } else if (error.status === 0) {
+            errorMessage = "Network error. Please check your connection.";
+          }
+        }
+        
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }

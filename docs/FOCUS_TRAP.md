@@ -22,8 +22,8 @@ The MB-Ribbon creation form now includes advanced focus management using focus t
 
 - **Page Load**: Automatically focuses on tracking input when component mounts
 - **Form Success**: Automatically focuses on tracking input after successful submission
-- **Validation Error**: Automatically focuses on tracking input after validation error
-- **API Error**: Automatically focuses on tracking input after API error
+- **Validation Error**: Clears input and focuses on tracking input after validation error
+- **API Error**: Clears input and focuses on tracking input after API error
 
 ### 🎨 **Visual Indicators**
 
