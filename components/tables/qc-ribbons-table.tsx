@@ -17,7 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Loader2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -33,19 +33,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { RippleButton } from "@/components/ui/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { MbRibbon } from "@/types/mb-ribbon";
-import { mbRibbonApi } from "@/lib/api/mbRibbonApi";
+import { QcRibbon } from "@/types/qc-ribbon";
+import { qcRibbonApi } from "@/lib/api/qcRibbonApi";
 import { ApiError } from "@/lib/api/types";
-import { MbRibbonForm } from "@/components/forms/mb-ribbon-form";
-import { MbRibbonStatus } from "@/components/status/mb-ribbon-status";
 import React from "react";
 import { Separator } from "../ui/separator";
+import { QcRibbonForm } from "@/components/forms/qc-ribbon-form";
+import { QcRibbonStatus } from "@/components/status/qc-ribbon-status";
 
-export default function MbRibbonsTable() {
-  const [data, setData] = useState<MbRibbon[]>([]);
+export default function QcRibbonsTable() {
+  const [data, setData] = useState<QcRibbon[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -58,39 +59,51 @@ export default function MbRibbonsTable() {
     limit: 10,
     total: 0,
   });
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-  // Fetch mb-ribbons data
+  // Toggle row expansion
+  const toggleRowExpansion = (rowId: number) => {
+    const newExpandedRows = new Set(expandedRows);
+    if (newExpandedRows.has(rowId)) {
+      newExpandedRows.delete(rowId);
+    } else {
+      newExpandedRows.add(rowId);
+    }
+    setExpandedRows(newExpandedRows);
+  };
+
+  // Fetch qc-ribbons data
   const fetchData = useCallback(
     async (page: number = 1, search: string = "") => {
       try {
         setIsLoading(true);
-        const response = await mbRibbonApi.getMbRibbons(
+        const response = await qcRibbonApi.getQcRibbons(
           page,
           pagination.limit,
           search
         );
-        // Extract mb-ribbons array from the response data
-        const mbRibbons = response.data.mb_ribbons as MbRibbon[];
-        setData(mbRibbons);
+        // Extract qc-ribbons array from the response data
+        const qcRibbons = response.data.qc_ribbons as QcRibbon[];
+        setData(qcRibbons);
         setPagination(response.data.pagination);
       } catch (error) {
         // Only log unexpected errors to console to reduce noise
         if (error instanceof ApiError) {
           if (error.status >= 500 || error.status === 0) {
-            console.error("Server/Network error fetching mb-ribbons:", error);
+            console.error("Server/Network error fetching qc-ribbons:", error);
           } else {
             console.debug(
-              "Client error fetching mb-ribbons:",
+              "Client error fetching qc-ribbons:",
               error.message,
               "Status:",
               error.status
             );
           }
         } else {
-          console.error("Unexpected error fetching mb-ribbons:", error);
+          console.error("Unexpected error fetching qc-ribbons:", error);
         }
 
-        let errorMessage = "Failed to fetch mb-ribbons. Please try again.";
+        let errorMessage = "Failed to fetch qc-ribbons. Please try again.";
 
         if (error instanceof ApiError) {
           if (error.status === 401) {
@@ -110,8 +123,8 @@ export default function MbRibbonsTable() {
     [pagination.limit]
   );
 
-  const handleMbRibbonCreated = () => {
-    // Refresh the data after creating a new mb-ribbon
+  const handleQcRibbonCreated = () => {
+    // Refresh the data after creating a new qc-ribbon
     fetchData(pagination.page, searchQuery);
   };
 
@@ -137,7 +150,83 @@ export default function MbRibbonsTable() {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  const columns: ColumnDef<MbRibbon>[] = [
+  // Render expanded row content
+  const renderExpandedContent = (qcRibbon: QcRibbon) => {
+    if (!qcRibbon.details || qcRibbon.details.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="p-4 bg-muted/30">
+        <h4 className="text-sm font-semibold mb-3">QC Ribbon Details</h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {qcRibbon.details.map((detail) => (
+            <div
+              key={detail.id}
+              className="border rounded-lg p-3 bg-background"
+            >
+              <div className="flex justify-between items-start mb-2">
+                <div className="text-sm font-medium">
+                  Box: {detail.box.name}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  #{detail.box.code}
+                </div>
+              </div>
+              <div className="text-sm text-muted-foreground mb-2">
+                Quantity:{" "}
+                <span className="font-mono font-medium">{detail.quantity}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Added:{" "}
+                {format(new Date(detail.created_at), "dd MMM yyyy HH:mm")}
+              </div>
+            </div>
+          ))}
+        </div>
+        {qcRibbon.details.length > 0 && (
+          <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
+            Total items:{" "}
+            {qcRibbon.details.reduce((sum, detail) => sum + detail.quantity, 0)}{" "}
+            in {qcRibbon.details.length} box
+            {qcRibbon.details.length === 1 ? "" : "es"}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const columns: ColumnDef<QcRibbon>[] = [
+    {
+      id: "expand",
+      header: () => (
+        <div className="text-sm text-center font-semibold w-12"></div>
+      ),
+      cell: ({ row }) => {
+        const qcRibbon = row.original;
+        const hasDetails = qcRibbon.details && qcRibbon.details.length > 0;
+        const isExpanded = expandedRows.has(qcRibbon.id);
+
+        if (!hasDetails) {
+          return <div className="w-12"></div>;
+        }
+
+        return (
+          <div className="flex justify-start">
+            <RippleButton
+              onClick={() => toggleRowExpansion(qcRibbon.id)}
+              className="h-8 w-8 p-0"
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </RippleButton>
+          </div>
+        );
+      },
+    },
     {
       accessorKey: "id",
       header: () => <div className="text-sm text-center font-semibold">ID</div>,
@@ -275,14 +364,14 @@ export default function MbRibbonsTable() {
     <div className="w-full space-y-4">
       <div className="grid grid-cols-4 gap-4">
         <div className="col-span-2 flex flex-col border p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-4">Create MB-Ribbon</h3>
+          <h3 className="text-lg font-semibold mb-4">Create QC-Ribbon</h3>
           <Separator className="mt-0 mb-6" />
-          <MbRibbonForm onMbRibbonCreated={handleMbRibbonCreated} />
+          <QcRibbonForm onQcRibbonCreated={handleQcRibbonCreated} />
         </div>
         <div className="col-span-2 flex flex-col border p-4 rounded-md">
-          <h3 className="text-lg font-semibold mb-4">MB-Ribbon Status</h3>
+          <h3 className="text-lg font-semibold mb-4">QC-Ribbon Status</h3>
           <Separator className="mt-0 mb-6" />
-          <MbRibbonStatus totalRecords={pagination.total} target={3000} />
+          <QcRibbonStatus totalRecords={pagination.total} target={3000} />
         </div>
       </div>
       <Separator className="mt-0" />
@@ -293,7 +382,7 @@ export default function MbRibbonsTable() {
           className="flex flex-1 gap-2 items-center"
         >
           <Input
-            placeholder="Search mb-ribbons..."
+            placeholder="Search qc-ribbons..."
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             className="max-w-sm"
@@ -303,9 +392,9 @@ export default function MbRibbonsTable() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <RippleButton variant="outline" size="sm" className="ml-auto">
+              <Button variant="outline" size="sm" className="ml-auto">
                 Show / Hide
-              </RippleButton>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               {table
@@ -377,32 +466,44 @@ export default function MbRibbonsTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading mb-ribbons...
+                    Loading qc-ribbons...
                   </div>
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow data-state={row.getIsSelected() && "selected"}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </React.Fragment>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const qcRibbon = row.original;
+                const isExpanded = expandedRows.has(qcRibbon.id);
+
+                return (
+                  <React.Fragment key={row.id}>
+                    <TableRow data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          {renderExpandedContent(qcRibbon)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No mb-ribbons found.
+                  No qc-ribbons found.
                 </TableCell>
               </TableRow>
             )}
@@ -415,10 +516,10 @@ export default function MbRibbonsTable() {
         <div className="text-sm text-muted-foreground">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} mb-ribbons
+          {pagination.total} qc-ribbons
         </div>
         <div className="flex items-center gap-2">
-          <RippleButton
+          <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
@@ -427,7 +528,7 @@ export default function MbRibbonsTable() {
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
-          </RippleButton>
+          </Button>
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
@@ -449,7 +550,7 @@ export default function MbRibbonsTable() {
               if (pageNumber < 1 || pageNumber > totalPages) return null;
 
               return (
-                <RippleButton
+                <Button
                   key={pageNumber}
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
@@ -460,11 +561,11 @@ export default function MbRibbonsTable() {
                   className="w-10 cursor-pointer"
                 >
                   {pageNumber}
-                </RippleButton>
+                </Button>
               );
             })}
           </div>
-          <RippleButton
+          <Button
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
@@ -473,7 +574,7 @@ export default function MbRibbonsTable() {
           >
             Next
             <ChevronRight className="h-4 w-4" />
-          </RippleButton>
+          </Button>
         </div>
       </div>
     </div>
