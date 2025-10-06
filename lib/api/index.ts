@@ -8,6 +8,8 @@ export { mbRibbonApi } from "@/lib/api/mbRibbonApi";
 export { qcRibbonApi } from "@/lib/api/qcRibbonApi";
 export { mbOnlineApi } from "@/lib/api/mbOnlineApi";
 export { qcOnlineApi } from "@/lib/api/qcOnlineApi";
+export { pcOnlineApi } from "@/lib/api/pcOnlineApi";
+export { outboundApi } from "@/lib/api/outboundApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility
@@ -36,3 +38,13 @@ export type {
   QcOnlineDetail,
   CreateQcOnlineRequest,
 } from "@/types/qc-online";
+export type {
+  PcOnline,
+  PcOnlineDetail,
+  CreatePcOnlineRequest,
+} from "@/types/pc-online";
+export type {
+  Outbound,
+  CreateOutboundRequest,
+  UpdateOutboundRequest,
+} from "@/types/outbound";
