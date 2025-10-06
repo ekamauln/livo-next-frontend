@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
-import { qcRibbonApi } from "@/lib/api/qcRibbonApi";
+import { qcOnlineApi } from "@/lib/api/qcOnlineApi";
 import { boxApi } from "@/lib/api/boxApi";
 import { ApiError } from "@/lib/api/types";
 import { Box } from "@/types/box";
@@ -54,11 +54,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-interface QcRibbonFormProps {
-  onQcRibbonCreated?: () => void;
+interface QcOnlineFormProps {
+  onQcOnlineCreated?: () => void;
 }
 
-export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
+export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
   const [boxes, setBoxes] = useState<Box[]>([]);
   const [isLoadingBoxes, setIsLoadingBoxes] = useState(false);
   const [boxSearchOpen, setBoxSearchOpen] = useState<boolean[]>([]);
@@ -220,22 +220,22 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
         })),
       };
 
-      const response = await qcRibbonApi.createQcRibbon(requestData);
+      const response = await qcOnlineApi.createQcOnline(requestData);
 
       // Check if response exists and has expected structure
       if (response && response.success) {
-        toast.success("QC-Ribbon created successfully!");
+        toast.success("QC-Online created successfully!");
         form.reset();
         setBoxSearchOpen([false]); // Reset search states
         setBoxSearch([""]);
-        onQcRibbonCreated?.();
+        onQcOnlineCreated?.();
         // Focus back to input for next entry
         setTimeout(() => {
           focusTrackingInput();
         }, 100);
       } else {
         // Handle cases where success is false or response is malformed
-        const errorMsg = response?.message || "Failed to create QC-Ribbon";
+        const errorMsg = response?.message || "Failed to create QC-Online";
         throw new Error(errorMsg);
       }
     } catch (error) {
@@ -258,7 +258,7 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
           console.error("Unexpected API error:", error);
         }
       } else {
-        console.error("Error creating QC-Ribbon:", error);
+        console.error("Error creating QC-Online:", error);
       }
 
       let errorMessage = "Unknown error occurred";
@@ -296,7 +296,7 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
       form.reset();
       setBoxSearchOpen([false]); // Reset search states
       setBoxSearch([""]);
-      toast.error("Failed to create QC-Ribbon", {
+      toast.error("Failed to create QC-Online", {
         description: toastDescription,
       });
       setTimeout(() => {
@@ -333,9 +333,12 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
           />
 
           <div className="space-y-3">
-            <FormLabel className="flex items-center gap-2">
-              <Separator className="mt-1" />
-            </FormLabel>
+            <div className="w-full">
+              <FormLabel className="flex items-center gap-2">
+                <Separator className="mt-1" />
+              </FormLabel>
+            </div>
+
             {fields.map((field, index) => (
               <div key={field.id} className="flex gap-2 items-end">
                 <div className="flex-1">
@@ -537,7 +540,7 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
             {form.formState.isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Create QC-Ribbon
+            Create QC-Online
           </RippleButton>
         </form>
       </FocusScope>
