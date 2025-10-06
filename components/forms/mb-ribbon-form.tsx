@@ -1,24 +1,47 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { FocusScope } from "@radix-ui/react-focus-scope";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2 } from "lucide-react";
 import { mbRibbonApi } from "@/lib/api/mbRibbonApi";
 import { ApiError } from "@/lib/api/types";
+
+const formSchema = z.object({
+  tracking: z
+    .string()
+    .min(1, { message: "Tracking number is required" })
+    .trim(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface MbRibbonFormProps {
   onMbRibbonCreated?: () => void;
 }
 
 export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [tracking, setTracking] = useState("");
-  const [error, setError] = useState("");
-  const formRef = useRef<HTMLFormElement>(null);
   const trackingInputRef = useRef<HTMLInputElement>(null);
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      tracking: "",
+    },
+  });
 
   // Helper function to focus the tracking input
   const focusTrackingInput = useCallback(() => {
@@ -37,32 +60,16 @@ export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
     return () => clearTimeout(timer);
   }, [focusTrackingInput]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validation
-    if (!tracking.trim()) {
-      setError("Tracking number is required");
-      // Clear input and focus back after validation error
-      setTracking("");
-      setTimeout(() => {
-        focusTrackingInput();
-      }, 100);
-      return;
-    }
-
+  const onSubmit = async (data: FormData) => {
     try {
-      setIsSubmitting(true);
-      setError("");
-
       const response = await mbRibbonApi.createMbRibbon({
-        tracking: tracking.trim(),
+        tracking: data.tracking,
       });
 
       // Check if response exists and has expected structure
       if (response && response.success) {
         toast.success("MB-Ribbon created successfully!");
-        setTracking("");
+        form.reset(); // Reset form using React Hook Form
         onMbRibbonCreated?.();
         // Focus back to input for next entry
         setTimeout(() => {
@@ -81,10 +88,7 @@ export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
           error.status === 404 &&
           error.message.toLowerCase().includes("order not found")
         ) {
-          console.debug(
-            "Order not found for tracking number:",
-            tracking.trim()
-          );
+          console.debug("Order not found for tracking number:", data.tracking);
         } else if (error.status >= 400 && error.status < 500) {
           console.debug(
             "Client error:",
@@ -128,44 +132,61 @@ export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
         errorMessage = error.message;
       }
 
-      setError(errorMessage);
+      // Set form error using React Hook Form
+      form.setError("tracking", { message: errorMessage });
       // Clear input and focus back after API error
-      setTracking("");
+      form.reset();
       toast.error("Failed to create MB-Ribbon", {
         description: toastDescription,
       });
       setTimeout(() => {
         focusTrackingInput();
       }, 100);
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="tracking">Tracking Number</Label>
-        <Input
-          ref={trackingInputRef}
-          id="tracking"
-          type="text"
-          placeholder="Enter tracking number (e.g., JNE1234567890)"
-          value={tracking}
-          onChange={(e) => setTracking(e.target.value)}
-          disabled={isSubmitting}
-        />
-        {error && <p className="text-sm text-destructive">{error}</p>}
-      </div>
+    <Form {...form}>
+      <FocusScope trapped={true}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="tracking"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tracking Number</FormLabel>
+                <FormControl>
+                  <Input
+                    type="text"
+                    placeholder="Enter tracking number (e.g., JNE1234567890)"
+                    disabled={form.formState.isSubmitting}
+                    {...field}
+                    ref={(e) => {
+                      field.ref(e);
+                      trackingInputRef.current = e;
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <Button
-        type="submit"
-        disabled={isSubmitting || !tracking.trim()}
-        className="w-full"
-      >
-        {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Create MB-Ribbon
-      </Button>
-    </form>
+          <RippleButton
+            size="sm"
+            type="submit"
+            disabled={
+              form.formState.isSubmitting || !form.watch("tracking").trim()
+            }
+            className="w-full"
+          >
+            {form.formState.isSubmitting && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Create MB-Ribbon
+          </RippleButton>
+        </form>
+      </FocusScope>
+    </Form>
   );
 }

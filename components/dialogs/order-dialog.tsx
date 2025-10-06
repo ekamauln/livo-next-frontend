@@ -598,6 +598,7 @@ export function OrderDialog({
                                 >
                                   <PopoverTrigger asChild>
                                     <RippleButton
+                                      size="sm"
                                       variant="outline"
                                       role="combobox"
                                       aria-expanded={productSearchOpen}
@@ -740,6 +741,7 @@ export function OrderDialog({
 
                               <div className="flex justify-end gap-2">
                                 <RippleButton
+                                  size="sm"
                                   type="button"
                                   variant="outline"
                                   onClick={() => form.reset()}
@@ -748,6 +750,7 @@ export function OrderDialog({
                                   Reset Form
                                 </RippleButton>
                                 <RippleButton
+                                  size="sm"
                                   type="submit"
                                   disabled={updating || !isOperationAllowed()}
                                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
@@ -870,6 +873,7 @@ export function OrderDialog({
 
                                 <div className="flex justify-end gap-2">
                                   <RippleButton
+                                    size="sm"
                                     type="button"
                                     variant="outline"
                                     onClick={() => {
@@ -882,6 +886,7 @@ export function OrderDialog({
                                     Cancel
                                   </RippleButton>
                                   <RippleButton
+                                    size="sm"
                                     type="submit"
                                     disabled={updating || !isOperationAllowed()}
                                     className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"

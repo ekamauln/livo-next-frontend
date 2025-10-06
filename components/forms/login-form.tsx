@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -104,7 +104,7 @@ export function LoginForm() {
                               }
                               {...field}
                             />
-                            <Button
+                            <RippleButton
                               type="button"
                               variant="ghost"
                               size="sm"
@@ -117,7 +117,7 @@ export function LoginForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </RippleButton>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -126,7 +126,8 @@ export function LoginForm() {
                   />
                 </div>
 
-                <Button
+                <RippleButton
+                  size="sm"
                   type="submit"
                   className="w-full cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                   disabled={isLoading}
@@ -142,7 +143,7 @@ export function LoginForm() {
                       Sign In
                     </div>
                   )}
-                </Button>
+                </RippleButton>
 
                 <div className="text-center text-sm">
                   Don&apos;t have an account?{" "}

@@ -642,6 +642,7 @@ export function ProductDialog({
 
                           <div className="flex justify-end gap-2">
                             <RippleButton
+                              size="sm"
                               type="button"
                               variant="outline"
                               className="cursor-pointer"
@@ -650,6 +651,7 @@ export function ProductDialog({
                               Cancel
                             </RippleButton>
                             <RippleButton
+                              size="sm"
                               type="submit"
                               disabled={updating}
                               className="cursor-pointer"
@@ -695,6 +697,7 @@ export function ProductDialog({
                               className="border"
                             />
                             <RippleButton
+                              size="sm"
                               className="cursor-pointer"
                               onClick={() =>
                                 downloadBarcode(
@@ -748,6 +751,7 @@ export function ProductDialog({
                               className="border"
                             />
                             <RippleButton
+                              size="sm"
                               className="cursor-pointer"
                               onClick={() =>
                                 downloadBarcode(

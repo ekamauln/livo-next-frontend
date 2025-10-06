@@ -292,6 +292,7 @@ export function StoreDialog({
 
                           <div className="flex justify-end gap-2">
                             <RippleButton
+                              size="sm"
                               type="button"
                               variant="outline"
                               className="cursor-pointer"
@@ -300,6 +301,7 @@ export function StoreDialog({
                               Cancel
                             </RippleButton>
                             <RippleButton
+                              size="sm"
                               type="submit"
                               disabled={updating}
                               className="cursor-pointer"

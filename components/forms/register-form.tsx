@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Button } from "@/components/ui/button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -163,7 +163,7 @@ export function RegisterForm() {
                               }
                               {...field}
                             />
-                            <Button
+                            <RippleButton
                               type="button"
                               variant="ghost"
                               size="sm"
@@ -176,7 +176,7 @@ export function RegisterForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </RippleButton>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -205,7 +205,7 @@ export function RegisterForm() {
                               }
                               {...field}
                             />
-                            <Button
+                            <RippleButton
                               type="button"
                               variant="ghost"
                               size="sm"
@@ -220,7 +220,7 @@ export function RegisterForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </Button>
+                            </RippleButton>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -229,7 +229,8 @@ export function RegisterForm() {
                   />
                 </div>
 
-                <Button
+                <RippleButton
+                  size="sm"
                   type="submit"
                   className="w-full cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                   disabled={isLoading}
@@ -245,7 +246,7 @@ export function RegisterForm() {
                       Sign Up
                     </div>
                   )}
-                </Button>
+                </RippleButton>
 
                 <div className="text-center text-sm">
                   Already have an account?{" "}

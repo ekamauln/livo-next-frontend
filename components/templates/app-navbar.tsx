@@ -172,6 +172,12 @@ export default function AppNavbar() {
                     MB Ribbons
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/ribbons/qc-ribbons">
+                    <ShoppingBag className="h-4 w-4" />
+                    QC Ribbons
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>

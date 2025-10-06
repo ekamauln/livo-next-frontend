@@ -24,7 +24,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -654,6 +653,7 @@ export function UserDialog({
 
                           <div className="flex justify-end gap-2">
                             <RippleButton
+                              size="sm"
                               type="button"
                               variant="outline"
                               onClick={() => setActiveTab("detail")}
@@ -661,7 +661,8 @@ export function UserDialog({
                             >
                               Cancel
                             </RippleButton>
-                            <Button
+                            <RippleButton
+                              size="sm"
                               type="submit"
                               variant="default"
                               disabled={updating}
@@ -671,7 +672,7 @@ export function UserDialog({
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
                               Update Profile
-                            </Button>
+                            </RippleButton>
                           </div>
                         </form>
                       </Form>
@@ -717,7 +718,7 @@ export function UserDialog({
                                       }
                                       {...field}
                                     />
-                                    <Button
+                                    <RippleButton
                                       type="button"
                                       variant="ghost"
                                       size="sm"
@@ -732,7 +733,7 @@ export function UserDialog({
                                       ) : (
                                         <Eye className="h-4 w-4" />
                                       )}
-                                    </Button>
+                                    </RippleButton>
                                   </div>
                                 </FormControl>
                                 <FormDescription>
@@ -762,7 +763,7 @@ export function UserDialog({
                                       }
                                       {...field}
                                     />
-                                    <Button
+                                    <RippleButton
                                       type="button"
                                       variant="ghost"
                                       size="sm"
@@ -777,7 +778,7 @@ export function UserDialog({
                                       ) : (
                                         <Eye className="h-4 w-4" />
                                       )}
-                                    </Button>
+                                    </RippleButton>
                                   </div>
                                 </FormControl>
                                 <FormMessage />
@@ -786,15 +787,17 @@ export function UserDialog({
                           />
 
                           <div className="flex justify-end gap-2">
-                            <Button
+                            <RippleButton
+                              size="sm"
                               type="button"
                               variant="destructive"
                               onClick={() => setActiveTab("detail")}
                               className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                             >
                               Cancel
-                            </Button>
-                            <Button
+                            </RippleButton>
+                            <RippleButton
+                              size="sm"
                               type="submit"
                               variant="default"
                               disabled={updating}
@@ -804,7 +807,7 @@ export function UserDialog({
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
                               Change Password
-                            </Button>
+                            </RippleButton>
                           </div>
                         </form>
                       </Form>
@@ -894,7 +897,7 @@ export function UserDialog({
                                   >
                                     {role.name}
                                   </Badge>
-                                  <Button
+                                  <RippleButton
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground "
@@ -902,7 +905,7 @@ export function UserDialog({
                                     disabled={updating}
                                   >
                                     ×
-                                  </Button>
+                                  </RippleButton>
                                 </div>
                               ))
                             ) : (
@@ -947,7 +950,8 @@ export function UserDialog({
                                   ))}
                               </SelectContent>
                             </Select>
-                            <Button
+                            <RippleButton
+                              size="sm"
                               variant="default"
                               onClick={assignRole}
                               disabled={
@@ -959,7 +963,7 @@ export function UserDialog({
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
                               Assign Role
-                            </Button>
+                            </RippleButton>
                           </div>
                           <p className="text-xs text-muted-foreground">
                             Only roles not currently assigned to this user are
