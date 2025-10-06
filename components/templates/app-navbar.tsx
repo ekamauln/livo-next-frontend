@@ -180,6 +180,25 @@ export default function AppNavbar() {
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
+
+            {/* Onlines menu */}
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer">Online</MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/onlines/mb-onlines">
+                    <ShoppingBag className="h-4 w-4" />
+                    MB Onlines
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/onlines/qc-onlines">
+                    <ShoppingBag className="h-4 w-4" />
+                    QC Onlines
+                  </Link>
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
           </Menubar>
         </div>
       </div>
