@@ -17,7 +17,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  Eye,
+  Edit,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -29,6 +36,8 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
@@ -41,6 +50,7 @@ import { outboundApi } from "@/lib/api/outboundApi";
 import { ApiError } from "@/lib/api/types";
 import { OutboundForm } from "@/components/forms/outbound-form";
 import { OutboundStatus } from "@/components/status/outbound-status";
+import { OutboundDialog } from "@/components/dialogs/outbound-dialog";
 import React from "react";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +69,12 @@ export default function OutboundsTable() {
     limit: 10,
     total: 0,
   });
+
+  // Outbound dialog state
+  const [selectedOutboundId, setSelectedOutboundId] = useState<number | null>(
+    null
+  );
+  const [outboundDialogOpen, setOutboundDialogOpen] = useState(false);
 
   // Fetch outbounds data
   const fetchData = useCallback(
@@ -113,6 +129,11 @@ export default function OutboundsTable() {
 
   const handleOutboundCreated = () => {
     // Refresh the data after creating a new outbound
+    fetchData(pagination.page, searchQuery);
+  };
+
+  const handleOutboundUpdated = () => {
+    // Refresh the data after updating an outbound
     fetchData(pagination.page, searchQuery);
   };
 
@@ -189,13 +210,18 @@ export default function OutboundsTable() {
         <div className="text-sm text-center font-semibold">Expedition Info</div>
       ),
       cell: ({ row }) => {
-        const expedition = row.original.expedition;
+        const outbound = row.original;
         return (
-          <div className="text-sm">
-            {expedition ? (
+          <div className="text-sm text-center">
+            {outbound.expedition ? (
               <div>
-                <Badge className="bg-blue-100">
-                  <div className="font-mono text-xs">{expedition}</div>
+                <Badge
+                  style={{
+                    backgroundColor: outbound.expedition_color,
+                    color: "white",
+                  }}
+                >
+                  <div className="font-mono text-xs">{outbound.expedition}</div>
                 </Badge>
               </div>
             ) : (
@@ -273,6 +299,48 @@ export default function OutboundsTable() {
             {format(date, "dd MMM yyyy")}
             <br />
             {format(date, "HH:mm:ss")}
+          </div>
+        );
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const outbound = row.original;
+        return (
+          <div className="flex justify-end text-right">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <RippleButton variant="ghost" className="h-8 w-8 p-0">
+                  <MoreHorizontal className="h-4 w-4" />
+                </RippleButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedOutboundId(outbound.id);
+                    setOutboundDialogOpen(true);
+                  }}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                {outbound.tracking.startsWith("TKP0") && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedOutboundId(outbound.id);
+                        setOutboundDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Edit Expedition
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         );
       },
@@ -499,6 +567,14 @@ export default function OutboundsTable() {
           </RippleButton>
         </div>
       </div>
+
+      {/* Outbound Details Dialog */}
+      <OutboundDialog
+        outboundId={selectedOutboundId}
+        open={outboundDialogOpen}
+        onOpenChange={setOutboundDialogOpen}
+        onOutboundUpdate={handleOutboundUpdated}
+      />
     </div>
   );
 }

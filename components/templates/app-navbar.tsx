@@ -197,6 +197,27 @@ export default function AppNavbar() {
                     QC Onlines
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/onlines/pc-onlines">
+                    <ShoppingBag className="h-4 w-4" />
+                    PC Onlines
+                  </Link>
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+
+            {/* Outbounds menu */}
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer">
+                Outbounds
+              </MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/outbounds/input-outbounds">
+                    <ShoppingBag className="h-4 w-4" />
+                    Input Outbounds
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>

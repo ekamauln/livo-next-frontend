@@ -2,9 +2,8 @@ import {
   Outbound,
   CreateOutboundRequest,
   UpdateOutboundRequest,
-  OutboundResponse,
 } from "@/types/outbound";
-import { ApiResponse } from "@/types/auth";
+import { ApiResponse, PaginatedResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
 
 export const outboundApi = {
@@ -12,9 +11,9 @@ export const outboundApi = {
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<OutboundResponse> => {
+  ): Promise<PaginatedResponse<Outbound>> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-    return apiRequest<OutboundResponse>(
+    return apiRequest<PaginatedResponse<Outbound>>(
       `/outbounds?page=${page}&limit=${limit}${searchParam}`
     );
   },

@@ -392,6 +392,11 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                                     {(() => {
                                       const filteredBoxes = boxes.filter(
                                         (box) => {
+                                          // Exclude PC boxes from PC-Online form
+                                          if (box.code === "PC") {
+                                            return false;
+                                          }
+
                                           const searchTerm = (
                                             boxSearch[index] || ""
                                           ).toLowerCase();

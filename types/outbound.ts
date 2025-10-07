@@ -66,16 +66,3 @@ export interface OutboundQueryParams {
   limit?: string;
   search?: string;
 }
-
-export interface OutboundResponse {
-  success: boolean;
-  message: string;
-  data: {
-    outbounds: Outbound[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-    };
-  };
-}

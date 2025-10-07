@@ -38,7 +38,7 @@ export default function Outbounds() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
-                  Outbounds
+                  Input Outbounds
                 </BreadcrumbPage>
               </BreadcrumbList>
             </Breadcrumb>
