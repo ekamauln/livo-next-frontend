@@ -9,6 +9,7 @@ export { qcRibbonApi } from "@/lib/api/qcRibbonApi";
 export { mbOnlineApi } from "@/lib/api/mbOnlineApi";
 export { qcOnlineApi } from "@/lib/api/qcOnlineApi";
 export { pcOnlineApi } from "@/lib/api/pcOnlineApi";
+export { onlineFlowApi } from "@/lib/api/onlineFlowApi";
 export { outboundApi } from "@/lib/api/outboundApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
@@ -48,3 +49,11 @@ export type {
   CreateOutboundRequest,
   UpdateOutboundRequest,
 } from "@/types/outbound";
+export type {
+  OnlineFlow,
+  OnlineFlowUser,
+  OnlineFlowProcessStep,
+  OnlineFlowOutbound,
+  OnlineFlowOrder,
+  OnlineFlowQueryParams,
+} from "@/types/online-flow";
