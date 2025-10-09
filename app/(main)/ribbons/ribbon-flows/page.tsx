@@ -11,9 +11,9 @@ import { House } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { ProtectedRoute } from "@/contexts/protected-route";
-import OnlineFlowsTable from "@/components/tables/online-flows-table";
+import RibbonFlowsTable from "@/components/tables/ribbon-flows-table";
 
-export default function PcOnlines() {
+export default function PcRibbons() {
   return (
     <ProtectedRoute requiredRoles={["admin", "coordinator"]}>
       <div>
@@ -34,11 +34,11 @@ export default function PcOnlines() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
-                  <BreadcrumbLink href="#">Onlines</BreadcrumbLink>
+                  <BreadcrumbLink href="#">Ribbons</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
-                  Onlines Data Flow List
+                  Ribbons Data Flow List
                 </BreadcrumbPage>
               </BreadcrumbList>
             </Breadcrumb>
@@ -47,9 +47,9 @@ export default function PcOnlines() {
 
         <div className="w-full p-4 pt-0">
           <Card className="p-6 space-y-2">
-            <h1 className="text-2xl font-semibold">Onlines Data Flow</h1>
+            <h1 className="text-2xl font-semibold">Ribbons Data Flow</h1>
             <Separator className="mt-0" />
-            <OnlineFlowsTable />
+            <RibbonFlowsTable />
           </Card>
         </div>
       </div>

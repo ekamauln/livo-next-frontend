@@ -178,6 +178,12 @@ export default function AppNavbar() {
                     QC Ribbons
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/ribbons/ribbon-flows">
+                    <ShoppingBag className="h-4 w-4" />
+                    Ribbon Flows
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
 
@@ -201,6 +207,12 @@ export default function AppNavbar() {
                   <Link href="/onlines/pc-onlines">
                     <ShoppingBag className="h-4 w-4" />
                     PC Onlines
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/onlines/online-flows">
+                    <ShoppingBag className="h-4 w-4" />
+                    Online Flows
                   </Link>
                 </MenubarItem>
               </MenubarContent>

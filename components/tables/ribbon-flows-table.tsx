@@ -45,10 +45,10 @@ import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { OnlineFlow } from "@/types/online-flow";
-import { onlineFlowApi } from "@/lib/api/onlineFlowApi";
+import { RibbonFlow } from "@/types/ribbon-flow";
+import { ribbonFlowApi } from "@/lib/api/ribbonFlowApi";
 import { Badge } from "@/components/ui/badge";
-import { OnlineFlowDialog } from "@/components/dialogs/online-flow-dialog";
+import { RibbonFlowDialog } from "@/components/dialogs/ribbon-flow-dialog";
 import React from "react";
 
 // Helper function to format date safely (like in orders table)
@@ -69,8 +69,8 @@ const formatDateSafely = (dateString?: string): string => {
   }
 };
 
-export default function OnlineFlowsTable() {
-  const [data, setData] = useState<OnlineFlow[]>([]);
+export default function RibbonFlowsTable() {
+  const [data, setData] = useState<RibbonFlow[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
@@ -89,23 +89,23 @@ export default function OnlineFlowsTable() {
 
   // Dialog state
   const [selectedTracking, setSelectedTracking] = useState<string | null>(null);
-  const [onlineFlowDialogOpen, setOnlineFlowDialogOpen] = useState(false);
+  const [ribbonFlowDialogOpen, setRibbonFlowDialogOpen] = useState(false);
 
   // Define query params interface like orders table
-  interface OnlineFlowQueryParams {
+  interface RibbonFlowQueryParams {
     page?: number;
     limit?: number;
     start_date?: string;
     end_date?: string;
   }
 
-  // Fetch online flows data (updated to match orders table structure)
-  const fetchOnlineFlows = useCallback(
-    async (params: OnlineFlowQueryParams = {}, search: string = "") => {
+  // Fetch ribbon flows data (updated to match orders table structure)
+  const fetchRibbonFlows = useCallback(
+    async (params: RibbonFlowQueryParams = {}, search: string = "") => {
       try {
         setIsLoading(true);
 
-        const response = await onlineFlowApi.getOnlineFlows(
+        const response = await ribbonFlowApi.getRibbonFlows(
           params.page || 1,
           params.limit || 10,
           search.trim() || undefined,
@@ -113,13 +113,13 @@ export default function OnlineFlowsTable() {
           params.end_date
         );
 
-        // Extract online flows array from the response data
-        const onlineFlows = response.data.online_flows as OnlineFlow[];
-        setData(onlineFlows || []); // Ensure we always set an array
+        // Extract ribbon flows array from the response data
+        const ribbonFlows = response.data.ribbon_flows as RibbonFlow[];
+        setData(ribbonFlows || []); // Ensure we always set an array
         setPagination(response.data.pagination);
       } catch (error) {
-        console.error("Error fetching online flows:", error);
-        toast.error("Failed to fetch online flows", {
+        console.error("Error fetching ribbon flows:", error);
+        toast.error("Failed to fetch ribbon flows", {
           description:
             error instanceof Error ? error.message : "Unknown error occurred",
         });
@@ -137,7 +137,7 @@ export default function OnlineFlowsTable() {
     // Reset to page 1 when searching
     setPagination((prev) => ({ ...prev, page: 1 }));
 
-    const params: OnlineFlowQueryParams = {
+    const params: RibbonFlowQueryParams = {
       page: 1,
       limit: pagination.limit,
     };
@@ -149,12 +149,12 @@ export default function OnlineFlowsTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchOnlineFlows(params, searchQuery);
+    fetchRibbonFlows(params, searchQuery);
   };
 
   // Initial load and date range changes (like orders table)
   useEffect(() => {
-    const params: OnlineFlowQueryParams = {
+    const params: RibbonFlowQueryParams = {
       page: 1,
       limit: pagination.limit,
     };
@@ -168,14 +168,14 @@ export default function OnlineFlowsTable() {
 
     setPagination((prev) => ({ ...prev, page: 1 }));
     setSearchQuery(""); // Reset search query on date/limit changes
-    fetchOnlineFlows(params, ""); // Reset search on date/limit changes
-  }, [dateRange, pagination.limit, fetchOnlineFlows]);
+    fetchRibbonFlows(params, ""); // Reset search on date/limit changes
+  }, [dateRange, pagination.limit, fetchRibbonFlows]);
 
   // Pagination handlers (like orders table)
   const handlePageChange = (newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage }));
 
-    const params: OnlineFlowQueryParams = {
+    const params: RibbonFlowQueryParams = {
       page: newPage,
       limit: pagination.limit,
     };
@@ -187,14 +187,14 @@ export default function OnlineFlowsTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchOnlineFlows(params, searchQuery);
+    fetchRibbonFlows(params, searchQuery);
   };
 
   const handleLimitChange = (newLimit: string) => {
     const newLimitValue = parseInt(newLimit);
     setPagination((prev) => ({ ...prev, limit: newLimitValue, page: 1 }));
 
-    const params: OnlineFlowQueryParams = {
+    const params: RibbonFlowQueryParams = {
       page: 1,
       limit: newLimitValue,
     };
@@ -206,7 +206,7 @@ export default function OnlineFlowsTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchOnlineFlows(params, searchQuery);
+    fetchRibbonFlows(params, searchQuery);
   };
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
@@ -216,7 +216,7 @@ export default function OnlineFlowsTable() {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  const columns: ColumnDef<OnlineFlow>[] = [
+  const columns: ColumnDef<RibbonFlow>[] = [
     {
       accessorKey: "tracking",
       header: () => (
@@ -232,10 +232,10 @@ export default function OnlineFlowsTable() {
         <div className="text-sm text-center font-semibold">Order ID</div>
       ),
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="font-mono text-sm">
-            {onlineFlow.order.order_ginee_id}
+            {ribbonFlow.order.order_ginee_id}
           </div>
         );
       },
@@ -246,38 +246,38 @@ export default function OnlineFlowsTable() {
         <div className="text-sm text-center font-semibold">Complained</div>
       ),
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="text-center">
             <span
               className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                onlineFlow.order.complained
+                ribbonFlow.order.complained
                   ? "bg-red-100 text-red-800"
                   : "bg-green-100 text-green-800"
               }`}
             >
-              {onlineFlow.order.complained ? "Yes" : "No"}
+              {ribbonFlow.order.complained ? "Yes" : "No"}
             </span>
           </div>
         );
       },
     },
     {
-      accessorKey: "mb_online",
+      accessorKey: "mb_ribbon",
       header: () => (
-        <div className="text-sm text-center font-semibold">MB Online</div>
+        <div className="text-sm text-center font-semibold">MB Ribbon</div>
       ),
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="text-sm text-center">
-            {onlineFlow.mb_online ? (
+            {ribbonFlow.mb_ribbon ? (
               <div>
                 <div className="font-medium text-xs">
-                  {onlineFlow.mb_online.user.full_name}
+                  {ribbonFlow.mb_ribbon.user.full_name}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatDateSafely(onlineFlow.mb_online.created_at)}
+                  {formatDateSafely(ribbonFlow.mb_ribbon.created_at)}
                 </div>
               </div>
             ) : (
@@ -290,48 +290,21 @@ export default function OnlineFlowsTable() {
       },
     },
     {
-      accessorKey: "qc_online",
+      accessorKey: "qc_ribbon",
       header: () => (
-        <div className="text-sm text-center font-semibold">QC Online</div>
+        <div className="text-sm text-center font-semibold">QC Ribbon</div>
       ),
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="text-sm text-center">
-            {onlineFlow.qc_online ? (
+            {ribbonFlow.qc_ribbon ? (
               <div>
                 <div className="font-medium text-xs">
-                  {onlineFlow.qc_online.user.full_name}
+                  {ribbonFlow.qc_ribbon.user.full_name}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatDateSafely(onlineFlow.qc_online.created_at)}
-                </div>
-              </div>
-            ) : (
-              <span className="text-muted-foreground text-xs">
-                Not processed
-              </span>
-            )}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "pc_online",
-      header: () => (
-        <div className="text-sm text-center font-semibold">PC Online</div>
-      ),
-      cell: ({ row }) => {
-        const onlineFlow = row.original;
-        return (
-          <div className="text-sm text-center">
-            {onlineFlow.pc_online ? (
-              <div>
-                <div className="font-medium text-xs">
-                  {onlineFlow.pc_online.user.full_name}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {formatDateSafely(onlineFlow.pc_online.created_at)}
+                  {formatDateSafely(ribbonFlow.qc_ribbon.created_at)}
                 </div>
               </div>
             ) : (
@@ -349,26 +322,26 @@ export default function OnlineFlowsTable() {
         <div className="text-sm text-center font-semibold">Outbound</div>
       ),
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="text-sm text-center">
-            {onlineFlow.outbound ? (
+            {ribbonFlow.outbound ? (
               <div>
                 <div className="flex items-center justify-center gap-2 mb-1">
                   <Badge
                     className="text-xs font-medium text-white"
                     style={{
-                      backgroundColor: onlineFlow.outbound.expedition_color,
+                      backgroundColor: ribbonFlow.outbound.expedition_color,
                     }}
                   >
-                    {onlineFlow.outbound.expedition}
+                    {ribbonFlow.outbound.expedition}
                   </Badge>
                 </div>
                 <div className="font-medium text-xs">
-                  {onlineFlow.outbound.user.full_name}
+                  {ribbonFlow.outbound.user.full_name}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {formatDateSafely(onlineFlow.outbound.created_at)}
+                  {formatDateSafely(ribbonFlow.outbound.created_at)}
                 </div>
               </div>
             ) : (
@@ -383,7 +356,7 @@ export default function OnlineFlowsTable() {
     {
       id: "actions",
       cell: ({ row }) => {
-        const onlineFlow = row.original;
+        const ribbonFlow = row.original;
         return (
           <div className="flex justify-end text-right">
             <DropdownMenu>
@@ -395,8 +368,8 @@ export default function OnlineFlowsTable() {
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
                   onClick={() => {
-                    setSelectedTracking(onlineFlow.tracking);
-                    setOnlineFlowDialogOpen(true);
+                    setSelectedTracking(ribbonFlow.tracking);
+                    setRibbonFlowDialogOpen(true);
                   }}
                 >
                   <Eye className="mr-2 h-4 w-4" />
@@ -464,7 +437,7 @@ export default function OnlineFlowsTable() {
         <div className="flex flex-1 gap-2 items-center">
           <form onSubmit={handleSearch} className="flex gap-2 items-center">
             <Input
-              placeholder="Search online flows..."
+              placeholder="Search ribbon flows..."
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               className="max-w-sm"
@@ -525,7 +498,7 @@ export default function OnlineFlowsTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading online flows...
+                    Loading ribbon flows...
                   </div>
                 </TableCell>
               </TableRow>
@@ -553,7 +526,7 @@ export default function OnlineFlowsTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No online flows found.
+                  No ribbon flows found.
                 </TableCell>
               </TableRow>
             )}
@@ -566,7 +539,7 @@ export default function OnlineFlowsTable() {
         <div className="text-sm text-muted-foreground">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} online flows
+          {pagination.total} ribbon flows
         </div>
         <div className="flex items-center gap-2">
           <RippleButton
@@ -628,11 +601,11 @@ export default function OnlineFlowsTable() {
         </div>
       </div>
 
-      {/* Online Flow Dialog */}
-      <OnlineFlowDialog
+      {/* Ribbon Flow Dialog */}
+      <RibbonFlowDialog
         tracking={selectedTracking}
-        open={onlineFlowDialogOpen}
-        onOpenChange={setOnlineFlowDialogOpen}
+        open={ribbonFlowDialogOpen}
+        onOpenChange={setRibbonFlowDialogOpen}
       />
     </div>
   );

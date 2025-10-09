@@ -6,12 +6,31 @@ export const onlineFlowApi = {
   getOnlineFlows: async (
     page: number = 1,
     limit: number = 10,
-    search?: string
+    search?: string,
+    startDate?: string,
+    endDate?: string
   ): Promise<PaginatedResponse<OnlineFlow>> => {
-    const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-    return apiRequest<PaginatedResponse<OnlineFlow>>(
-      `/online-flow?page=${page}&limit=${limit}${searchParam}`
-    );
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (search && search.trim()) {
+      params.append('search', search.trim());
+    }
+    
+    if (startDate) {
+      params.append('start_date', startDate);
+    }
+    
+    if (endDate) {
+      params.append('end_date', endDate);
+    }
+    
+    const url = `/online-flow?${params.toString()}`;
+    console.log('Online Flow API URL:', url); // Debug log
+    
+    return apiRequest<PaginatedResponse<OnlineFlow>>(url);
   },
 
   getOnlineFlowById: async (id: number): Promise<ApiResponse<OnlineFlow>> => {
