@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
+import { playSoundPcOnline } from "@/lib/sounds/pc-online-sound";
 import { pcOnlineApi } from "@/lib/api/pcOnlineApi";
 import { boxApi } from "@/lib/api/boxApi";
 import { ApiError } from "@/lib/api/types";
@@ -224,6 +225,7 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
 
       // Check if response exists and has expected structure
       if (response && response.success) {
+        playSoundPcOnline("success");
         toast.success("PC-Online created successfully!");
         form.reset();
         setBoxSearchOpen([false]); // Reset search states
@@ -234,11 +236,13 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
           focusTrackingInput();
         }, 100);
       } else {
+        playSoundPcOnline("error");
         // Handle cases where success is false or response is malformed
         const errorMsg = response?.message || "Failed to create PC-Online";
         throw new Error(errorMsg);
       }
     } catch (error) {
+      playSoundPcOnline("error");
       // Only log unexpected errors to console to reduce noise
       if (error instanceof ApiError) {
         // For expected API errors, log at debug level

@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { playSoundQcRibbon } from "@/lib/sounds/qc-ribbon-sound";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
 import { qcRibbonApi } from "@/lib/api/qcRibbonApi";
@@ -224,6 +225,7 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
 
       // Check if response exists and has expected structure
       if (response && response.success) {
+        playSoundQcRibbon("success");
         toast.success("QC-Ribbon created successfully!");
         form.reset();
         setBoxSearchOpen([false]); // Reset search states
@@ -234,11 +236,13 @@ export function QcRibbonForm({ onQcRibbonCreated }: QcRibbonFormProps) {
           focusTrackingInput();
         }, 100);
       } else {
+        playSoundQcRibbon("error");
         // Handle cases where success is false or response is malformed
         const errorMsg = response?.message || "Failed to create QC-Ribbon";
         throw new Error(errorMsg);
       }
     } catch (error) {
+      playSoundQcRibbon("error");
       // Only log unexpected errors to console to reduce noise
       if (error instanceof ApiError) {
         // For expected API errors, log at debug level

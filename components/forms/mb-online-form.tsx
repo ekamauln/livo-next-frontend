@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2 } from "lucide-react";
+import { playSoundMbRibbon } from "@/lib/sounds/mb-ribbon-sound";
 import { mbOnlineApi } from "@/lib/api/mbOnlineApi";
 import { ApiError } from "@/lib/api/types";
 
@@ -68,6 +69,7 @@ export function MbOnlineForm({ onMbOnlineCreated }: MbOnlineFormProps) {
 
       // Check if response exists and has expected structure
       if (response && response.success) {
+        playSoundMbRibbon("success");
         toast.success("MB-Online created successfully!");
         form.reset(); // Reset form using React Hook Form
         onMbOnlineCreated?.();
@@ -76,11 +78,13 @@ export function MbOnlineForm({ onMbOnlineCreated }: MbOnlineFormProps) {
           focusTrackingInput();
         }, 100);
       } else {
+        playSoundMbRibbon("error");
         // Handle cases where success is false or response is malformed
         const errorMsg = response?.message || "Failed to create MB-Online";
         throw new Error(errorMsg);
       }
     } catch (error) {
+      playSoundMbRibbon("error");
       // Only log unexpected errors to console to reduce noise
       if (error instanceof ApiError) {
         // For expected API errors, log at debug level

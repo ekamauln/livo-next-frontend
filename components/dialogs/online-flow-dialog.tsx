@@ -131,7 +131,7 @@ export function OnlineFlowDialog({
               <div className="space-y-2">
                 <h3 className="font-semibold text-lg flex items-center gap-2">
                   <Package className="h-4 w-4" />
-                  Tracking Information
+                  Order Information
                 </h3>
                 <div className="space-y-1 rounded-md border border-border">
                   <Table>

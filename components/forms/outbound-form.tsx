@@ -21,6 +21,7 @@ import { outboundApi } from "@/lib/api/outboundApi";
 import { ApiError } from "@/lib/api/types";
 import { CreateOutboundRequest } from "@/types/outbound";
 import { OutboundCreateDialog } from "@/components/dialogs/outbound-create-dialog";
+import { playSoundOutbound } from "@/lib/sounds/outbound-sound";
 
 const formSchema = z.object({
   tracking: z
@@ -82,7 +83,9 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
     });
   };
 
-  const handleExpeditionSelect = async (expeditionData: Omit<CreateOutboundRequest, 'tracking'>) => {
+  const handleExpeditionSelect = async (
+    expeditionData: Omit<CreateOutboundRequest, "tracking">
+  ) => {
     setShowExpeditionDialog(false);
     await createOutbound({
       tracking: pendingTracking,
@@ -97,6 +100,9 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
 
       // Check if response exists and has expected structure
       if (response && response.success) {
+        // Play sound based on expedition_slug from response data
+        const expeditionSlug = response.data?.expedition_slug || outboundData.expedition_slug;
+        playSoundOutbound(expeditionSlug);
         toast.success("Outbound created successfully!");
         form.reset(); // Reset form using React Hook Form
         onOutboundCreated?.();
@@ -105,11 +111,13 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
           focusTrackingInput();
         }, 100);
       } else {
+        playSoundOutbound("error");
         // Handle cases where success is false or response is malformed
         const errorMsg = response?.message || "Failed to create Outbound";
         throw new Error(errorMsg);
       }
     } catch (error) {
+      playSoundOutbound("error");
       // Only log unexpected errors to console to reduce noise
       if (error instanceof ApiError) {
         // For expected API errors, log at debug level
@@ -117,7 +125,10 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
           error.status === 404 &&
           error.message.toLowerCase().includes("order not found")
         ) {
-          console.debug("Order not found for tracking number:", outboundData.tracking);
+          console.debug(
+            "Order not found for tracking number:",
+            outboundData.tracking
+          );
         } else if (error.status >= 400 && error.status < 500) {
           console.debug(
             "Client error:",
@@ -138,14 +149,16 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
       if (error instanceof ApiError) {
         // Use the backend error message directly
         errorMessage = error.message;
-        
+
         // Provide more specific descriptions based on status code and message
         if (error.status === 400) {
           // For 400 errors, show the specific backend message
           if (error.message.includes("QC process required")) {
-            toastDescription = "This tracking number must go through Quality Control first";
+            toastDescription =
+              "This tracking number must go through Quality Control first";
           } else if (error.message.includes("already exists")) {
-            toastDescription = "This tracking number already has an outbound record";
+            toastDescription =
+              "This tracking number already has an outbound record";
           } else {
             toastDescription = "Please check your input and try again";
           }
@@ -153,7 +166,8 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
           toastDescription = "Your session has expired. Please login again";
         } else if (error.status === 404) {
           if (error.message.toLowerCase().includes("order not found")) {
-            errorMessage = "This tracking number is not associated with any order";
+            errorMessage =
+              "This tracking number is not associated with any order";
             toastDescription = "Please check the tracking number and try again";
           } else {
             toastDescription = "Resource not found. Please try again";
@@ -171,15 +185,15 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
 
       // Set form error using React Hook Form
       form.setError("tracking", { message: errorMessage });
-      
+
       // Clear the tracking input on error
       form.setValue("tracking", "");
-      
+
       // Show toast with backend error message and description
       toast.error(errorMessage, {
         description: toastDescription,
       });
-      
+
       // Focus back to input after API error
       setTimeout(() => {
         focusTrackingInput();

@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
+import { playSoundQcOnline } from "@/lib/sounds/qc-online-sound";
 import { qcOnlineApi } from "@/lib/api/qcOnlineApi";
 import { boxApi } from "@/lib/api/boxApi";
 import { ApiError } from "@/lib/api/types";
@@ -224,6 +225,7 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
 
       // Check if response exists and has expected structure
       if (response && response.success) {
+        playSoundQcOnline("success");
         toast.success("QC-Online created successfully!");
         form.reset();
         setBoxSearchOpen([false]); // Reset search states
@@ -234,11 +236,13 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
           focusTrackingInput();
         }, 100);
       } else {
+        playSoundQcOnline("error");
         // Handle cases where success is false or response is malformed
         const errorMsg = response?.message || "Failed to create QC-Online";
         throw new Error(errorMsg);
       }
     } catch (error) {
+      playSoundQcOnline("error");
       // Only log unexpected errors to console to reduce noise
       if (error instanceof ApiError) {
         // For expected API errors, log at debug level
