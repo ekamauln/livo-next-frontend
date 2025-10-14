@@ -138,6 +138,12 @@ export default function AppNavbar() {
                     Boxes
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/expeditions">
+                    <PackageOpen className="h-4 w-4" />
+                    Expeditions
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
 

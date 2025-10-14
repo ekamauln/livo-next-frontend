@@ -11,6 +11,7 @@ export { qcOnlineApi } from "@/lib/api/qcOnlineApi";
 export { pcOnlineApi } from "@/lib/api/pcOnlineApi";
 export { onlineFlowApi } from "@/lib/api/onlineFlowApi";
 export { outboundApi } from "@/lib/api/outboundApi";
+export { expeditionApi } from "@/lib/api/expeditionApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility
@@ -26,6 +27,7 @@ export type {
 
 export type { Product } from "@/types/product";
 export type { Box } from "@/types/box";
+export type { Expedition } from "@/types/expedition";
 export type { Order, OrderDetail } from "@/types/order";
 export type { MbRibbon } from "@/types/mb-ribbon";
 export type {

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Color from 'color';
-import { PipetteIcon } from 'lucide-react';
-import { Slider } from 'radix-ui';
+import Color from "color";
+import { PipetteIcon } from "lucide-react";
+import { Slider } from "radix-ui";
 import {
   type ComponentProps,
   createContext,
@@ -14,17 +14,17 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 interface ColorPickerContextValue {
   hue: number;
@@ -47,7 +47,7 @@ export const useColorPicker = () => {
   const context = useContext(ColorPickerContext);
 
   if (!context) {
-    throw new Error('useColorPicker must be used within a ColorPickerProvider');
+    throw new Error("useColorPicker must be used within a ColorPickerProvider");
   }
 
   return context;
@@ -61,49 +61,59 @@ export type ColorPickerProps = HTMLAttributes<HTMLDivElement> & {
 
 export const ColorPicker = ({
   value,
-  defaultValue = '#000000',
+  defaultValue = "#000000",
   onChange,
   className,
   ...props
 }: ColorPickerProps) => {
-  const selectedColor = Color(value);
+  const selectedColor = Color(value || defaultValue);
   const defaultColor = Color(defaultValue);
 
   const [hue, setHue] = useState(
     selectedColor.hue() || defaultColor.hue() || 0
   );
   const [saturation, setSaturation] = useState(
-    selectedColor.saturationl() || defaultColor.saturationl() || 100
+    selectedColor.saturationl() || defaultColor.saturationl() || 0
   );
   const [lightness, setLightness] = useState(
     selectedColor.lightness() || defaultColor.lightness() || 50
   );
   const [alpha, setAlpha] = useState(
-    selectedColor.alpha() * 100 || defaultColor.alpha() * 100
+    (selectedColor.alpha() || defaultColor.alpha() || 1) * 100
   );
-  const [mode, setMode] = useState('hex');
+  const [mode, setMode] = useState("hex");
+  const [isInternalUpdate, setIsInternalUpdate] = useState(false);
 
   // Update color when controlled value changes
+  const prevValueRef = useRef(value);
   useEffect(() => {
-    if (value) {
-      const color = Color.rgb(value).rgb().object();
-
-      setHue(color.r);
-      setSaturation(color.g);
-      setLightness(color.b);
-      setAlpha(color.a);
+    if (value && value !== prevValueRef.current && !isInternalUpdate) {
+      prevValueRef.current = value;
+      const color = Color(value);
+      const hslValues = color.hsl().array();
+      
+      setHue(hslValues[0] || 0);
+      setSaturation(hslValues[1] || 0);
+      setLightness(hslValues[2] || 0);
+      setAlpha((color.alpha() || 1) * 100);
     }
-  }, [value]);
+    setIsInternalUpdate(false);
+  }, [value, isInternalUpdate]);
 
-  // Notify parent of changes
-  useEffect(() => {
+  // Notify parent of changes with debounce to prevent infinite loops
+  const notifyChange = useCallback(() => {
     if (onChange) {
+      setIsInternalUpdate(true);
       const color = Color.hsl(hue, saturation, lightness).alpha(alpha / 100);
       const rgba = color.rgb().array();
-
       onChange([rgba[0], rgba[1], rgba[2], alpha / 100]);
     }
   }, [hue, saturation, lightness, alpha, onChange]);
+
+  useEffect(() => {
+    const timeoutId = setTimeout(notifyChange, 10);
+    return () => clearTimeout(timeoutId);
+  }, [notifyChange]);
 
   return (
     <ColorPickerContext.Provider
@@ -121,7 +131,7 @@ export const ColorPicker = ({
       }}
     >
       <div
-        className={cn('flex size-full flex-col gap-4', className)}
+        className={cn("flex size-full flex-col gap-4", className)}
         {...props}
       />
     </ColorPickerContext.Provider>
@@ -134,9 +144,11 @@ export const ColorPickerSelection = memo(
   ({ className, ...props }: ColorPickerSelectionProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
-    const [positionX, setPositionX] = useState(0);
-    const [positionY, setPositionY] = useState(0);
-    const { hue, setSaturation, setLightness } = useColorPicker();
+    const { hue, saturation, lightness, setSaturation, setLightness } = useColorPicker();
+    
+    // Calculate position based on current saturation and lightness
+    const positionX = saturation / 100;
+    const positionY = 1 - (lightness / 100);
 
     const backgroundGradient = useMemo(() => {
       return `linear-gradient(0deg, rgba(0,0,0,1), rgba(0,0,0,0)),
@@ -158,13 +170,9 @@ export const ColorPickerSelection = memo(
           0,
           Math.min(1, (event.clientY - rect.top) / rect.height)
         );
-        setPositionX(x);
-        setPositionY(y);
+        
         setSaturation(x * 100);
-        const topLightness = x < 0.01 ? 100 : 50 + 50 * (1 - x);
-        const lightness = topLightness * (1 - y);
-
-        setLightness(lightness);
+        setLightness((1 - y) * 100);
       },
       [isDragging, setSaturation, setLightness]
     );
@@ -173,19 +181,19 @@ export const ColorPickerSelection = memo(
       const handlePointerUp = () => setIsDragging(false);
 
       if (isDragging) {
-        window.addEventListener('pointermove', handlePointerMove);
-        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener("pointermove", handlePointerMove);
+        window.addEventListener("pointerup", handlePointerUp);
       }
 
       return () => {
-        window.removeEventListener('pointermove', handlePointerMove);
-        window.removeEventListener('pointerup', handlePointerUp);
+        window.removeEventListener("pointermove", handlePointerMove);
+        window.removeEventListener("pointerup", handlePointerUp);
       };
     }, [isDragging, handlePointerMove]);
 
     return (
       <div
-        className={cn('relative size-full cursor-crosshair rounded', className)}
+        className={cn("relative size-full cursor-crosshair rounded", className)}
         onPointerDown={(e) => {
           e.preventDefault();
           setIsDragging(true);
@@ -202,7 +210,7 @@ export const ColorPickerSelection = memo(
           style={{
             left: `${positionX * 100}%`,
             top: `${positionY * 100}%`,
-            boxShadow: '0 0 0 1px rgba(0,0,0,0.5)',
+            boxShadow: "0 0 0 1px rgba(0,0,0,0.5)",
           }}
         />
       </div>
@@ -210,7 +218,7 @@ export const ColorPickerSelection = memo(
   }
 );
 
-ColorPickerSelection.displayName = 'ColorPickerSelection';
+ColorPickerSelection.displayName = "ColorPickerSelection";
 
 export type ColorPickerHueProps = ComponentProps<typeof Slider.Root>;
 
@@ -222,7 +230,7 @@ export const ColorPickerHue = ({
 
   return (
     <Slider.Root
-      className={cn('relative flex h-4 w-full touch-none', className)}
+      className={cn("relative flex h-4 w-full touch-none", className)}
       max={360}
       onValueChange={([hue]) => setHue(hue)}
       step={1}
@@ -247,7 +255,7 @@ export const ColorPickerAlpha = ({
 
   return (
     <Slider.Root
-      className={cn('relative flex h-4 w-full touch-none', className)}
+      className={cn("relative flex h-4 w-full touch-none", className)}
       max={100}
       onValueChange={([alpha]) => setAlpha(alpha)}
       step={1}
@@ -290,13 +298,13 @@ export const ColorPickerEyeDropper = ({
       setLightness(l);
       setAlpha(100);
     } catch (error) {
-      console.error('EyeDropper failed:', error);
+      console.error("EyeDropper failed:", error);
     }
   };
 
   return (
     <Button
-      className={cn('shrink-0 text-muted-foreground', className)}
+      className={cn("shrink-0 text-muted-foreground", className)}
       onClick={handleEyeDropper}
       size="icon"
       variant="outline"
@@ -310,9 +318,10 @@ export const ColorPickerEyeDropper = ({
 
 export type ColorPickerOutputProps = ComponentProps<typeof SelectTrigger>;
 
-const formats = ['hex', 'rgb', 'css', 'hsl'];
+const formats = ["hex", "rgb", "css", "hsl"];
 
 export const ColorPickerOutput = ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   className,
   ...props
 }: ColorPickerOutputProps) => {
@@ -344,7 +353,7 @@ const PercentageInput = ({ className, ...props }: PercentageInputProps) => {
         type="text"
         {...props}
         className={cn(
-          'h-8 w-[3.25rem] rounded-l-none bg-secondary px-2 text-xs shadow-none',
+          "h-8 w-[3.25rem] rounded-l-none bg-secondary px-2 text-xs shadow-none",
           className
         )}
       />
@@ -364,13 +373,13 @@ export const ColorPickerFormat = ({
   const { hue, saturation, lightness, alpha, mode } = useColorPicker();
   const color = Color.hsl(hue, saturation, lightness, alpha / 100);
 
-  if (mode === 'hex') {
+  if (mode === "hex") {
     const hex = color.hex();
 
     return (
       <div
         className={cn(
-          '-space-x-px relative flex w-full items-center rounded-md shadow-sm',
+          "-space-x-px relative flex w-full items-center rounded-md shadow-sm",
           className
         )}
         {...props}
@@ -386,7 +395,7 @@ export const ColorPickerFormat = ({
     );
   }
 
-  if (mode === 'rgb') {
+  if (mode === "rgb") {
     const rgb = color
       .rgb()
       .array()
@@ -395,7 +404,7 @@ export const ColorPickerFormat = ({
     return (
       <div
         className={cn(
-          '-space-x-px flex items-center rounded-md shadow-sm',
+          "-space-x-px flex items-center rounded-md shadow-sm",
           className
         )}
         {...props}
@@ -403,8 +412,8 @@ export const ColorPickerFormat = ({
         {rgb.map((value, index) => (
           <Input
             className={cn(
-              'h-8 rounded-r-none bg-secondary px-2 text-xs shadow-none',
-              index && 'rounded-l-none',
+              "h-8 rounded-r-none bg-secondary px-2 text-xs shadow-none",
+              index && "rounded-l-none",
               className
             )}
             key={index}
@@ -418,26 +427,26 @@ export const ColorPickerFormat = ({
     );
   }
 
-  if (mode === 'css') {
+  if (mode === "css") {
     const rgb = color
       .rgb()
       .array()
       .map((value) => Math.round(value));
 
     return (
-      <div className={cn('w-full rounded-md shadow-sm', className)} {...props}>
+      <div className={cn("w-full rounded-md shadow-sm", className)} {...props}>
         <Input
           className="h-8 w-full bg-secondary px-2 text-xs shadow-none"
           readOnly
           type="text"
-          value={`rgba(${rgb.join(', ')}, ${alpha}%)`}
+          value={`rgba(${rgb.join(", ")}, ${alpha}%)`}
           {...props}
         />
       </div>
     );
   }
 
-  if (mode === 'hsl') {
+  if (mode === "hsl") {
     const hsl = color
       .hsl()
       .array()
@@ -446,7 +455,7 @@ export const ColorPickerFormat = ({
     return (
       <div
         className={cn(
-          '-space-x-px flex items-center rounded-md shadow-sm',
+          "-space-x-px flex items-center rounded-md shadow-sm",
           className
         )}
         {...props}
@@ -454,8 +463,8 @@ export const ColorPickerFormat = ({
         {hsl.map((value, index) => (
           <Input
             className={cn(
-              'h-8 rounded-r-none bg-secondary px-2 text-xs shadow-none',
-              index && 'rounded-l-none',
+              "h-8 rounded-r-none bg-secondary px-2 text-xs shadow-none",
+              index && "rounded-l-none",
               className
             )}
             key={index}
