@@ -138,7 +138,7 @@ export function UserCreateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-3xl max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-[700px] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserPlus className="h-5 w-5" /> Create New User
@@ -319,7 +319,7 @@ export function UserCreateDialog({
                 <RippleButton
                   type="button"
                   size="sm"
-                  variant="destructive"
+                  variant="outline"
                   onClick={() => onOpenChange(false)}
                   className="cursor-pointer"
                 >

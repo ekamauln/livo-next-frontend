@@ -242,7 +242,7 @@ export function BoxDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 truncate">
-                        <PackageOpen className="h-5 w-5" />
+                        <Settings className="h-5 w-5" />
                         Edit Box Information
                       </CardTitle>
                       <Separator

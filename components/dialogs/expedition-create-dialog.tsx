@@ -24,7 +24,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Loader2, UserPlus } from "lucide-react";
+import { BusFront, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -93,10 +93,10 @@ export function ExpeditionCreateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-3xl max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-[700px] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" /> Create New Expedition
+            <BusFront className="h-5 w-5" /> Create New Expedition
           </DialogTitle>
           <DialogDescription>
             Create a new expedition by filling out the form below.
@@ -254,7 +254,7 @@ export function ExpeditionCreateDialog({
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
+                    <BusFront className="mr-2 h-4 w-4" />
                   )}
                   Create New Expedition
                 </RippleButton>

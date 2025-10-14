@@ -28,11 +28,11 @@ import {
   Loader2,
   Package,
   Settings,
-  QrCode,
   Download,
   Upload,
-  Image as ImageIcon,
   PackageOpen,
+  ScanBarcode,
+  ScanQrCode,
 } from "lucide-react";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
@@ -404,14 +404,14 @@ export function ProductDialog({
                 value="barcode1d"
                 className="flex items-center gap-2"
               >
-                <ImageIcon className="h-4 w-4" />
+                <ScanBarcode className="h-4 w-4" />
                 1D Barcode
               </TabsTrigger>
               <TabsTrigger
                 value="barcode2d"
                 className="flex items-center gap-2"
               >
-                <QrCode className="h-4 w-4" />
+                <ScanQrCode className="h-4 w-4" />
                 2D Barcode
               </TabsTrigger>
             </TabsList>
@@ -522,7 +522,7 @@ export function ProductDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 truncate">
-                        <PackageOpen className="h-5 w-5" />
+                        <Settings className="h-5 w-5" />
                         Edit Product Information
                       </CardTitle>
                       <Separator
@@ -673,7 +673,7 @@ export function ProductDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 truncate">
-                        <PackageOpen className="h-5 w-5" />
+                        <ScanBarcode className="h-5 w-5" />
                         Generate 1D Barcode
                       </CardTitle>
                       <Separator
@@ -727,7 +727,7 @@ export function ProductDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2 truncate">
-                        <PackageOpen className="h-5 w-5" />
+                        <ScanQrCode className="h-5 w-5" />
                         Generate 2D Barcode
                       </CardTitle>
                       <Separator

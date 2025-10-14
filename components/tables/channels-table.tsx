@@ -24,7 +24,7 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
-  UserPlus,
+  Tv,
 } from "lucide-react";
 import {
   Select,
@@ -247,7 +247,7 @@ export default function ChannelsTable() {
           onClick={() => setCreateDialogOpen(true)}
         >
           <div className="flex items-center gap-2 justify-center">
-            <UserPlus className="w-4 h-4" /> <span>Create New Channel</span>
+            <Tv className="w-4 h-4" /> <span>Create New Channel</span>
           </div>
         </RippleButton>
         {/* Column visibility */}

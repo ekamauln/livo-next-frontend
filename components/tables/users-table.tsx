@@ -279,22 +279,32 @@ export default function UsersTable() {
                 <DropdownMenuItem
                   onClick={() => {
                     setSelectedUserId(user.id);
-                    setDialogTab("role");
-                    setUserDialogOpen(true);
-                  }}
-                >
-                  <BookUser className="mr-2 h-4 w-4" />
-                  Manage Roles
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedUserId(user.id);
                     setDialogTab("password");
                     setUserDialogOpen(true);
                   }}
                 >
                   <KeyRound className="mr-2 h-4 w-4" />
                   Reset Password
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedUserId(user.id);
+                    setDialogTab("status");
+                    setUserDialogOpen(true);
+                  }}
+                >
+                  <Zap className="mr-2 h-4 w-4" />
+                  Status Change
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedUserId(user.id);
+                    setDialogTab("role");
+                    setUserDialogOpen(true);
+                  }}
+                >
+                  <BookUser className="mr-2 h-4 w-4" />
+                  Manage Roles
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

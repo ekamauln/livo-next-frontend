@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/form";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, PackageOpen } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -84,10 +84,10 @@ export function ProductCreateDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-3xl max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="min-w-[700px] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" /> Create New Product
+            <PackageOpen className="h-5 w-5" /> Create New Product
           </DialogTitle>
           <DialogDescription>
             Create a new product by filling out the form below.
@@ -208,7 +208,7 @@ export function ProductCreateDialog({
                   {isLoading ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : (
-                    <UserPlus className="mr-2 h-4 w-4" />
+                    <PackageOpen className="mr-2 h-4 w-4" />
                   )}
                   Create New Product
                 </RippleButton>

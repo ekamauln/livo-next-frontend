@@ -26,7 +26,7 @@ import {
   Edit,
   KeyRound,
   BookUser,
-  UserPlus,
+  PackageOpen,
 } from "lucide-react";
 import {
   Select,
@@ -325,7 +325,7 @@ export default function ProductsTable() {
           onClick={() => setCreateDialogOpen(true)}
         >
           <div className="flex items-center gap-2 justify-center">
-            <UserPlus className="w-4 h-4" /> <span>Create New Product</span>
+            <PackageOpen className="w-4 h-4" /> <span>Create New Product</span>
           </div>
         </RippleButton>
         {/* Column visibility */}

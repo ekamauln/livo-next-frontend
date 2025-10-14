@@ -24,7 +24,7 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
-  UserPlus,
+  Store as StoreIcon,
 } from "lucide-react";
 import {
   Select,
@@ -245,7 +245,7 @@ export default function StoresTable() {
           onClick={() => setCreateDialogOpen(true)}
         >
           <div className="flex items-center gap-2 justify-center">
-            <UserPlus className="w-4 h-4" /> <span>Create New Store</span>
+            <StoreIcon className="w-4 h-4" /> <span>Create New Store</span>
           </div>
         </RippleButton>
         {/* Column visibility */}

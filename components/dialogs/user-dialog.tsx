@@ -790,7 +790,7 @@ export function UserDialog({
                             <RippleButton
                               size="sm"
                               type="button"
-                              variant="destructive"
+                              variant="outline"
                               onClick={() => setActiveTab("detail")}
                               className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                             >
@@ -820,7 +820,7 @@ export function UserDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <KeyRound className="h-5 w-5" />
+                        <Shield className="h-5 w-5" />
                         {user.full_name} - Status Management
                       </CardTitle>
                       <Separator
@@ -869,7 +869,7 @@ export function UserDialog({
                   <Card className="grid gap-6 rounded-md border mt-4">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <KeyRound className="h-5 w-5" />
+                        <Armchair className="h-5 w-5" />
                         {user.full_name} - Role Management
                       </CardTitle>
                       <Separator

@@ -5,6 +5,7 @@ import {
   MenubarContent,
   MenubarItem,
   MenubarMenu,
+  MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import {
@@ -16,6 +17,7 @@ import {
   ShoppingBag,
   SquareUser,
   Store,
+  Truck,
   Tv,
   User,
 } from "lucide-react";
@@ -109,15 +111,9 @@ export default function AppNavbar() {
               </MenubarTrigger>
               <MenubarContent>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/users">
-                    <SquareUser className="h-4 w-4" />
-                    Users
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/products">
-                    <Package className="h-4 w-4" />
-                    Products
+                  <Link href="/coordinator/boxes">
+                    <PackageOpen className="h-4 w-4" />
+                    Boxes
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
@@ -127,21 +123,27 @@ export default function AppNavbar() {
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/expeditions">
+                    <Truck className="h-4 w-4" />
+                    Expeditions
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/coordinator/products">
+                    <Package className="h-4 w-4" />
+                    Products
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
                   <Link href="/coordinator/stores">
                     <Store className="h-4 w-4" />
                     Stores
                   </Link>
                 </MenubarItem>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/boxes">
-                    <PackageOpen className="h-4 w-4" />
-                    Boxes
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/expeditions">
-                    <PackageOpen className="h-4 w-4" />
-                    Expeditions
+                  <Link href="/coordinator/users">
+                    <SquareUser className="h-4 w-4" />
+                    Users
                   </Link>
                 </MenubarItem>
               </MenubarContent>
@@ -184,6 +186,7 @@ export default function AppNavbar() {
                     QC Ribbons
                   </Link>
                 </MenubarItem>
+                <MenubarSeparator />
                 <MenubarItem asChild className="cursor-pointer">
                   <Link href="/ribbons/ribbon-flows">
                     <ShoppingBag className="h-4 w-4" />
@@ -215,6 +218,7 @@ export default function AppNavbar() {
                     PC Onlines
                   </Link>
                 </MenubarItem>
+                <MenubarSeparator />
                 <MenubarItem asChild className="cursor-pointer">
                   <Link href="/onlines/online-flows">
                     <ShoppingBag className="h-4 w-4" />
