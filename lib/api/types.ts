@@ -6,7 +6,7 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE_URL = "http://192.168.31.136:8000/api";
+export const API_BASE_URL = "http://192.168.31.136:8081/api";
 
 // Token refresh management
 let isRefreshing = false;
@@ -15,7 +15,10 @@ let failedQueue: Array<{
   reject: (error: ApiError | Error) => void;
 }> = [];
 
-const processQueue = (error: ApiError | Error | null, token: string | null = null) => {
+const processQueue = (
+  error: ApiError | Error | null,
+  token: string | null = null
+) => {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) {
       reject(error);
@@ -23,7 +26,7 @@ const processQueue = (error: ApiError | Error | null, token: string | null = nul
       resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -61,18 +64,20 @@ export async function apiRequest<T>(
               Authorization: `Bearer ${newToken}`,
             },
           };
-          return fetch(`${API_BASE_URL}${endpoint}`, newConfig).then(async (retryResponse) => {
-            if (!retryResponse.ok) {
-              const errorData = await retryResponse
-                .json()
-                .catch(() => ({ message: "Request failed" }));
-              throw new ApiError(
-                retryResponse.status,
-                errorData.message || "Request failed"
-              );
+          return fetch(`${API_BASE_URL}${endpoint}`, newConfig).then(
+            async (retryResponse) => {
+              if (!retryResponse.ok) {
+                const errorData = await retryResponse
+                  .json()
+                  .catch(() => ({ message: "Request failed" }));
+                throw new ApiError(
+                  retryResponse.status,
+                  errorData.message || "Request failed"
+                );
+              }
+              return await retryResponse.json();
             }
-            return await retryResponse.json();
-          });
+          );
         });
       }
 
@@ -98,7 +103,11 @@ export async function apiRequest<T>(
         }
 
         const refreshData = await refreshResponse.json();
-        const { access_token, refresh_token: newRefreshToken, user } = refreshData.data;
+        const {
+          access_token,
+          refresh_token: newRefreshToken,
+          user,
+        } = refreshData.data;
 
         // Update stored tokens
         localStorage.setItem("access_token", access_token);
@@ -117,8 +126,11 @@ export async function apiRequest<T>(
           },
         };
 
-        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, newConfig);
-        
+        const retryResponse = await fetch(
+          `${API_BASE_URL}${endpoint}`,
+          newConfig
+        );
+
         if (!retryResponse.ok) {
           const errorData = await retryResponse
             .json()
@@ -130,22 +142,24 @@ export async function apiRequest<T>(
         }
 
         return await retryResponse.json();
-
       } catch (refreshError) {
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
         localStorage.removeItem("user_data");
-        
+
         // Process queued requests with error
-        const error = refreshError instanceof Error ? refreshError : new Error("Token refresh failed");
+        const error =
+          refreshError instanceof Error
+            ? refreshError
+            : new Error("Token refresh failed");
         processQueue(error, null);
-        
+
         // Redirect to login page
         if (typeof window !== "undefined") {
           window.location.href = "/auth/login";
         }
-        
+
         throw new ApiError(401, "Session expired. Please login again.");
       } finally {
         isRefreshing = false;
