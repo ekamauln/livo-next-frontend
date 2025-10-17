@@ -15,7 +15,7 @@ import OnlineFlowsTable from "@/components/tables/online-flows-table";
 
 export default function PcOnlines() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator"]}>
+    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

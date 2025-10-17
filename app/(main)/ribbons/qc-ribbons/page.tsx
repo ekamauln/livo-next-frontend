@@ -15,7 +15,9 @@ import QcRibbonsTable from "@/components/tables/qc-ribbons-table";
 
 export default function QcRibbons() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator", "qc-ribbon"]}>
+    <ProtectedRoute
+      requiredRoles={["superadmin", "admin", "coordinator", "qc-ribbon"]}
+    >
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

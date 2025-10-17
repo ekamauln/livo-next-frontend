@@ -15,7 +15,9 @@ import MbRibbonsTable from "@/components/tables/mb-ribbons-table";
 
 export default function MbRibbons() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator", "mb-ribbon"]}>
+    <ProtectedRoute
+      requiredRoles={["superadmin", "admin", "coordinator", "mb-ribbon"]}
+    >
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

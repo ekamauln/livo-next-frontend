@@ -15,7 +15,9 @@ import QcOnlinesTable from "@/components/tables/qc-onlines-table";
 
 export default function QcOnlines() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator", "qc-online"]}>
+    <ProtectedRoute
+      requiredRoles={["superadmin", "admin", "coordinator", "qc-online"]}
+    >
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

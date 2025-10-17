@@ -15,7 +15,7 @@ import ChannelsTable from "@/components/tables/channels-table";
 
 export default function Channels() {
   return (
-    <ProtectedRoute requiredRoles={["admin", "coordinator"]}>
+    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
