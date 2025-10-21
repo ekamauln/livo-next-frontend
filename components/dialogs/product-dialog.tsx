@@ -359,15 +359,17 @@ export function ProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-[900px] max-w-5xl max-h-[90vh] flex flex-col overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 truncate">
+      <DialogContent className="min-w-[900px] max-w-5xl max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            {loading
-              ? "Loading..."
-              : product
-              ? `${product.name}`
-              : "Product Details"}
+            <span className="truncate">
+              {loading
+                ? "Loading..."
+                : product
+                ? `${product.name}`
+                : "Product Details"}
+            </span>
           </DialogTitle>
           <DialogDescription>
             {product
@@ -389,9 +391,9 @@ export function ProductDialog({
                 value as "detail" | "profile" | "barcode1d" | "barcode2d"
               )
             }
-            className="w-full"
+            className="flex-1 flex flex-col min-h-0"
           >
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 flex-shrink-0">
               <TabsTrigger value="detail" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Details
@@ -416,15 +418,15 @@ export function ProductDialog({
               </TabsTrigger>
             </TabsList>
 
-            <div>
-              <TabsContents className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto min-h-0 mt-4">
+              <TabsContents>
                 {/* Product Details Tab */}
-                <TabsContent value="detail" className="space-y-6">
-                  <Card className="grid gap-6 rounded-md border mt-4">
+                <TabsContent value="detail" className="space-y-6 mt-0">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 truncate">
-                        <PackageOpen className="h-5 w-5" />
-                        Detail Information
+                      <CardTitle className="flex items-center gap-2">
+                        <PackageOpen className="h-5 w-5 flex-shrink-0" />
+                        <span className="truncate">Detail Information</span>
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -518,12 +520,14 @@ export function ProductDialog({
                 </TabsContent>
 
                 {/* Edit Product Tab */}
-                <TabsContent value="profile">
-                  <Card className="grid gap-6 rounded-md border mt-4">
+                <TabsContent value="profile" className="mt-0">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 truncate">
-                        <Settings className="h-5 w-5" />
-                        Edit Product Information
+                      <CardTitle className="flex items-center gap-2">
+                        <Settings className="h-5 w-5 flex-shrink-0" />
+                        <span className="truncate">
+                          Edit Product Information
+                        </span>
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -669,12 +673,12 @@ export function ProductDialog({
                 </TabsContent>
 
                 {/* Generate 1D Barcode Tab */}
-                <TabsContent value="barcode1d">
-                  <Card className="grid gap-6 rounded-md border mt-4">
+                <TabsContent value="barcode1d" className="mt-0">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 truncate">
-                        <ScanBarcode className="h-5 w-5" />
-                        Generate 1D Barcode
+                      <CardTitle className="flex items-center gap-2">
+                        <ScanBarcode className="h-5 w-5 flex-shrink-0" />
+                        <span className="truncate">Generate 1D Barcode</span>
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -723,12 +727,12 @@ export function ProductDialog({
                 </TabsContent>
 
                 {/* Generate 2D Barcode Tab */}
-                <TabsContent value="barcode2d">
-                  <Card className="grid gap-6 rounded-md border mt-4">
+                <TabsContent value="barcode2d" className="mt-0">
+                  <Card>
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2 truncate">
-                        <ScanQrCode className="h-5 w-5" />
-                        Generate 2D Barcode
+                      <CardTitle className="flex items-center gap-2">
+                        <ScanQrCode className="h-5 w-5 flex-shrink-0" />
+                        <span className="truncate">Generate 2D Barcode</span>
                       </CardTitle>
                       <Separator
                         orientation="horizontal"

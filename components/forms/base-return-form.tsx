@@ -96,7 +96,7 @@ export function BaseReturnForm({ onBaseReturnCreated }: BaseReturnFormProps) {
 
   // Get selected channel display text
   const getSelectedChannelText = (channelID: string) => {
-    if (!channelID) return "Select channel";
+    if (!channelID) return "Select channel...";
     const channel = channels.find((ch) => ch.id.toString() === channelID);
     return channel ? `${channel.name}` : "Select channel...";
   };

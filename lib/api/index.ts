@@ -12,6 +12,9 @@ export { pcOnlineApi } from "@/lib/api/pcOnlineApi";
 export { onlineFlowApi } from "@/lib/api/onlineFlowApi";
 export { outboundApi } from "@/lib/api/outboundApi";
 export { expeditionApi } from "@/lib/api/expeditionApi";
+export { returnApi } from "@/lib/api/returnApi";
+export { channelApi } from "@/lib/api/channelApi";
+export { storeApi } from "@/lib/api/storeApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility
