@@ -23,6 +23,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  ChevronRight as ChevronRightIcon,
   Package,
   Truck,
   Clock,
@@ -30,6 +31,7 @@ import {
   Eye,
   Edit,
 } from "lucide-react";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -55,7 +57,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { orderApi } from "@/lib/api/orderApi";
 import { OrderDialog } from "@/components/dialogs/order-dialog";
-import { RippleButton } from "../ui/shadcn-io/ripple-button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 
 // Status badge color mapping
 const getStatusBadgeStyle = (status: string) => {
@@ -105,17 +107,31 @@ const renderExpandedContent = (order: Order) => {
             className="border rounded-lg p-4 bg-background"
           >
             <div className="flex gap-4">
-              {/* Item Number Badge */}
-              <div className="flex-shrink-0">
-                <Badge variant="outline" className="text-xs">
-                  #{index + 1}
-                </Badge>
-              </div>
-
+              {/* Product Image */}
+              {detail.product?.image && (
+                <div className="flex-shrink-0">
+                  <Image
+                    src={detail.product.image}
+                    alt={detail.product_name || "Product"}
+                    width={64}
+                    height={64}
+                    className="w-16 h-16 object-cover rounded-md border"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/placeholder.png";
+                    }}
+                  />
+                </div>
+              )}
+              
               {/* Product Details */}
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between items-start">
                   <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs">
+                        #{index + 1}
+                      </Badge>
+                    </div>
                     <div className="font-medium text-sm">
                       {detail.product_name}
                     </div>
@@ -124,9 +140,14 @@ const renderExpandedContent = (order: Order) => {
                         SKU: {detail.sku}
                       </div>
                     )}
-                    {detail.variant && detail.variant !== "-" && (
+                    {detail.variant && detail.variant !== "-" && detail.variant !== "" && (
                       <div className="text-xs text-muted-foreground">
                         Variant: {detail.variant}
+                      </div>
+                    )}
+                    {detail.product?.location && detail.product.location !== "" && (
+                      <div className="text-xs text-muted-foreground">
+                        Location: {detail.product.location}
                       </div>
                     )}
                   </div>
@@ -138,9 +159,7 @@ const renderExpandedContent = (order: Order) => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Summary */}
+      </div>      {/* Summary */}
       {order.order_details.length > 0 && (
         <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
           Total items:{" "}
@@ -346,7 +365,7 @@ export default function OrdersTable() {
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRightIcon className="h-4 w-4" />
               )}
             </RippleButton>
           </div>

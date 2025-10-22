@@ -4,6 +4,17 @@ export interface OrderDetail {
   product_name: string;
   variant?: string;
   quantity?: number;
+  product?: {
+    id: number;
+    sku: string;
+    name: string;
+    image: string;
+    variant: string;
+    location: string;
+    barcode: string;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 export interface Order {

@@ -167,82 +167,116 @@ export default function ReturnsTable() {
   // Render expanded row content
   const renderExpandedContent = (returnData: Return) => {
     const details = returnData.return_details || returnData.details || [];
-    
+
     if (details.length === 0) {
       return null;
     }
 
     return (
-      <div className="p-4 bg-muted/30">
-        <h4 className="text-sm font-semibold mb-3">Return Details</h4>
-        <div className="space-y-3">
-          {details.map((detail) => (
-            <div
-              key={detail.id}
-              className="border rounded-lg p-4 bg-background"
-            >
-              <div className="flex gap-4">
-                {/* Product Image */}
-                {detail.product?.image && (
-                  <div className="flex-shrink-0">
-                    <Image
-                      src={detail.product.image}
-                      alt={detail.product.name || "Product"}
-                      width={64}
-                      height={64}
-                      className="w-16 h-16 object-cover rounded-md border"
-                      onError={(e) => {
-                        e.currentTarget.src = "/images/placeholder.png";
-                      }}
-                    />
-                  </div>
-                )}
-                
-                {/* Product Details */}
-                <div className="flex-1 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <div className="font-medium text-sm">
-                        {detail.product?.name || `Product ID: ${detail.product_id}`}
+      <div>
+        <div className="p-4 bg-muted/30">
+          {/* Return Reason */}
+          {returnData.return_reason && (
+            <div className="border rounded-md">
+              <Table>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>Return Number</TableCell>
+                    <TableCell>{returnData.return_number || "NA"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Scrap Number</TableCell>
+                    <TableCell>{returnData.scrap_number || "NA"}</TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell>Return Reason</TableCell>
+                    <TableCell className="break-words whitespace-normal max-w-md">
+                      {returnData.return_reason || "NA"}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          <div className="mt-3 pt-3 border-t">
+            <h4 className="text-sm font-semibold mb-3">Return Details</h4>
+            <div className="space-y-3">
+              {details.map((detail) => (
+                <div
+                  key={detail.id}
+                  className="border rounded-lg p-4 bg-background"
+                >
+                  <div className="flex gap-4">
+                    {/* Product Image */}
+                    {detail.product?.image && (
+                      <div className="flex-shrink-0">
+                        <Image
+                          src={detail.product.image}
+                          alt={detail.product.name || "Product"}
+                          width={64}
+                          height={64}
+                          className="w-16 h-16 object-cover rounded-md border"
+                          onError={(e) => {
+                            e.currentTarget.src = "/images/placeholder.png";
+                          }}
+                        />
                       </div>
-                      {detail.product?.sku && (
-                        <div className="text-xs text-muted-foreground font-mono">
-                          SKU: {detail.product.sku}
+                    )}
+
+                    {/* Product Details */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-medium text-sm">
+                            {detail.product?.name ||
+                              `Product ID: ${detail.product_id}`}
+                          </div>
+                          {detail.product?.sku && (
+                            <div className="text-xs text-muted-foreground font-mono">
+                              SKU: {detail.product.sku}
+                            </div>
+                          )}
+                          {detail.product?.variant &&
+                            detail.product.variant !== "-" && (
+                              <div className="text-xs text-muted-foreground">
+                                Variant: {detail.product.variant}
+                              </div>
+                            )}
                         </div>
-                      )}
-                      {detail.product?.variant && detail.product.variant !== "-" && (
+                        <Badge variant="secondary" className="ml-2">
+                          Qty: {detail.quantity}
+                        </Badge>
+                      </div>
+
+                      {detail.product?.location && (
                         <div className="text-xs text-muted-foreground">
-                          Variant: {detail.product.variant}
+                          Location: {detail.product.location}
                         </div>
                       )}
+
+                      <div className="text-xs text-muted-foreground">
+                        Added:{" "}
+                        {format(
+                          new Date(detail.created_at),
+                          "dd MMM yyyy HH:mm"
+                        )}
+                      </div>
                     </div>
-                    <Badge variant="secondary" className="ml-2">
-                      Qty: {detail.quantity}
-                    </Badge>
-                  </div>
-                  
-                  {detail.product?.location && (
-                    <div className="text-xs text-muted-foreground">
-                      Location: {detail.product.location}
-                    </div>
-                  )}
-                  
-                  <div className="text-xs text-muted-foreground">
-                    Added: {format(new Date(detail.created_at), "dd MMM yyyy HH:mm")}
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-        
-        {details.length > 0 && (
-          <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
-            Total items:{" "}
-            {details.reduce((sum, detail) => sum + detail.quantity, 0)}{" "}
-            in {details.length} product{details.length === 1 ? "" : "s"}
           </div>
-        )}
+
+          {details.length > 0 && (
+            <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
+              Total items:{" "}
+              {details.reduce((sum, detail) => sum + detail.quantity, 0)} in{" "}
+              {details.length} product{details.length === 1 ? "" : "s"}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -370,17 +404,6 @@ export default function ReturnsTable() {
       ),
     },
     {
-      accessorKey: "return_reason",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Return Reason</div>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm text-muted-foreground">
-          {row.getValue("return_reason") || "-"}
-        </div>
-      ),
-    },
-    {
       accessorKey: "created_at",
       header: () => (
         <div className="text-sm text-center font-semibold">Created</div>
@@ -443,7 +466,7 @@ export default function ReturnsTable() {
                   }}
                 >
                   <SquarePen className="mr-2 h-4 w-4" />
-                  Edit Data Return
+                  Input Data Return
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => {
@@ -453,7 +476,7 @@ export default function ReturnsTable() {
                   }}
                 >
                   <SquarePen className="mr-2 h-4 w-4" />
-                  Edit Data Admin Return
+                  Input Data Admin Return
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
