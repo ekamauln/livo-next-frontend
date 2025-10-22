@@ -1,3 +1,10 @@
+import axios, {
+  AxiosInstance,
+  AxiosError,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+} from "axios";
+
 // Common API types and utilities
 export class ApiError extends Error {
   constructor(public status: number, message: string) {
@@ -7,6 +14,14 @@ export class ApiError extends Error {
 }
 
 export const API_BASE_URL = "http://192.168.31.136:8081/api";
+
+// Create axios instance
+const axiosInstance: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 // Token refresh management
 let isRefreshing = false;
@@ -30,57 +45,55 @@ const processQueue = (
   failedQueue = [];
 };
 
-export async function apiRequest<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = localStorage.getItem("access_token");
+// Request interceptor to add token
+axiosInstance.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
-  const config: RequestInit = {
-    headers: {
-      "Content-Type": "application/json",
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-    ...options,
-  };
+// Response interceptor to handle token refresh
+axiosInstance.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response;
+  },
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-    // If unauthorized and not already refreshing, try to refresh token
-    if (response.status === 401 && token && endpoint !== "/auth/refresh") {
+    // If error is 401 and we haven't retried yet
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      originalRequest.url !== "/auth/refresh"
+    ) {
       if (isRefreshing) {
         // If already refreshing, queue this request
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
-        }).then(() => {
-          // Retry with new token
-          const newToken = localStorage.getItem("access_token");
-          const newConfig = {
-            ...config,
-            headers: {
-              ...config.headers,
-              Authorization: `Bearer ${newToken}`,
-            },
-          };
-          return fetch(`${API_BASE_URL}${endpoint}`, newConfig).then(
-            async (retryResponse) => {
-              if (!retryResponse.ok) {
-                const errorData = await retryResponse
-                  .json()
-                  .catch(() => ({ message: "Request failed" }));
-                throw new ApiError(
-                  retryResponse.status,
-                  errorData.message || "Request failed"
-                );
-              }
-              return await retryResponse.json();
+        })
+          .then(() => {
+            const newToken = localStorage.getItem("access_token");
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${newToken}`;
             }
-          );
-        });
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => {
+            return Promise.reject(err);
+          });
       }
 
+      originalRequest._retry = true;
       isRefreshing = true;
 
       try {
@@ -90,24 +103,21 @@ export async function apiRequest<T>(
         }
 
         // Call refresh endpoint
-        const refreshResponse = await fetch(`${API_BASE_URL}/auth/refresh`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ refresh_token: refreshToken }),
-        });
+        const refreshResponse = await axios.post(
+          `${API_BASE_URL}/auth/refresh`,
+          { refresh_token: refreshToken },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-        if (!refreshResponse.ok) {
-          throw new Error("Token refresh failed");
-        }
-
-        const refreshData = await refreshResponse.json();
         const {
           access_token,
           refresh_token: newRefreshToken,
           user,
-        } = refreshData.data;
+        } = refreshResponse.data.data;
 
         // Update stored tokens
         localStorage.setItem("access_token", access_token);
@@ -118,30 +128,11 @@ export async function apiRequest<T>(
         processQueue(null, access_token);
 
         // Retry original request with new token
-        const newConfig = {
-          ...config,
-          headers: {
-            ...config.headers,
-            Authorization: `Bearer ${access_token}`,
-          },
-        };
-
-        const retryResponse = await fetch(
-          `${API_BASE_URL}${endpoint}`,
-          newConfig
-        );
-
-        if (!retryResponse.ok) {
-          const errorData = await retryResponse
-            .json()
-            .catch(() => ({ message: "Request failed" }));
-          throw new ApiError(
-            retryResponse.status,
-            errorData.message || "Request failed"
-          );
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${access_token}`;
         }
 
-        return await retryResponse.json();
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
         // Refresh failed, clear tokens and redirect to login
         localStorage.removeItem("access_token");
@@ -149,34 +140,59 @@ export async function apiRequest<T>(
         localStorage.removeItem("user_data");
 
         // Process queued requests with error
-        const error =
+        const err =
           refreshError instanceof Error
             ? refreshError
             : new Error("Token refresh failed");
-        processQueue(error, null);
+        processQueue(err, null);
 
         // Redirect to login page
         if (typeof window !== "undefined") {
           window.location.href = "/auth/login";
         }
 
-        throw new ApiError(401, "Session expired. Please login again.");
+        return Promise.reject(
+          new ApiError(401, "Session expired. Please login again.")
+        );
       } finally {
         isRefreshing = false;
       }
     }
 
-    if (!response.ok) {
-      const errorData = await response
-        .json()
-        .catch(() => ({ message: "Request failed" }));
-      throw new ApiError(
-        response.status,
-        errorData.message || "Request failed"
-      );
+    // Handle other errors
+    if (error.response) {
+      const errorMessage =
+        (error.response.data as { message?: string })?.message ||
+        "Request failed";
+      throw new ApiError(error.response.status, errorMessage);
+    } else if (error.request) {
+      throw new ApiError(0, "Network error");
+    } else {
+      throw new ApiError(0, error.message || "Unknown error");
     }
+  }
+);
 
-    return await response.json();
+// Export the apiRequest function that uses axios
+export async function apiRequest<T>(
+  endpoint: string,
+  options: {
+    method?: string;
+    body?: string;
+    headers?: Record<string, string>;
+  } = {}
+): Promise<T> {
+  try {
+    const { method = "GET", body, headers = {} } = options;
+
+    const response = await axiosInstance.request({
+      url: endpoint,
+      method,
+      data: body ? JSON.parse(body) : undefined,
+      headers,
+    });
+
+    return response.data;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;
@@ -184,3 +200,6 @@ export async function apiRequest<T>(
     throw new ApiError(0, "Network error");
   }
 }
+
+// Export axios instance for direct use if needed
+export { axiosInstance };

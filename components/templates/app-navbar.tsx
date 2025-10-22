@@ -242,6 +242,21 @@ export default function AppNavbar() {
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
+
+            {/* Complains menu */}
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer">
+                Complains
+              </MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/complains/returns">
+                    <ShoppingBag className="h-4 w-4" />
+                    Returns
+                  </Link>
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
           </Menubar>
         </div>
       </div>
