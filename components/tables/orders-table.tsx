@@ -23,11 +23,9 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  ChevronUp,
   Package,
   Truck,
-  User,
-  Calendar,
+  Clock,
   MoreHorizontal,
   Eye,
   Edit,
@@ -46,13 +44,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  Order,
-  OrderDetail,
-  OrdersQueryParams,
-  Pagination,
-} from "@/types/order";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { Order, OrdersQueryParams, Pagination } from "@/types/order";
+import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,9 +53,9 @@ import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
 import { orderApi } from "@/lib/api/orderApi";
 import { OrderDialog } from "@/components/dialogs/order-dialog";
+import { RippleButton } from "../ui/shadcn-io/ripple-button";
 
 // Status badge color mapping
 const getStatusBadgeStyle = (status: string) => {
@@ -77,13 +70,6 @@ const getStatusBadgeStyle = (status: string) => {
       return "bg-gray-500 text-white hover:bg-gray-600";
   }
 };
-
-// Order Details Component (shown when row is expanded)
-interface OrderDetailsProps {
-  orderDetails: OrderDetail[];
-  pickedBy?: string;
-  pickedAt?: string;
-}
 
 // Helper function to format picked date safely
 const formatPickedDate = (pickedAt?: string): string => {
@@ -103,103 +89,94 @@ const formatPickedDate = (pickedAt?: string): string => {
   }
 };
 
-function OrderDetailsRow({
-  orderDetails,
-  pickedBy,
-  pickedAt,
-}: OrderDetailsProps) {
+// Render expanded row content
+const renderExpandedContent = (order: Order) => {
+  if (!order.order_details || order.order_details.length === 0) {
+    return null;
+  }
+
   return (
-    <div className="p-4 bg-muted/30 border-t">
-      <div className="space-y-4">
-        <h4 className="text-sm font-semibold flex items-center gap-2">
-          <Package className="h-4 w-4" />
-          Order Details ({orderDetails.length} items)
-        </h4>
-        <div className="grid gap-2">
-          {orderDetails.map((detail, index) => (
-            <Card key={detail.id || index} className="p-3">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                <div>
-                  <span className="font-medium text-muted-foreground">
-                    SKU:
-                  </span>
-                  <p className="font-mono text-xs">{detail.sku || "N/A"}</p>
-                </div>
-                <div className="md:col-span-2">
-                  <span className="font-medium text-muted-foreground">
-                    Product:
-                  </span>
-                  <p className="font-medium truncate">{detail.product_name}</p>
-                  {detail.variant && (
-                    <Badge variant="secondary" className="text-xs mt-1">
-                      {detail.variant}
-                    </Badge>
-                  )}
-                </div>
-                <div>
-                  <span className="font-medium text-muted-foreground">
-                    Quantity:
-                  </span>
-                  <p className="font-bold text-primary">
-                    {detail.quantity || 0}
-                  </p>
+    <div className="p-4 bg-muted/30">
+      <h4 className="text-sm font-semibold mb-3">Order Details</h4>
+      <div className="space-y-3">
+        {order.order_details.map((detail, index) => (
+          <div
+            key={detail.id || index}
+            className="border rounded-lg p-4 bg-background"
+          >
+            <div className="flex gap-4">
+              {/* Item Number Badge */}
+              <div className="flex-shrink-0">
+                <Badge variant="outline" className="text-xs">
+                  #{index + 1}
+                </Badge>
+              </div>
+
+              {/* Product Details */}
+              <div className="flex-1 space-y-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="font-medium text-sm">
+                      {detail.product_name}
+                    </div>
+                    {detail.sku && (
+                      <div className="text-xs text-muted-foreground font-mono">
+                        SKU: {detail.sku}
+                      </div>
+                    )}
+                    {detail.variant && detail.variant !== "-" && (
+                      <div className="text-xs text-muted-foreground">
+                        Variant: {detail.variant}
+                      </div>
+                    )}
+                  </div>
+                  <Badge variant="secondary" className="ml-2">
+                    Qty: {detail.quantity || 0}
+                  </Badge>
                 </div>
               </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Picked Information */}
-        {(pickedBy || pickedAt) && (
-          <div className="mt-4 pt-4 border-t border-muted">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              {pickedBy && (
-                <Card className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <span className="font-medium text-muted-foreground">
-                        Picked by:
-                      </span>
-                      <p className="font-medium">
-                        {pickedBy === "Not picked yet" ||
-                        !pickedBy ||
-                        pickedBy === ""
-                          ? "Not picked yet"
-                          : pickedBy}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              )}
-              {pickedAt && (
-                // <div className="flex items-center gap-2">
-                <Card className="flex items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <div>
-                      <span className="font-medium text-muted-foreground">
-                        Picked at:
-                      </span>
-                      <p className="font-medium">
-                        {formatPickedDate(pickedAt)}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-                // </div>
-              )}
             </div>
           </div>
-        )}
+        ))}
+      </div>
+
+      {/* Summary */}
+      {order.order_details.length > 0 && (
+        <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
+          Total items:{" "}
+          {order.order_details.reduce(
+            (sum, detail) => sum + (detail.quantity || 0),
+            0
+          )}{" "}
+          in {order.order_details.length} product
+          {order.order_details.length === 1 ? "" : "s"}
+        </div>
+      )}
+
+      {/* Picked Information - Always show */}
+      <div className="mt-3 pt-3 border-t">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center gap-2">
+            <Package className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-sm font-medium">Picked By:</span>
+            <span className="text-sm">
+              {order.picked_by || "Not picked yet"}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+            <span className="text-sm font-medium">Picked At:</span>
+            <span className="text-sm">{formatPickedDate(order.picked_at)}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
-}
+};
 
 export default function OrdersTable() {
   const [data, setData] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     updated_at: false,
@@ -215,7 +192,7 @@ export default function OrdersTable() {
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of current month
     to: new Date(), // Today
   });
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({});
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   // Order dialog state
   const [orderDialogOpen, setOrderDialogOpen] = useState(false);
@@ -223,6 +200,17 @@ export default function OrdersTable() {
   const [orderDialogTab, setOrderDialogTab] = useState<
     "details" | "edit" | "add"
   >("details");
+
+  // Toggle row expansion
+  const toggleRowExpansion = (rowId: number) => {
+    const newExpandedRows = new Set(expandedRows);
+    if (newExpandedRows.has(rowId)) {
+      newExpandedRows.delete(rowId);
+    } else {
+      newExpandedRows.add(rowId);
+    }
+    setExpandedRows(newExpandedRows);
+  };
 
   // Order dialog handlers
   const handleViewDetails = (orderId: number) => {
@@ -264,7 +252,7 @@ export default function OrdersTable() {
   const fetchOrders = useCallback(
     async (params: OrdersQueryParams = {}, search: string = "") => {
       try {
-        setLoading(true);
+        setIsLoading(true);
 
         const response = await orderApi.getOrders(
           params.page || 1,
@@ -286,7 +274,7 @@ export default function OrdersTable() {
         setData([]);
         setPagination((prev: Pagination) => ({ ...prev, total: 0 }));
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     []
@@ -333,180 +321,183 @@ export default function OrdersTable() {
   }, [dateRange, pagination.limit, fetchOrders]);
 
   // Table columns definition
-  const columns: ColumnDef<Order>[] = useMemo(
-    () => [
-      {
-        id: "expander",
-        cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              const orderId = row.original.id.toString();
-              setExpandedRows((prev) => ({
-                ...prev,
-                [orderId]: !prev[orderId],
-              }));
-            }}
-            className="p-1 h-6 w-6"
-          >
-            {expandedRows[row.original.id.toString()] ? (
-              <ChevronUp className="h-3 w-3" />
-            ) : (
-              <ChevronDown className="h-3 w-3" />
-            )}
-          </Button>
-        ),
-        size: 40,
-      },
-      {
-        accessorKey: "order_id",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Order ID</div>
-        ),
-        cell: ({ row }) => (
-          <div className="font-mono text-sm">{row.getValue("order_id")}</div>
-        ),
-      },
-      {
-        accessorKey: "status",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Status</div>
-        ),
-        cell: ({ row }) => (
-          <div className="text-center text-sm">
-            <Badge
-              variant="default"
-              className={getStatusBadgeStyle(row.getValue("status"))}
+  const columns: ColumnDef<Order>[] = [
+    {
+      id: "expand",
+      header: () => (
+        <div className="text-sm text-center font-semibold w-12"></div>
+      ),
+      cell: ({ row }) => {
+        const order = row.original;
+        const details = order.order_details || [];
+        const hasDetails = details.length > 0;
+        const isExpanded = expandedRows.has(order.id);
+
+        if (!hasDetails) {
+          return <div className="w-12"></div>;
+        }
+
+        return (
+          <div className="flex justify-start">
+            <RippleButton
+              onClick={() => toggleRowExpansion(order.id)}
+              className="h-8 w-8 p-0"
             >
-              {row.getValue("status")}
-            </Badge>
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+            </RippleButton>
           </div>
-        ),
+        );
       },
-      {
-        accessorKey: "store",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Store</div>
-        ),
-        cell: ({ row }) => (
-          <div className="max-w-32 truncate">
-            {row.getValue("store") || "N/A"}
+    },
+    {
+      accessorKey: "order_id",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Order ID</div>
+      ),
+      cell: ({ row }) => (
+        <div className="font-mono text-sm">{row.getValue("order_id")}</div>
+      ),
+    },
+    {
+      accessorKey: "status",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Status</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center text-sm">
+          <Badge
+            variant="default"
+            className={getStatusBadgeStyle(row.getValue("status"))}
+          >
+            {row.getValue("status")}
+          </Badge>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "store",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Store</div>
+      ),
+      cell: ({ row }) => (
+        <div className="max-w-32 truncate">
+          {row.getValue("store") || "N/A"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "courier",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Courier</div>
+      ),
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <Truck className="h-4 w-4 text-muted-foreground" />
+          <div>{row.getValue("courier") || "N/A"}</div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "tracking",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Tracking</div>
+      ),
+      cell: ({ row }) => (
+        <div className="font-mono text-xs">
+          {row.getValue("tracking") || "N/A"}
+        </div>
+      ),
+    },
+    {
+      accessorKey: "created_at",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Created</div>
+      ),
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("created_at"));
+        return (
+          <div className="text-xs text-muted-foreground text-center">
+            {format(date, "dd MMM yyyy")}
+            <br />
+            {format(date, "HH:mm:ss")}
           </div>
-        ),
+        );
       },
-      {
-        accessorKey: "courier",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Courier</div>
-        ),
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4 text-muted-foreground" />
-            <div>{row.getValue("courier") || "N/A"}</div>
+    },
+    {
+      accessorKey: "updated_at",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Updated</div>
+      ),
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("updated_at"));
+        return (
+          <div className="text-xs text-muted-foreground text-center">
+            {format(date, "dd MMM yyyy")}
+            <br />
+            {format(date, "HH:mm:ss")}
           </div>
-        ),
+        );
       },
-      {
-        accessorKey: "tracking",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Tracking</div>
-        ),
-        cell: ({ row }) => (
-          <div className="font-mono text-xs">
-            {row.getValue("tracking") || "N/A"}
+    },
+    {
+      id: "items_count",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Items</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-center text-sm">
+          <Badge variant="outline">{row.original.order_details.length}</Badge>
+        </div>
+      ),
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => {
+        const order = row.original;
+        return (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48" forceMount>
+                <DropdownMenuItem
+                  onClick={() => handleViewDetails(order.id)}
+                  className="cursor-pointer"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  View Details
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => handleEditDetails(order.id)}
+                  className="cursor-pointer"
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit Details
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => handleAddDetail(order.id)}
+                  className="cursor-pointer"
+                >
+                  <Package className="mr-2 h-4 w-4" />
+                  Add Detail
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
-        ),
+        );
       },
-      {
-        accessorKey: "created_at",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Created</div>
-        ),
-        cell: ({ row }) => {
-          const date = new Date(row.getValue("created_at"));
-          return (
-            <div className="text-xs text-muted-foreground text-center">
-              {format(date, "dd MMM yyyy")}
-              <br />
-              {format(date, "HH:mm:ss")}
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: "updated_at",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Updated</div>
-        ),
-        cell: ({ row }) => {
-          const date = new Date(row.getValue("updated_at"));
-          return (
-            <div className="text-xs text-muted-foreground text-center">
-              {format(date, "dd MMM yyyy")}
-              <br />
-              {format(date, "HH:mm:ss")}
-            </div>
-          );
-        },
-      },
-      {
-        id: "items_count",
-        header: () => (
-          <div className="text-sm text-center font-semibold">Items</div>
-        ),
-        cell: ({ row }) => (
-          <div className="text-center text-sm">
-            <Badge variant="outline">{row.original.order_details.length}</Badge>
-          </div>
-        ),
-      },
-      {
-        id: "actions",
-        cell: ({ row }) => {
-          const order = row.original;
-          return (
-            <div className="flex justify-end">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48" forceMount>
-                  <DropdownMenuItem
-                    onClick={() => handleViewDetails(order.id)}
-                    className="cursor-pointer"
-                  >
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Details
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => handleEditDetails(order.id)}
-                    className="cursor-pointer"
-                  >
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Details
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleAddDetail(order.id)}
-                    className="cursor-pointer"
-                  >
-                    <Package className="mr-2 h-4 w-4" />
-                    Add Detail
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
-        size: 80,
-      },
-    ],
-    [expandedRows]
-  );
+    },
+  ];
 
   const table = useReactTable({
     data,
@@ -626,7 +617,7 @@ export default function OrdersTable() {
             ))}
           </TableHeader>
           <TableBody>
-            {loading ? (
+            {isLoading ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
@@ -634,43 +625,44 @@ export default function OrdersTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading orders...
+                    Loading returns...
                   </div>
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <React.Fragment key={row.id}>
-                  <TableRow data-state={row.getIsSelected() && "selected"}>
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  {expandedRows[row.original.id.toString()] && (
-                    <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
-                        <OrderDetailsRow
-                          orderDetails={row.original.order_details}
-                          pickedBy={row.original.picked_by}
-                          pickedAt={row.original.picked_at}
-                        />
-                      </TableCell>
+              table.getRowModel().rows.map((row) => {
+                const order = row.original;
+                const isExpanded = expandedRows.has(order.id);
+
+                return (
+                  <React.Fragment key={row.id}>
+                    <TableRow data-state={row.getIsSelected() && "selected"}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
                     </TableRow>
-                  )}
-                </React.Fragment>
-              ))
+                    {isExpanded && (
+                      <TableRow>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          {renderExpandedContent(order)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                );
+              })
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No orders found.
+                  No returns found.
                 </TableCell>
               </TableRow>
             )}
@@ -690,7 +682,7 @@ export default function OrdersTable() {
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
-            disabled={pagination.page <= 1 || loading}
+            disabled={pagination.page <= 1 || isLoading}
             className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -724,7 +716,7 @@ export default function OrdersTable() {
                   }
                   size="sm"
                   onClick={() => handlePageChange(pageNumber)}
-                  disabled={loading}
+                  disabled={isLoading}
                   className="w-10 cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                 >
                   {pageNumber}
@@ -736,7 +728,7 @@ export default function OrdersTable() {
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
-            disabled={pagination.page >= totalPages || loading}
+            disabled={pagination.page >= totalPages || isLoading}
             className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
           >
             Next

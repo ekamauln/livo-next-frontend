@@ -27,6 +27,8 @@ import {
   PackagePlus,
   SquarePen,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -164,44 +166,81 @@ export default function ReturnsTable() {
 
   // Render expanded row content
   const renderExpandedContent = (returnData: Return) => {
-    if (!returnData.details || returnData.details.length === 0) {
+    const details = returnData.return_details || returnData.details || [];
+    
+    if (details.length === 0) {
       return null;
     }
 
     return (
       <div className="p-4 bg-muted/30">
         <h4 className="text-sm font-semibold mb-3">Return Details</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {returnData.details.map((detail) => (
+        <div className="space-y-3">
+          {details.map((detail) => (
             <div
               key={detail.id}
-              className="border rounded-lg p-3 bg-background"
+              className="border rounded-lg p-4 bg-background"
             >
-              <div className="flex justify-between items-start mb-2">
-                <div className="text-sm font-medium">
-                  Product ID: {detail.product_id}
+              <div className="flex gap-4">
+                {/* Product Image */}
+                {detail.product?.image && (
+                  <div className="flex-shrink-0">
+                    <Image
+                      src={detail.product.image}
+                      alt={detail.product.name || "Product"}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 object-cover rounded-md border"
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/placeholder.png";
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Product Details */}
+                <div className="flex-1 space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="font-medium text-sm">
+                        {detail.product?.name || `Product ID: ${detail.product_id}`}
+                      </div>
+                      {detail.product?.sku && (
+                        <div className="text-xs text-muted-foreground font-mono">
+                          SKU: {detail.product.sku}
+                        </div>
+                      )}
+                      {detail.product?.variant && detail.product.variant !== "-" && (
+                        <div className="text-xs text-muted-foreground">
+                          Variant: {detail.product.variant}
+                        </div>
+                      )}
+                    </div>
+                    <Badge variant="secondary" className="ml-2">
+                      Qty: {detail.quantity}
+                    </Badge>
+                  </div>
+                  
+                  {detail.product?.location && (
+                    <div className="text-xs text-muted-foreground">
+                      Location: {detail.product.location}
+                    </div>
+                  )}
+                  
+                  <div className="text-xs text-muted-foreground">
+                    Added: {format(new Date(detail.created_at), "dd MMM yyyy HH:mm")}
+                  </div>
                 </div>
-              </div>
-              <div className="text-sm text-muted-foreground mb-2">
-                Quantity:{" "}
-                <span className="font-mono font-medium">{detail.quantity}</span>
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Added:{" "}
-                {format(new Date(detail.created_at), "dd MMM yyyy HH:mm")}
               </div>
             </div>
           ))}
         </div>
-        {returnData.details.length > 0 && (
+        
+        {details.length > 0 && (
           <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
             Total items:{" "}
-            {returnData.details.reduce(
-              (sum, detail) => sum + detail.quantity,
-              0
-            )}{" "}
-            in {returnData.details.length} product
-            {returnData.details.length === 1 ? "" : "s"}
+            {details.reduce((sum, detail) => sum + detail.quantity, 0)}{" "}
+            in {details.length} product{details.length === 1 ? "" : "s"}
           </div>
         )}
       </div>
@@ -216,7 +255,8 @@ export default function ReturnsTable() {
       ),
       cell: ({ row }) => {
         const returnData = row.original;
-        const hasDetails = returnData.details && returnData.details.length > 0;
+        const details = returnData.return_details || returnData.details || [];
+        const hasDetails = details.length > 0;
         const isExpanded = expandedRows.has(returnData.id);
 
         if (!hasDetails) {

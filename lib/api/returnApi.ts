@@ -36,7 +36,7 @@ export const returnApi = {
     id: number,
     updateData: UpdateReturnData
   ): Promise<ApiResponse<Return>> => {
-    return apiRequest<ApiResponse<Return>>(`/returns/${id}`, {
+    return apiRequest<ApiResponse<Return>>(`/returns/${id}/data`, {
       method: "PUT",
       body: JSON.stringify(updateData),
     });

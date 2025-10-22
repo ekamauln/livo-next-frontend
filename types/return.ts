@@ -10,7 +10,8 @@ export interface Return {
   scrap_number: string;
   created_at: string;
   updated_at: string;
-  details: ReturnDetails[];
+  details?: ReturnDetails[];
+  return_details?: ReturnDetails[];
   channel?: {
     id: number;
     code: string;
@@ -25,6 +26,28 @@ export interface Return {
     created_at: string;
     updated_at: string;
   };
+  order?: {
+    id: number;
+    order_id: string;
+    status: string;
+    channel: string;
+    store: string;
+    buyer: string;
+    courier: string;
+    tracking: string;
+    complained: boolean;
+    picked_by: string;
+    picked_at: string;
+    created_at: string;
+    updated_at: string;
+    order_details: Array<{
+      id: number;
+      sku: string;
+      product_name: string;
+      variant: string;
+      quantity: number;
+    }>;
+  };
 }
 
 export interface ReturnDetails {
@@ -33,6 +56,18 @@ export interface ReturnDetails {
   product_id: number;
   quantity: number;
   created_at: string;
+  updated_at: string;
+  product?: {
+    id: number;
+    sku: string;
+    name: string;
+    image: string;
+    variant: string;
+    location: string;
+    barcode: string;
+    created_at: string;
+    updated_at: string;
+  };
 }
 
 export interface CreateBaseReturn {
