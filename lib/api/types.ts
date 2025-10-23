@@ -13,7 +13,8 @@ export class ApiError extends Error {
   }
 }
 
-export const API_BASE_URL = "http://192.168.31.136:8081/api";
+export const API_BASE_URL = 
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://192.168.31.136:8081/api";
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
