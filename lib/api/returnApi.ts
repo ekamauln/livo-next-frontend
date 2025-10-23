@@ -11,11 +11,15 @@ export const returnApi = {
   getReturns: async (
     page: number = 1,
     limit: number = 10,
-    search?: string
+    search?: string,
+    start_date?: string,
+    end_date?: string
   ): Promise<PaginatedResponse<Return>> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
+    const startDateParam = start_date ? `&start_date=${start_date}` : "";
+    const endDateParam = end_date ? `&end_date=${end_date}` : "";
     return apiRequest<PaginatedResponse<Return>>(
-      `/returns?page=${page}&limit=${limit}${searchParam}`
+      `/returns?page=${page}&limit=${limit}${searchParam}${startDateParam}${endDateParam}`
     );
   },
 

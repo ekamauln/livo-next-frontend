@@ -49,6 +49,8 @@ import { toast } from "sonner";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
+import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
 import { Return } from "@/types/return";
 import { returnApi } from "@/lib/api/returnApi";
@@ -63,12 +65,17 @@ export default function ReturnsTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     updated_at: false,
+    old_tracking: false,
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
+  });
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of current month
+    to: new Date(), // Today
   });
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
@@ -96,10 +103,21 @@ export default function ReturnsTable() {
     async (page: number = 1, search: string = "") => {
       try {
         setIsLoading(true);
+
+        // Build date parameters
+        const start_date = dateRange?.from
+          ? format(dateRange.from, "yyyy-MM-dd")
+          : undefined;
+        const end_date = dateRange?.to
+          ? format(dateRange.to, "yyyy-MM-dd")
+          : undefined;
+
         const response = await returnApi.getReturns(
           page,
           pagination.limit,
-          search
+          search,
+          start_date,
+          end_date
         );
         // Extract return array from the response data
         const returns = response.data.returns as Return[];
@@ -139,7 +157,7 @@ export default function ReturnsTable() {
         setIsLoading(false);
       }
     },
-    [pagination.limit]
+    [pagination.limit, dateRange]
   );
 
   useEffect(() => {
@@ -343,6 +361,17 @@ export default function ReturnsTable() {
       ),
     },
     {
+      accessorKey: "order_id",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Order ID</div>
+      ),
+      cell: ({ row }) => (
+        <div className="font-mono text-sm">
+          {row.getValue("order_id") || "-"}
+        </div>
+      ),
+    },
+    {
       accessorKey: "channel_id",
       header: () => (
         <div className="text-sm text-center font-semibold">Channel</div>
@@ -503,81 +532,92 @@ export default function ReturnsTable() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
-        {/* Create New User Button */}
-        <RippleButton
-          variant="default"
-          size="sm"
-          className="cursor-pointer rounded-md"
-          onClick={() => setCreateDialogOpen(true)}
-        >
-          <div className="flex items-center gap-2 justify-center">
-            <PackagePlus className="w-4 h-4" /> <span>Create New Return</span>
-          </div>
-        </RippleButton>
-        {/* Column visibility */}
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <RippleButton variant="outline" size="sm" className="ml-auto">
-                Show / Hide
-              </RippleButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        {/* Filters */}
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-1 gap-2 items-center"
-        >
-          <Input
-            placeholder="Search returns..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="max-w-sm"
-          />
-        </form>
+        <div className="flex justify-start gap-2">
+          {/* Filters */}
+          <div className="flex flex-1 gap-2 items-center">
+            <form onSubmit={handleSearch} className="flex gap-2 items-center">
+              <Input
+                placeholder="Search returns..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="max-w-sm"
+              />
+            </form>
+          </div>
 
-        {/* Pagination limit */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Show:</span>
-          <Select
-            value={pagination.limit.toString()}
-            onValueChange={handleLimitChange}
+          {/* Date Range Picker */}
+          <div className="flex flex-1 gap-2 items-center">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={setDateRange}
+              className="w-auto"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-start gap-2">
+          {/* Create New User Button */}
+          <RippleButton
+            variant="default"
+            size="sm"
+            className="cursor-pointer rounded-md"
+            onClick={() => setCreateDialogOpen(true)}
           >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+            <div className="flex items-center gap-2 justify-center">
+              <PackagePlus className="w-4 h-4" /> <span>Create New Return</span>
+            </div>
+          </RippleButton>
+
+          {/* Pagination limit */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select
+              value={pagination.limit.toString()}
+              onValueChange={handleLimitChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Column visibility */}
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <RippleButton variant="outline" size="sm" className="ml-auto">
+                  Show / Hide
+                </RippleButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 

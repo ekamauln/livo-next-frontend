@@ -199,6 +199,7 @@ export function ReturnDialog({
             scrap_number: updatedReturn.scrap_number || "",
           });
           onReturnUpdate?.();
+          onOpenChange(false);
         } else {
           throw new Error("Updated return data not found in response");
         }
@@ -260,6 +261,7 @@ export function ReturnDialog({
             scrap_number: updatedReturn.scrap_number || "",
           });
           onReturnUpdate?.();
+          onOpenChange(false);
         } else {
           throw new Error("Updated return admin data not found in response");
         }
