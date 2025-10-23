@@ -15,7 +15,9 @@ import ReturnsTable from "@/components/tables/returns-table";
 
 export default function Returns() {
   return (
-    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
+    <ProtectedRoute
+      requiredRoles={["superadmin", "admin", "coordinator", "admin-retur"]}
+    >
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

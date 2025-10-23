@@ -57,9 +57,11 @@ import { returnApi } from "@/lib/api/returnApi";
 import { ApiError } from "@/lib/api/types";
 import { ReturnCreateDialog } from "@/components/dialogs/return-create-dialog";
 import { ReturnDialog } from "@/components/dialogs/return-dialog";
+import { useAuth } from "@/contexts/auth-context";
 import React from "react";
 
 export default function ReturnsTable() {
+  const { hasAnyRole } = useAuth();
   const [data, setData] = useState<Return[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -78,6 +80,14 @@ export default function ReturnsTable() {
     to: new Date(), // Today
   });
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+
+  // Check user permissions
+  const canEditData = hasAnyRole(["superadmin", "coordinator", "admin"]);
+  const canEditAdmin = hasAnyRole([
+    "superadmin",
+    "coordinator",
+    "admin-retur",
+  ]);
 
   // Dialog state
   const [selectedReturnId, setSelectedReturnId] = useState<number | null>(null);
@@ -486,27 +496,31 @@ export default function ReturnsTable() {
                   <Eye className="mr-2 h-4 w-4" />
                   View Details
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedReturnId(returnData.id);
-                    setDialogTab("edit-data");
-                    setReturnDialogOpen(true);
-                  }}
-                >
-                  <SquarePen className="mr-2 h-4 w-4" />
-                  Input Data Return
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => {
-                    setSelectedReturnId(returnData.id);
-                    setDialogTab("edit-admin");
-                    setReturnDialogOpen(true);
-                  }}
-                >
-                  <SquarePen className="mr-2 h-4 w-4" />
-                  Input Data Admin Return
-                </DropdownMenuItem>
+                {(canEditData || canEditAdmin) && <DropdownMenuSeparator />}
+                {canEditData && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedReturnId(returnData.id);
+                      setDialogTab("edit-data");
+                      setReturnDialogOpen(true);
+                    }}
+                  >
+                    <SquarePen className="mr-2 h-4 w-4" />
+                    Input Data Return
+                  </DropdownMenuItem>
+                )}
+                {canEditAdmin && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelectedReturnId(returnData.id);
+                      setDialogTab("edit-admin");
+                      setReturnDialogOpen(true);
+                    }}
+                  >
+                    <SquarePen className="mr-2 h-4 w-4" />
+                    Input Data Admin Return
+                  </DropdownMenuItem>
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

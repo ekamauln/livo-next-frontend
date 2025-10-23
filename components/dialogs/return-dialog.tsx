@@ -44,6 +44,7 @@ import { returnApi } from "@/lib/api/returnApi";
 import { ApiError } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { useAuth } from "@/contexts/auth-context";
 
 // Form schema for editing return data
 const editDataFormSchema = z.object({
@@ -80,10 +81,19 @@ export function ReturnDialog({
   initialTab = "detail",
   onReturnUpdate,
 }: ReturnDialogProps) {
+  const { hasAnyRole } = useAuth();
   const [returnData, setReturnData] = useState<Return | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(initialTab);
   const [updating, setUpdating] = useState(false);
+
+  // Check user permissions
+  const canEditData = hasAnyRole(["superadmin", "coordinator", "admin"]);
+  const canEditAdmin = hasAnyRole([
+    "superadmin",
+    "coordinator",
+    "admin-retur",
+  ]);
 
   // Return data form
   const editDataForm = useForm<EditDataFormValues>({
@@ -364,25 +374,37 @@ export function ReturnDialog({
             }
             className="flex-1 flex flex-col min-h-0"
           >
-            <TabsList className="grid w-full grid-cols-3 flex-shrink-0">
+            <TabsList
+              className={`grid w-full ${
+                canEditData && canEditAdmin
+                  ? "grid-cols-3"
+                  : canEditData || canEditAdmin
+                  ? "grid-cols-2"
+                  : "grid-cols-1"
+              } flex-shrink-0`}
+            >
               <TabsTrigger value="detail" className="flex items-center gap-2">
                 <Package className="h-4 w-4" />
                 Details
               </TabsTrigger>
-              <TabsTrigger
-                value="edit-data"
-                className="flex items-center gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Edit Data
-              </TabsTrigger>
-              <TabsTrigger
-                value="edit-admin"
-                className="flex items-center gap-2"
-              >
-                <Edit className="h-4 w-4" />
-                Edit Admin
-              </TabsTrigger>
+              {canEditData && (
+                <TabsTrigger
+                  value="edit-data"
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit Data
+                </TabsTrigger>
+              )}
+              {canEditAdmin && (
+                <TabsTrigger
+                  value="edit-admin"
+                  className="flex items-center gap-2"
+                >
+                  <Edit className="h-4 w-4" />
+                  Edit Admin
+                </TabsTrigger>
+              )}
             </TabsList>
 
             <div className="flex-1 overflow-y-auto min-h-0 mt-4">
@@ -521,7 +543,8 @@ export function ReturnDialog({
                 </TabsContent>
 
                 {/* Edit Data Tab */}
-                <TabsContent value="edit-data" className="space-y-4 mt-0">
+                {canEditData && (
+                  <TabsContent value="edit-data" className="space-y-4 mt-0">
                   <Card>
                     <CardContent className="pt-6">
                       <div className="space-y-4">
@@ -629,9 +652,11 @@ export function ReturnDialog({
                     </CardContent>
                   </Card>
                 </TabsContent>
+                )}
 
                 {/* Edit Admin Tab */}
-                <TabsContent value="edit-admin" className="space-y-4 mt-0">
+                {canEditAdmin && (
+                  <TabsContent value="edit-admin" className="space-y-4 mt-0">
                   <Card>
                     <CardContent className="pt-6">
                       <div className="space-y-4">
@@ -794,6 +819,7 @@ export function ReturnDialog({
                     </CardContent>
                   </Card>
                 </TabsContent>
+                )}
               </TabsContents>
             </div>
           </Tabs>
