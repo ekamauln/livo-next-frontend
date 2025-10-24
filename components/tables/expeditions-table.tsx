@@ -273,19 +273,21 @@ export default function ExpeditionsTable() {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        {/* Filters */}
         <div className="flex justify-start items-center gap-2">
-          <form
-            onSubmit={handleSearch}
-            className="flex flex-1 gap-2 items-center"
-          >
-            <Input
-              placeholder="Search expeditions..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="max-w-sm"
-            />
-          </form>
+          {/* Filters */}
+          <div className="flex justify-start items-center gap-2">
+            <form
+              onSubmit={handleSearch}
+              className="flex flex-1 gap-2 items-center"
+            >
+              <Input
+                placeholder="Search expeditions..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="max-w-sm"
+              />
+            </form>
+          </div>
         </div>
 
         <div className="flex items-center justify-start gap-2">

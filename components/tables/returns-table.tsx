@@ -47,7 +47,6 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
@@ -715,7 +714,7 @@ export default function ReturnsTable() {
           {pagination.total} returns
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          <RippleButton
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
@@ -724,7 +723,7 @@ export default function ReturnsTable() {
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
-          </Button>
+          </RippleButton>
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
@@ -746,7 +745,7 @@ export default function ReturnsTable() {
               if (pageNumber < 1 || pageNumber > totalPages) return null;
 
               return (
-                <Button
+                <RippleButton
                   key={pageNumber}
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
@@ -757,11 +756,11 @@ export default function ReturnsTable() {
                   className="w-10 cursor-pointer"
                 >
                   {pageNumber}
-                </Button>
+                </RippleButton>
               );
             })}
           </div>
-          <Button
+          <RippleButton
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
@@ -770,7 +769,7 @@ export default function ReturnsTable() {
           >
             Next
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </RippleButton>
         </div>
       </div>
 

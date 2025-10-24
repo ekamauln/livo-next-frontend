@@ -33,8 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { RippleButton } from "@/components/ui/ripple-button";
-import { Button } from "@/components/ui/button";
+import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { QcRibbon } from "@/types/qc-ribbon";
@@ -376,65 +375,73 @@ export default function QcRibbonsTable() {
       </div>
       <Separator className="mt-0" />
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        {/* Filters */}
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-1 gap-2 items-center"
-        >
-          <Input
-            placeholder="Search qc-ribbons..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="max-w-sm"
-          />
-        </form>
-        {/* Column visibility */}
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="ml-auto">
-                Show / Hide
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex justify-start items-center gap-2">
+          {/* Filters */}
+          <div className="flex justify-start items-center gap-2">
+            <form
+              onSubmit={handleSearch}
+              className="flex flex-1 gap-2 items-center"
+            >
+              <Input
+                placeholder="Search qc-ribbons..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="max-w-sm"
+              />
+            </form>
+          </div>
         </div>
-        {/* Pagination limit */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Show:</span>
-          <Select
-            value={pagination.limit.toString()}
-            onValueChange={handleLimitChange}
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+
+        <div className="flex justify-start items-center gap-2">
+          {/* Pagination limit */}
+          <div className="flex justify-start items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select
+              value={pagination.limit.toString()}
+              onValueChange={handleLimitChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Column visibility */}
+          <div className="flex justify-start items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <RippleButton variant="outline" size="sm" className="ml-auto">
+                  Show / Hide
+                </RippleButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
@@ -519,7 +526,7 @@ export default function QcRibbonsTable() {
           {pagination.total} qc-ribbons
         </div>
         <div className="flex items-center gap-2">
-          <Button
+          <RippleButton
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
@@ -528,7 +535,7 @@ export default function QcRibbonsTable() {
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
-          </Button>
+          </RippleButton>
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
@@ -550,7 +557,7 @@ export default function QcRibbonsTable() {
               if (pageNumber < 1 || pageNumber > totalPages) return null;
 
               return (
-                <Button
+                <RippleButton
                   key={pageNumber}
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
@@ -561,11 +568,11 @@ export default function QcRibbonsTable() {
                   className="w-10 cursor-pointer"
                 >
                   {pageNumber}
-                </Button>
+                </RippleButton>
               );
             })}
           </div>
-          <Button
+          <RippleButton
             variant="outline"
             size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
@@ -574,7 +581,7 @@ export default function QcRibbonsTable() {
           >
             Next
             <ChevronRight className="h-4 w-4" />
-          </Button>
+          </RippleButton>
         </div>
       </div>
     </div>
