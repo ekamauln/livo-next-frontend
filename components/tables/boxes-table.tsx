@@ -232,80 +232,88 @@ export default function BoxesTable() {
 
   return (
     <div className="w-full space-y-4">
-      <div className="flex flex-col sm:flex-row gap-2 items-center justify-end">
-        {/* Create New Box Button */}
-        <RippleButton
-          variant="default"
-          size="sm"
-          className="cursor-pointer rounded-md"
-          onClick={() => setCreateDialogOpen(true)}
-        >
-          <div className="flex items-center gap-2 justify-center">
-            <PackagePlus className="w-4 h-4" /> <span>Create New Box</span>
-          </div>
-        </RippleButton>
-        {/* Column visibility */}
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <RippleButton variant="outline" size="sm" className="ml-auto">
-                Show / Hide
-              </RippleButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) =>
-                        column.toggleVisibility(!!value)
-                      }
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  );
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        {/* Filters */}
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-1 gap-2 items-center"
-        >
-          <Input
-            placeholder="Search boxes..."
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            className="max-w-sm"
-          />
-        </form>
-        {/* Pagination limit */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Show:</span>
-          <Select
-            value={pagination.limit.toString()}
-            onValueChange={handleLimitChange}
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex justify-start items-center gap-2">
+          {/* Filters */}
+          <div className="flex justify-start items-center gap-2">
+            <form
+              onSubmit={handleSearch}
+              className="flex flex-1 gap-2 items-center"
+            >
+              <Input
+                placeholder="Search boxes..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="max-w-sm"
+              />
+            </form>
+          </div>
+        </div>
+
+        <div className="flex justify-start items-center gap-2">
+          {/* Create New Box Button */}
+          <div className="flex justify-start items-center gap-2">
+            <RippleButton
+              variant="default"
+              size="sm"
+              className="cursor-pointer rounded-md"
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <PackagePlus className="w-4 h-4" /> <span>Create New Box</span>
+              </div>
+            </RippleButton>
+          </div>
+
+          {/* Pagination limit */}
+          <div className="flex justify-start items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select
+              value={pagination.limit.toString()}
+              onValueChange={handleLimitChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Column visibility */}
+          <div className="flex justify-start items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <RippleButton variant="outline" size="sm" className="ml-auto">
+                  Show / Hide
+                </RippleButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 

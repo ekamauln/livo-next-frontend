@@ -45,6 +45,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
+  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Order, OrdersQueryParams, Pagination } from "@/types/order";
 import { useState, useEffect, useCallback } from "react";
@@ -122,7 +123,7 @@ const renderExpandedContent = (order: Order) => {
                   />
                 </div>
               )}
-              
+
               {/* Product Details */}
               <div className="flex-1 space-y-2">
                 <div className="flex justify-between items-start">
@@ -140,16 +141,19 @@ const renderExpandedContent = (order: Order) => {
                         SKU: {detail.sku}
                       </div>
                     )}
-                    {detail.variant && detail.variant !== "-" && detail.variant !== "" && (
-                      <div className="text-xs text-muted-foreground">
-                        Variant: {detail.variant}
-                      </div>
-                    )}
-                    {detail.product?.location && detail.product.location !== "" && (
-                      <div className="text-xs text-muted-foreground">
-                        Location: {detail.product.location}
-                      </div>
-                    )}
+                    {detail.variant &&
+                      detail.variant !== "-" &&
+                      detail.variant !== "" && (
+                        <div className="text-xs text-muted-foreground">
+                          Variant: {detail.variant}
+                        </div>
+                      )}
+                    {detail.product?.location &&
+                      detail.product.location !== "" && (
+                        <div className="text-xs text-muted-foreground">
+                          Location: {detail.product.location}
+                        </div>
+                      )}
                   </div>
                   <Badge variant="secondary" className="ml-2">
                     Qty: {detail.quantity || 0}
@@ -159,7 +163,8 @@ const renderExpandedContent = (order: Order) => {
             </div>
           </div>
         ))}
-      </div>      {/* Summary */}
+      </div>{" "}
+      {/* Summary */}
       {order.order_details.length > 0 && (
         <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
           Total items:{" "}
@@ -171,7 +176,6 @@ const renderExpandedContent = (order: Order) => {
           {order.order_details.length === 1 ? "" : "s"}
         </div>
       )}
-
       {/* Picked Information - Always show */}
       <div className="mt-3 pt-3 border-t">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -579,40 +583,78 @@ export default function OrdersTable() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex flex-1 gap-2 items-center">
-          <form onSubmit={handleSearch} className="flex gap-2 items-center">
-            <Input
-              placeholder="Search orders..."
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              className="max-w-sm"
+        <div className="flex justify-start gap-2 items-center">
+          {/* Filters */}
+          <div className="flex justify-start gap-2 items-center">
+            <form onSubmit={handleSearch} className="flex gap-2 items-center">
+              <Input
+                placeholder="Search orders..."
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                className="max-w-sm"
+              />
+            </form>
+          </div>
+          <div className="flex justify-start gap-2 items-center">
+            <DateRangePicker
+              date={dateRange}
+              onDateChange={setDateRange}
+              className="w-auto"
             />
-          </form>
-          <DateRangePicker
-            date={dateRange}
-            onDateChange={setDateRange}
-            className="w-auto"
-          />
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Show:</span>
-          <Select
-            value={pagination.limit.toString()}
-            onValueChange={handleLimitChange}
-          >
-            <SelectTrigger className="w-20">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="5">5</SelectItem>
-              <SelectItem value="10">10</SelectItem>
-              <SelectItem value="25">25</SelectItem>
-              <SelectItem value="50">50</SelectItem>
-              <SelectItem value="100">100</SelectItem>
-            </SelectContent>
-          </Select>
+
+        <div className="flex justify-start items-center gap-2">
+          {/* Pagination limit */}
+          <div className="flex justify-start items-center gap-2">
+            <span className="text-sm text-muted-foreground">Show:</span>
+            <Select
+              value={pagination.limit.toString()}
+              onValueChange={handleLimitChange}
+            >
+              <SelectTrigger className="w-20">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="5">5</SelectItem>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Column visibility */}
+          <div className="flex justify-start items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <RippleButton variant="outline" size="sm" className="ml-auto">
+                  Show / Hide
+                </RippleButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                {table
+                  .getAllColumns()
+                  .filter((column) => column.getCanHide())
+                  .map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) =>
+                          column.toggleVisibility(!!value)
+                        }
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    );
+                  })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 

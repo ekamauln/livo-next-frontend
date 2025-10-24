@@ -83,11 +83,7 @@ export default function ReturnsTable() {
 
   // Check user permissions
   const canEditData = hasAnyRole(["superadmin", "coordinator", "admin"]);
-  const canEditAdmin = hasAnyRole([
-    "superadmin",
-    "coordinator",
-    "admin-retur",
-  ]);
+  const canEditAdmin = hasAnyRole(["superadmin", "coordinator", "admin-retur"]);
 
   // Dialog state
   const [selectedReturnId, setSelectedReturnId] = useState<number | null>(null);
@@ -547,9 +543,9 @@ export default function ReturnsTable() {
   return (
     <div className="w-full space-y-4">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex justify-start gap-2">
+        <div className="flex justify-start gap-2 items-center">
           {/* Filters */}
-          <div className="flex flex-1 gap-2 items-center">
+          <div className="flex justify-start gap-2 items-center">
             <form onSubmit={handleSearch} className="flex gap-2 items-center">
               <Input
                 placeholder="Search returns..."
@@ -561,7 +557,7 @@ export default function ReturnsTable() {
           </div>
 
           {/* Date Range Picker */}
-          <div className="flex flex-1 gap-2 items-center">
+          <div className="flex justify-start gap-2 items-center">
             <DateRangePicker
               date={dateRange}
               onDateChange={setDateRange}
@@ -570,21 +566,24 @@ export default function ReturnsTable() {
           </div>
         </div>
 
-        <div className="flex justify-start gap-2">
+        <div className="flex justify-start gap-2 items-center">
           {/* Create New User Button */}
-          <RippleButton
-            variant="default"
-            size="sm"
-            className="cursor-pointer rounded-md"
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            <div className="flex items-center gap-2 justify-center">
-              <PackagePlus className="w-4 h-4" /> <span>Create New Return</span>
-            </div>
-          </RippleButton>
+          <div className="flex justify-start gap-2 items-center">
+            <RippleButton
+              variant="default"
+              size="sm"
+              className="cursor-pointer rounded-md"
+              onClick={() => setCreateDialogOpen(true)}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <PackagePlus className="w-4 h-4" />{" "}
+                <span>Create New Return</span>
+              </div>
+            </RippleButton>
+          </div>
 
           {/* Pagination limit */}
-          <div className="flex items-center gap-2">
+          <div className="flex justify-start items-center gap-2">
             <span className="text-sm text-muted-foreground">Show:</span>
             <Select
               value={pagination.limit.toString()}
@@ -604,7 +603,7 @@ export default function ReturnsTable() {
           </div>
 
           {/* Column visibility */}
-          <div className="flex items-center gap-2">
+          <div className="flex justify-start items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <RippleButton variant="outline" size="sm" className="ml-auto">
