@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -89,11 +90,7 @@ export function ReturnDialog({
 
   // Check user permissions
   const canEditData = hasAnyRole(["superadmin", "coordinator", "admin"]);
-  const canEditAdmin = hasAnyRole([
-    "superadmin",
-    "coordinator",
-    "admin-retur",
-  ]);
+  const canEditAdmin = hasAnyRole(["superadmin", "coordinator", "admin-retur"]);
 
   // Return data form
   const editDataForm = useForm<EditDataFormValues>({
@@ -461,7 +458,7 @@ export function ReturnDialog({
                               <TableCell className="font-medium">
                                 Return Reason
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="break-words whitespace-normal max-w-md">
                                 {returnData.return_reason || "-"}
                               </TableCell>
                             </TableRow>
@@ -508,36 +505,106 @@ export function ReturnDialog({
                       </div>
 
                       {/* Return Details Section */}
-                      {returnData.details && returnData.details.length > 0 && (
-                        <>
-                          <Separator className="my-6" />
-                          <div className="space-y-4">
-                            <h3 className="text-lg font-semibold">
-                              Return Details
-                            </h3>
-                            <Table>
-                              <TableBody>
-                                {returnData.details.map((detail) => (
-                                  <TableRow key={detail.id}>
-                                    <TableCell className="font-medium">
-                                      Product ID: {detail.product_id}
-                                    </TableCell>
-                                    <TableCell>
-                                      Quantity: {detail.quantity}
-                                    </TableCell>
-                                    <TableCell>
-                                      {format(
-                                        new Date(detail.created_at),
-                                        "PPpp"
+                      {(() => {
+                        const details =
+                          returnData.return_details || returnData.details || [];
+                        if (details.length === 0) return null;
+
+                        return (
+                          <>
+                            <Separator className="my-6" />
+                            <div className="space-y-4">
+                              <h3 className="text-lg font-semibold">
+                                Return Details ({details.length}{" "}
+                                {details.length === 1 ? "item" : "items"})
+                              </h3>
+                              <div className="space-y-3">
+                                {details.map((detail) => (
+                                  <div
+                                    key={detail.id}
+                                    className="border rounded-lg p-4 bg-muted/30"
+                                  >
+                                    <div className="flex gap-4">
+                                      {/* Product Image */}
+                                      {detail.product?.image && (
+                                        <div className="flex-shrink-0">
+                                          <Image
+                                            src={detail.product.image}
+                                            alt={
+                                              detail.product.name || "Product"
+                                            }
+                                            width={80}
+                                            height={80}
+                                            className="w-20 h-20 object-cover rounded-md border"
+                                            onError={(e) => {
+                                              e.currentTarget.src =
+                                                "/images/placeholder.png";
+                                            }}
+                                          />
+                                        </div>
                                       )}
-                                    </TableCell>
-                                  </TableRow>
+
+                                      {/* Product Details */}
+                                      <div className="flex-1 space-y-2">
+                                        <div className="flex justify-between items-start">
+                                          <div className="space-y-1">
+                                            <div className="font-medium">
+                                              {detail.product?.name ||
+                                                `Product ID: ${detail.product_id}`}
+                                            </div>
+                                            {detail.product?.sku && (
+                                              <div className="text-sm text-muted-foreground font-mono">
+                                                SKU: {detail.product.sku}
+                                              </div>
+                                            )}
+                                            {detail.product?.variant &&
+                                              detail.product.variant !==
+                                                "-" && (
+                                                <div className="text-sm text-muted-foreground">
+                                                  Variant:{" "}
+                                                  {detail.product.variant}
+                                                </div>
+                                              )}
+                                            {detail.product?.barcode && (
+                                              <div className="text-sm text-muted-foreground font-mono">
+                                                Barcode:{" "}
+                                                {detail.product.barcode}
+                                              </div>
+                                            )}
+                                          </div>
+                                          <Badge
+                                            variant="secondary"
+                                            className="ml-2"
+                                          >
+                                            Qty: {detail.quantity}
+                                          </Badge>
+                                        </div>
+
+                                        {detail.product?.location && (
+                                          <div className="text-sm text-muted-foreground">
+                                            <span className="font-medium">
+                                              Location:
+                                            </span>{" "}
+                                            {detail.product.location}
+                                          </div>
+                                        )}
+
+                                        <div className="text-xs text-muted-foreground">
+                                          Added:{" "}
+                                          {format(
+                                            new Date(detail.created_at),
+                                            "dd MMMM yyyy - HH:mm"
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        </>
-                      )}
+                              </div>
+                            </div>
+                          </>
+                        );
+                      })()}
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -545,280 +612,280 @@ export function ReturnDialog({
                 {/* Edit Data Tab */}
                 {canEditData && (
                   <TabsContent value="edit-data" className="space-y-4 mt-0">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Edit className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold">
-                            Edit Return Data
-                          </h3>
-                        </div>
-                        <Separator />
-                        <Form {...editDataForm}>
-                          <form
-                            onSubmit={editDataForm.handleSubmit(
-                              updateReturnData
-                            )}
-                            className="space-y-4"
-                          >
-                            <FormField
-                              control={editDataForm.control}
-                              name="old_tracking"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Old Tracking</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      type="text"
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter old tracking number"
-                                      disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <Edit className="h-5 w-5" />
+                            <h3 className="text-lg font-semibold">
+                              Edit Return Data
+                            </h3>
+                          </div>
+                          <Separator />
+                          <Form {...editDataForm}>
+                            <form
+                              onSubmit={editDataForm.handleSubmit(
+                                updateReturnData
                               )}
-                            />
-
-                            <FormField
-                              control={editDataForm.control}
-                              name="return_type"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Return Type</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    disabled={updating}
-                                  >
+                              className="space-y-4"
+                            >
+                              <FormField
+                                control={editDataForm.control}
+                                name="old_tracking"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Old Tracking</FormLabel>
                                     <FormControl>
-                                      <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select return type" />
-                                      </SelectTrigger>
+                                      <input
+                                        type="text"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter old tracking number"
+                                        disabled={updating}
+                                        {...field}
+                                      />
                                     </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="retur">
-                                        Retur
-                                      </SelectItem>
-                                      <SelectItem value="tukar">
-                                        Tukar
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <FormField
-                              control={editDataForm.control}
-                              name="return_reason"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Return Reason</FormLabel>
-                                  <FormControl>
-                                    <textarea
-                                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter return reason"
+                              <FormField
+                                control={editDataForm.control}
+                                name="return_type"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Return Type</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value}
                                       disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="Select return type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="retur">
+                                          Retur
+                                        </SelectItem>
+                                        <SelectItem value="tukar">
+                                          Tukar
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setActiveTab("detail")}
-                                disabled={updating}
-                              >
-                                <X className="mr-2 h-4 w-4" />
-                                Cancel
-                              </Button>
-                              <Button type="submit" disabled={updating}>
-                                <Save className="mr-2 h-4 w-4" />
-                                {updating ? "Saving..." : "Save Changes"}
-                              </Button>
-                            </div>
-                          </form>
-                        </Form>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                              <FormField
+                                control={editDataForm.control}
+                                name="return_reason"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Return Reason</FormLabel>
+                                    <FormControl>
+                                      <textarea
+                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter return reason"
+                                        disabled={updating}
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => setActiveTab("detail")}
+                                  disabled={updating}
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  Cancel
+                                </Button>
+                                <Button type="submit" disabled={updating}>
+                                  <Save className="mr-2 h-4 w-4" />
+                                  {updating ? "Saving..." : "Save Changes"}
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
                 )}
 
                 {/* Edit Admin Tab */}
                 {canEditAdmin && (
                   <TabsContent value="edit-admin" className="space-y-4 mt-0">
-                  <Card>
-                    <CardContent className="pt-6">
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2">
-                          <Edit className="h-5 w-5" />
-                          <h3 className="text-lg font-semibold">
-                            Edit Admin Data
-                          </h3>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <AlertCircle className="h-4 w-4" />
-                          <p>
-                            Admin return access required to edit these fields
-                          </p>
-                        </div>
-                        <Separator />
-                        <Form {...editAdminForm}>
-                          <form
-                            onSubmit={editAdminForm.handleSubmit(
-                              updateReturnAdmin
-                            )}
-                            className="space-y-4"
-                          >
-                            <FormField
-                              control={editAdminForm.control}
-                              name="old_tracking"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Old Tracking</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      type="text"
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter old tracking number"
-                                      disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
+                    <Card>
+                      <CardContent className="pt-6">
+                        <div className="space-y-4">
+                          <div className="flex items-center gap-2">
+                            <Edit className="h-5 w-5" />
+                            <h3 className="text-lg font-semibold">
+                              Edit Admin Data
+                            </h3>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <AlertCircle className="h-4 w-4" />
+                            <p>
+                              Admin return access required to edit these fields
+                            </p>
+                          </div>
+                          <Separator />
+                          <Form {...editAdminForm}>
+                            <form
+                              onSubmit={editAdminForm.handleSubmit(
+                                updateReturnAdmin
                               )}
-                            />
-
-                            <FormField
-                              control={editAdminForm.control}
-                              name="return_type"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Return Type</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    value={field.value}
-                                    disabled={updating}
-                                  >
+                              className="space-y-4"
+                            >
+                              <FormField
+                                control={editAdminForm.control}
+                                name="old_tracking"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Old Tracking</FormLabel>
                                     <FormControl>
-                                      <SelectTrigger className="w-full">
-                                        <SelectValue placeholder="Select return type" />
-                                      </SelectTrigger>
+                                      <input
+                                        type="text"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter old tracking number"
+                                        disabled={updating}
+                                        {...field}
+                                      />
                                     </FormControl>
-                                    <SelectContent>
-                                      <SelectItem value="retur">
-                                        Retur
-                                      </SelectItem>
-                                      <SelectItem value="tukar">
-                                        Tukar
-                                      </SelectItem>
-                                      <SelectItem value="gagal kirim">
-                                        Gagal Kirim
-                                      </SelectItem>
-                                      <SelectItem value="batal">
-                                        Batal
-                                      </SelectItem>
-                                      <SelectItem value="double">
-                                        Double
-                                      </SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <FormField
-                              control={editAdminForm.control}
-                              name="return_reason"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Return Reason</FormLabel>
-                                  <FormControl>
-                                    <textarea
-                                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter return reason"
+                              <FormField
+                                control={editAdminForm.control}
+                                name="return_type"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Return Type</FormLabel>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value}
                                       disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="w-full">
+                                          <SelectValue placeholder="Select return type" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="retur">
+                                          Retur
+                                        </SelectItem>
+                                        <SelectItem value="tukar">
+                                          Tukar
+                                        </SelectItem>
+                                        <SelectItem value="gagal kirim">
+                                          Gagal Kirim
+                                        </SelectItem>
+                                        <SelectItem value="batal">
+                                          Batal
+                                        </SelectItem>
+                                        <SelectItem value="double">
+                                          Double
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <FormField
-                              control={editAdminForm.control}
-                              name="return_number"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Return Number</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      type="text"
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter return number"
-                                      disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <FormField
+                                control={editAdminForm.control}
+                                name="return_reason"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Return Reason</FormLabel>
+                                    <FormControl>
+                                      <textarea
+                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter return reason"
+                                        disabled={updating}
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <FormField
-                              control={editAdminForm.control}
-                              name="scrap_number"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Scrap Number</FormLabel>
-                                  <FormControl>
-                                    <input
-                                      type="text"
-                                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                                      placeholder="Enter scrap number"
-                                      disabled={updating}
-                                      {...field}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                              <FormField
+                                control={editAdminForm.control}
+                                name="return_number"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Return Number</FormLabel>
+                                    <FormControl>
+                                      <input
+                                        type="text"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter return number"
+                                        disabled={updating}
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
 
-                            <div className="flex gap-2 justify-end">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setActiveTab("detail")}
-                                disabled={updating}
-                              >
-                                <X className="mr-2 h-4 w-4" />
-                                Cancel
-                              </Button>
-                              <Button type="submit" disabled={updating}>
-                                <Save className="mr-2 h-4 w-4" />
-                                {updating ? "Saving..." : "Save Changes"}
-                              </Button>
-                            </div>
-                          </form>
-                        </Form>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
+                              <FormField
+                                control={editAdminForm.control}
+                                name="scrap_number"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Scrap Number</FormLabel>
+                                    <FormControl>
+                                      <input
+                                        type="text"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                        placeholder="Enter scrap number"
+                                        disabled={updating}
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="flex gap-2 justify-end">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() => setActiveTab("detail")}
+                                  disabled={updating}
+                                >
+                                  <X className="mr-2 h-4 w-4" />
+                                  Cancel
+                                </Button>
+                                <Button type="submit" disabled={updating}>
+                                  <Save className="mr-2 h-4 w-4" />
+                                  {updating ? "Saving..." : "Save Changes"}
+                                </Button>
+                              </div>
+                            </form>
+                          </Form>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
                 )}
               </TabsContents>
             </div>
