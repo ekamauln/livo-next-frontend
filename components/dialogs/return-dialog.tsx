@@ -46,6 +46,8 @@ import { ApiError } from "@/lib/api/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { useAuth } from "@/contexts/auth-context";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 // Form schema for editing return data
 const editDataFormSchema = z.object({
@@ -417,91 +419,94 @@ export function ReturnDialog({
                           </h3>
                           <Badge variant="outline">ID: {returnData.id}</Badge>
                         </div>
-                        <Separator />
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                New Tracking
-                              </TableCell>
-                              <TableCell>{returnData.new_tracking}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Old Tracking
-                              </TableCell>
-                              <TableCell>
-                                {returnData.old_tracking || "-"}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Channel
-                              </TableCell>
-                              <TableCell>{returnData.channel?.name}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Store ID
-                              </TableCell>
-                              <TableCell>{returnData.store?.name}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Return Type
-                              </TableCell>
-                              <TableCell>
-                                {returnData.return_type || "-"}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Return Reason
-                              </TableCell>
-                              <TableCell className="break-words whitespace-normal max-w-md">
-                                {returnData.return_reason || "-"}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Return Number
-                              </TableCell>
-                              <TableCell>
-                                {returnData.return_number || "-"}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Scrap Number
-                              </TableCell>
-                              <TableCell>
-                                {returnData.scrap_number || "-"}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Created At
-                              </TableCell>
-                              <TableCell>
-                                {format(
-                                  new Date(returnData.created_at),
-                                  "dd MMMM yyyy - HH:mm"
-                                )}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell className="font-medium">
-                                Updated At
-                              </TableCell>
-                              <TableCell>
-                                {format(
-                                  new Date(returnData.updated_at),
-                                  "dd MMMM yyyy - HH:mm"
-                                )}
-                              </TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
+                        <div className="border rounded-md">
+                          <Table>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  New Tracking
+                                </TableCell>
+                                <TableCell>{returnData.new_tracking}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Old Tracking
+                                </TableCell>
+                                <TableCell>
+                                  {returnData.old_tracking || "-"}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Channel
+                                </TableCell>
+                                <TableCell>
+                                  {returnData.channel?.name}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Store ID
+                                </TableCell>
+                                <TableCell>{returnData.store?.name}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Return Type
+                                </TableCell>
+                                <TableCell>
+                                  {returnData.return_type || "-"}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Return Reason
+                                </TableCell>
+                                <TableCell className="break-words whitespace-normal max-w-md">
+                                  {returnData.return_reason || "-"}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Return Number
+                                </TableCell>
+                                <TableCell>
+                                  {returnData.return_number || "-"}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Scrap Number
+                                </TableCell>
+                                <TableCell>
+                                  {returnData.scrap_number || "-"}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Created At
+                                </TableCell>
+                                <TableCell>
+                                  {format(
+                                    new Date(returnData.created_at),
+                                    "dd MMMM yyyy - HH:mm"
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell className="font-medium">
+                                  Updated At
+                                </TableCell>
+                                <TableCell>
+                                  {format(
+                                    new Date(returnData.updated_at),
+                                    "dd MMMM yyyy - HH:mm"
+                                  )}
+                                </TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </div>
                       </div>
 
                       {/* Return Details Section */}
@@ -512,8 +517,7 @@ export function ReturnDialog({
 
                         return (
                           <>
-                            <Separator className="my-6" />
-                            <div className="space-y-4">
+                            <div className="space-y-4 mt-6">
                               <h3 className="text-lg font-semibold">
                                 Return Details ({details.length}{" "}
                                 {details.length === 1 ? "item" : "items"})
@@ -636,9 +640,8 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Old Tracking</FormLabel>
                                     <FormControl>
-                                      <input
+                                      <Input
                                         type="text"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Enter old tracking number"
                                         disabled={updating}
                                         {...field}
@@ -686,8 +689,7 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Return Reason</FormLabel>
                                     <FormControl>
-                                      <textarea
-                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                      <Textarea
                                         placeholder="Enter return reason"
                                         disabled={updating}
                                         {...field}
@@ -702,7 +704,7 @@ export function ReturnDialog({
                                 <Button
                                   type="button"
                                   variant="outline"
-                                  onClick={() => setActiveTab("detail")}
+                                  onClick={() => onOpenChange(false)}
                                   disabled={updating}
                                 >
                                   <X className="mr-2 h-4 w-4" />
@@ -754,9 +756,8 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Old Tracking</FormLabel>
                                     <FormControl>
-                                      <input
+                                      <Input
                                         type="text"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Enter old tracking number"
                                         disabled={updating}
                                         {...field}
@@ -813,8 +814,7 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Return Reason</FormLabel>
                                     <FormControl>
-                                      <textarea
-                                        className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                      <Textarea
                                         placeholder="Enter return reason"
                                         disabled={updating}
                                         {...field}
@@ -832,9 +832,8 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Return Number</FormLabel>
                                     <FormControl>
-                                      <input
+                                      <Input
                                         type="text"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Enter return number"
                                         disabled={updating}
                                         {...field}
@@ -852,9 +851,8 @@ export function ReturnDialog({
                                   <FormItem>
                                     <FormLabel>Scrap Number</FormLabel>
                                     <FormControl>
-                                      <input
+                                      <Input
                                         type="text"
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         placeholder="Enter scrap number"
                                         disabled={updating}
                                         {...field}
@@ -869,7 +867,7 @@ export function ReturnDialog({
                                 <Button
                                   type="button"
                                   variant="outline"
-                                  onClick={() => setActiveTab("detail")}
+                                  onClick={() => onOpenChange(false)}
                                   disabled={updating}
                                 >
                                   <X className="mr-2 h-4 w-4" />

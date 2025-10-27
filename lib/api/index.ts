@@ -15,6 +15,7 @@ export { expeditionApi } from "@/lib/api/expeditionApi";
 export { returnApi } from "@/lib/api/returnApi";
 export { channelApi } from "@/lib/api/channelApi";
 export { storeApi } from "@/lib/api/storeApi";
+export { complainApi } from "@/lib/api/complainApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility
@@ -62,3 +63,10 @@ export type {
   OnlineFlowOrder,
   OnlineFlowQueryParams,
 } from "@/types/online-flow";
+export type {
+  Complain,
+  ComplainProductDetails,
+  ComplainUserDetails,
+  CreateComplain,
+  UpdateComplain,
+} from "@/types/complain";
