@@ -240,6 +240,13 @@ export default function AppNavbar() {
                     Input Outbounds
                   </Link>
                 </MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/outbounds/handout-outbounds">
+                    <ShoppingBag className="h-4 w-4" />
+                    Handout Outbounds
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
 
@@ -259,6 +266,20 @@ export default function AppNavbar() {
                   <Link href="/complains/input-returns">
                     <ShoppingBag className="h-4 w-4" />
                     Input Returns
+                  </Link>
+                </MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/complains/data-complains">
+                    <ShoppingBag className="h-4 w-4" />
+                    Data Complains
+                  </Link>
+                </MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/complains/handout-returns">
+                    <ShoppingBag className="h-4 w-4" />
+                    Handout Returns
                   </Link>
                 </MenubarItem>
               </MenubarContent>
