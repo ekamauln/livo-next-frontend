@@ -45,9 +45,14 @@ export const complainApi = {
     id: number,
     checked: boolean
   ): Promise<ApiResponse<Complain>> => {
+    const requestBody = { checked };
+    
     return apiRequest<ApiResponse<Complain>>(`/complains/${id}/check`, {
       method: "PUT",
-      body: JSON.stringify({ checked }),
+      body: JSON.stringify(requestBody),
+      headers: {
+        'Content-Type': 'application/json',
+      },
     });
   },
 };

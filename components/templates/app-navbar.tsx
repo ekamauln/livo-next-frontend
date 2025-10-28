@@ -250,9 +250,15 @@ export default function AppNavbar() {
               </MenubarTrigger>
               <MenubarContent>
                 <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/returns">
+                  <Link href="/complains/input-complains">
                     <ShoppingBag className="h-4 w-4" />
-                    Returns
+                    Input Complains
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/complains/input-returns">
+                    <ShoppingBag className="h-4 w-4" />
+                    Input Returns
                   </Link>
                 </MenubarItem>
               </MenubarContent>

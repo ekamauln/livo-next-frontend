@@ -484,22 +484,11 @@ export function ReturnDialog({
                               </TableRow>
                               <TableRow>
                                 <TableCell className="font-medium">
-                                  Created At
+                                  Created
                                 </TableCell>
                                 <TableCell>
                                   {format(
                                     new Date(returnData.created_at),
-                                    "dd MMMM yyyy - HH:mm"
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                              <TableRow>
-                                <TableCell className="font-medium">
-                                  Updated At
-                                </TableCell>
-                                <TableCell>
-                                  {format(
-                                    new Date(returnData.updated_at),
                                     "dd MMMM yyyy - HH:mm"
                                   )}
                                 </TableCell>
