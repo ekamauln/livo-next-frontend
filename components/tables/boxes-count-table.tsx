@@ -199,21 +199,36 @@ export default function BoxesCountTable() {
         params.end_date = format(dateRange.to, "yyyy-MM-dd");
       }
 
-      const response = await reportApi.getBoxesCountReports(
-        1, // page 1
-        1000, // high limit to get all data
-        params.start_date,
-        params.end_date,
-        searchQuery.trim() || undefined
-      );
-
-      if (!response.success) {
-        throw new Error(
-          response.message || "Failed to fetch boxes count reports"
+      // Fetch all data for PDF (not limited by table pagination)
+      let allReportData: BoxesCountReport[] = [];
+      let currentPage = 1;
+      let hasMoreData = true;
+      
+      while (hasMoreData) {
+        const response = await reportApi.getBoxesCountReports(
+          currentPage,
+          100, // Use reasonable page size for API calls
+          params.start_date,
+          params.end_date,
+          searchQuery.trim() || undefined
         );
+
+        if (!response.success) {
+          throw new Error(
+            response.message || "Failed to fetch boxes count reports"
+          );
+        }
+
+        const pageData = response.data.reports || [];
+        allReportData = [...allReportData, ...pageData];
+        
+        // Check if we have more data to fetch
+        const totalPages = Math.ceil(response.data.pagination.total / 100);
+        hasMoreData = currentPage < totalPages;
+        currentPage++;
       }
 
-      const reportData: BoxesCountReport[] = response.data.reports || [];
+      const reportData = allReportData;
 
       if (reportData.length === 0) {
         let message = "No boxes count reports found";
