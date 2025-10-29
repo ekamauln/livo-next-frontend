@@ -342,7 +342,10 @@ export default function UserChargeFeesTable() {
 
       // Log the filter being applied
       const userFilter = selectedUserId.trim() || undefined;
-      console.log("PDF Generation - User Filter:", userFilter ? `User ID: ${userFilter}` : "All Users");
+      console.log(
+        "PDF Generation - User Filter:",
+        userFilter ? `User ID: ${userFilter}` : "All Users"
+      );
 
       while (hasMoreData) {
         const response = await reportApi.getUserChargeFeeReports(
@@ -365,12 +368,16 @@ export default function UserChargeFeesTable() {
         // Check if we have more data to fetch
         const totalPages = Math.ceil(response.data.pagination.total / 100);
         hasMoreData = currentPage < totalPages;
-        
-        console.log(`PDF Generation - Page ${currentPage}/${totalPages}: Fetched ${pageData.length} records, Total so far: ${allReportData.length}`);
+
+        console.log(
+          `PDF Generation - Page ${currentPage}/${totalPages}: Fetched ${pageData.length} records, Total so far: ${allReportData.length}`
+        );
         currentPage++;
       }
 
-      console.log(`PDF Generation Complete - Total records fetched: ${allReportData.length}`);
+      console.log(
+        `PDF Generation Complete - Total records fetched: ${allReportData.length}`
+      );
 
       const reportData = allReportData;
 
@@ -525,6 +532,77 @@ export default function UserChargeFeesTable() {
           4: { cellWidth: 50 }, // Total Fee Charge
         },
       });
+
+      // Add detailed complain list section
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const detailYPosition = (doc as any).lastAutoTable.finalY - 5;
+
+      // Create flat array of all complain details with user info
+      const allComplainDetails: Array<{
+        full_name: string;
+        order_id: string;
+        fee_charge: number;
+        updated_at: string;
+      }> = [];
+
+      reportData.forEach((userReport) => {
+        if (
+          userReport.complain_details &&
+          userReport.complain_details.length > 0
+        ) {
+          userReport.complain_details.forEach((complainDetail) => {
+            allComplainDetails.push({
+              full_name: userReport.full_name,
+              order_id: complainDetail.order_ginee_id,
+              fee_charge: complainDetail.fee_charge,
+              updated_at: complainDetail.complain_updated_at,
+            });
+          });
+        }
+      });
+
+      console.log(
+        `PDF Generation - Complain Details: Found ${allComplainDetails.length} complain records`
+      );
+
+      // Add complain details table if there are any details
+      if (allComplainDetails.length > 0) {
+        autoTable(doc, {
+          head: [["No", "Full Name", "Order ID", "Fee Charge", "Updated"]],
+          body: allComplainDetails.map((detail, index) => [
+            index + 1,
+            detail.full_name,
+            detail.order_id,
+            `Rp. ${formatCurrency(detail.fee_charge)}`,
+            format(new Date(detail.updated_at), "dd MMMM yyyy"),
+          ]),
+          startY: detailYPosition + 10,
+          theme: "grid",
+          styles: {
+            fontSize: 9,
+            cellPadding: 2,
+            halign: "center",
+            valign: "middle",
+            lineColor: [0, 0, 0],
+            lineWidth: 0.1,
+          },
+          headStyles: {
+            fillColor: [255, 255, 255],
+            textColor: 0,
+            lineColor: [0, 0, 0],
+            lineWidth: 0.1,
+            halign: "center",
+            valign: "middle",
+          },
+          columnStyles: {
+            0: { cellWidth: 10 }, // No
+            1: { cellWidth: 50 }, // Full Name
+            2: { cellWidth: 40 }, // Order ID
+            3: { cellWidth: 35 }, // Fee Charge
+            4: { cellWidth: 47 }, // Updated
+          },
+        });
+      }
 
       // Open in new tab for print preview
       const pdfBlob = doc.output("blob");
