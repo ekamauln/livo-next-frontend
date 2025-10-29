@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { playSoundMbRibbon } from "@/lib/sounds/mb-ribbon-sound";
 import { mbOnlineApi } from "@/lib/api/mbOnlineApi";
@@ -176,8 +176,7 @@ export function MbOnlineForm({ onMbOnlineCreated }: MbOnlineFormProps) {
             )}
           />
 
-          <RippleButton
-            size="sm"
+          <Button
             type="submit"
             disabled={
               form.formState.isSubmitting || !form.watch("tracking").trim()
@@ -188,7 +187,7 @@ export function MbOnlineForm({ onMbOnlineCreated }: MbOnlineFormProps) {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Create MB-Online
-          </RippleButton>
+          </Button>
         </form>
       </FocusScope>
     </Form>

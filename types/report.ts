@@ -249,3 +249,37 @@ export interface BoxesCountReportResponse {
     pagination: BoxesCountReportPagination;
   };
 }
+
+export interface UserChargeFeeReport {
+  user_id: number;
+  username: string;
+  full_name: string;
+  email: string;
+  total_complaints: number;
+  total_fee_charge: number;
+  complain_details: UserChargeFeeComplainDetail[];
+}
+
+export interface UserChargeFeeComplainDetail {
+  complain_id: number;
+  complain_code: string;
+  tracking: string;
+  order_ginee_id: string;
+  fee_charge: number;
+  complain_updated_at: string;
+}
+
+export interface UserChargeFeeReportPagination {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface UserChargeFeeReportResponse {
+  success: boolean;
+  message: string;
+  data: {
+    reports: UserChargeFeeReport[];
+    pagination: UserChargeFeeReportPagination;
+  };
+}

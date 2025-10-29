@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
 import { playSoundPcOnline } from "@/lib/sounds/pc-online-sound";
 import { pcOnlineApi } from "@/lib/api/pcOnlineApi";
@@ -360,8 +360,7 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                             }
                           >
                             <PopoverTrigger asChild>
-                              <RippleButton
-                                size="sm"
+                              <Button
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={boxSearchOpen[index] || false}
@@ -372,7 +371,7 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                               >
                                 {getSelectedBoxText(boxField.value)}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </RippleButton>
+                              </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-full p-0">
                               <Command shouldFilter={false}>
@@ -503,8 +502,7 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                 </div>
                 <div className="flex gap-1">
                   {index === fields.length - 1 && (
-                    <RippleButton
-                      size="sm"
+                    <Button
                       type="button"
                       variant="outline"
                       onClick={addBoxDetail}
@@ -517,11 +515,10 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                       }
                     >
                       <Plus className="h-4 w-4" />
-                    </RippleButton>
+                    </Button>
                   )}
                   {fields.length > 1 && (
-                    <RippleButton
-                      size="sm"
+                    <Button
                       type="button"
                       variant="outline"
                       onClick={() => removeBoxDetail(index)}
@@ -529,15 +526,14 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
                       className="px-2"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </RippleButton>
+                    </Button>
                   )}
                 </div>
               </div>
             ))}
           </div>
 
-          <RippleButton
-            size="sm"
+          <Button
             type="submit"
             disabled={
               form.formState.isSubmitting ||
@@ -550,7 +546,7 @@ export function PcOnlineForm({ onPcOnlineCreated }: PcOnlineFormProps) {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Create PC-Online
-          </RippleButton>
+          </Button>
         </form>
       </FocusScope>
     </Form>

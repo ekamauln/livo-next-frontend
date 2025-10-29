@@ -30,7 +30,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Check, ChevronsUpDown, Loader2, Package } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -204,8 +204,7 @@ export function ComplainCreateDialog({
                         onOpenChange={setChannelSearchOpen}
                       >
                         <PopoverTrigger asChild>
-                          <RippleButton
-                            size="sm"
+                          <Button
                             variant="outline"
                             role="combobox"
                             aria-expanded={channelSearchOpen}
@@ -217,7 +216,7 @@ export function ComplainCreateDialog({
                           >
                             {getSelectedChannelText(channelField.value)}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </RippleButton>
+                          </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0">
                           <Command shouldFilter={false}>
@@ -288,8 +287,7 @@ export function ComplainCreateDialog({
                         onOpenChange={setStoreSearchOpen}
                       >
                         <PopoverTrigger asChild>
-                          <RippleButton
-                            size="sm"
+                          <Button
                             variant="outline"
                             role="combobox"
                             aria-expanded={storeSearchOpen}
@@ -301,7 +299,7 @@ export function ComplainCreateDialog({
                           >
                             {getSelectedStoreText(storeField.value)}
                             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </RippleButton>
+                          </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-full p-0">
                           <Command shouldFilter={false}>
@@ -380,19 +378,17 @@ export function ComplainCreateDialog({
               />
 
               <div className="flex justify-end gap-2">
-                <RippleButton
+                <Button
                   type="button"
-                  size="sm"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   className="cursor-pointer"
                 >
                   Cancel
-                </RippleButton>
-                <RippleButton
+                </Button>
+                <Button
                   type="submit"
                   variant="default"
-                  size="sm"
                   disabled={isLoading}
                   className="cursor-pointer"
                 >
@@ -402,7 +398,7 @@ export function ComplainCreateDialog({
                     <Package className="mr-2 h-4 w-4" />
                   )}
                   Create Return
-                </RippleButton>
+                </Button>
               </div>
             </form>
           </Form>

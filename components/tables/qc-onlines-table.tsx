@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { QcOnline } from "@/types/qc-online";
@@ -212,7 +212,7 @@ export default function QcOnlinesTable() {
 
         return (
           <div className="flex justify-start">
-            <RippleButton
+            <Button
               onClick={() => toggleRowExpansion(qcOnline.id)}
               className="h-8 w-8 p-0"
             >
@@ -221,7 +221,7 @@ export default function QcOnlinesTable() {
               ) : (
                 <ChevronRight className="h-4 w-4" />
               )}
-            </RippleButton>
+            </Button>
           </div>
         );
       },
@@ -417,9 +417,9 @@ export default function QcOnlinesTable() {
           <div className="flex justify-start items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <RippleButton variant="outline" size="sm" className="ml-auto">
+                <Button variant="outline" className="ml-auto">
                   Show / Hide
-                </RippleButton>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {table
@@ -526,16 +526,15 @@ export default function QcOnlinesTable() {
           {pagination.total} qc-ribbons
         </div>
         <div className="flex items-center gap-2">
-          <RippleButton
+          <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
             disabled={pagination.page <= 1 || isLoading}
             className="cursor-pointer"
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
-          </RippleButton>
+          </Button>
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
@@ -557,31 +556,29 @@ export default function QcOnlinesTable() {
               if (pageNumber < 1 || pageNumber > totalPages) return null;
 
               return (
-                <RippleButton
+                <Button
                   key={pageNumber}
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => handlePageChange(pageNumber)}
                   disabled={isLoading}
                   className="w-10 cursor-pointer"
                 >
                   {pageNumber}
-                </RippleButton>
+                </Button>
               );
             })}
           </div>
-          <RippleButton
+          <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page >= totalPages || isLoading}
             className="cursor-pointer"
           >
             Next
             <ChevronRight className="h-4 w-4" />
-          </RippleButton>
+          </Button>
         </div>
       </div>
     </div>

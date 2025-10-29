@@ -17,7 +17,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, ChevronLeft, ChevronRight, Printer } from "lucide-react";
+import {
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  Printer,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -31,26 +40,48 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { BoxesCountReport } from "@/types/report";
+import { UserChargeFeeReport } from "@/types/report";
+import { User } from "@/types/auth";
 import { reportApi } from "@/lib/api/reportApi";
+import { cn } from "@/lib/utils";
+import { adminApi } from "@/lib/api/adminApi";
 import { ApiError } from "@/lib/api/types";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import React from "react";
 
-export default function BoxesCountTable() {
-  const [data, setData] = useState<BoxesCountReport[]>([]);
+export default function UserChargeFeesTable() {
+  const [data, setData] = useState<UserChargeFeeReport[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [searchQuery, setSearchQuery] = useState("");
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    user_id: false,
+    email: false,
+  });
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [userSearchOpen, setUserSearchOpen] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -60,36 +91,79 @@ export default function BoxesCountTable() {
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of current month
     to: new Date(), // Today
   });
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-  // Define query params interface for boxes count reports
-  interface BoxesCountQueryParams {
+  // Define query params interface for user charge fee reports
+  interface UserChargeFeeQueryParams {
     page?: number;
     limit?: number;
     start_date?: string;
     end_date?: string;
   }
 
-  // Fetch boxes count reports data
-  const fetchBoxesCountReports = useCallback(
-    async (params: BoxesCountQueryParams = {}, search: string = "") => {
+  // Toggle row expansion
+  const toggleRowExpansion = (rowId: number) => {
+    const newExpandedRows = new Set(expandedRows);
+    if (newExpandedRows.has(rowId)) {
+      newExpandedRows.delete(rowId);
+    } else {
+      newExpandedRows.add(rowId);
+    }
+    setExpandedRows(newExpandedRows);
+  };
+
+  // Format currency with thousand dot separator
+  const formatCurrency = (amount: number) => {
+    return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  // Get selected user display text
+  const getSelectedUserText = (userId: string) => {
+    if (!userId) return "Select user...";
+    const user = users.find((u) => u.id.toString() === userId);
+    return user ? `${user.full_name}` : "Select user...";
+  };
+
+  // Fetch users data for combobox
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoadingUsers(true);
+      // Fetch all users with a large limit to get all users
+      const response = await adminApi.getUsers(1, 1000);
+      setUsers((response.data?.users as User[]) || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to fetch users", {
+        description:
+          error instanceof Error ? error.message : "Unknown error occurred",
+      });
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  // Fetch user charge fee reports data
+  const fetchUserChargeFeeReports = useCallback(
+    async (params: UserChargeFeeQueryParams = {}, userId: string = "") => {
       try {
         setIsLoading(true);
 
-        const response = await reportApi.getBoxesCountReports(
+        const response = await reportApi.getUserChargeFeeReports(
           params.page || 1,
           params.limit || 10,
           params.start_date,
           params.end_date,
-          search.trim() || undefined
+          userId.trim() || undefined
         );
 
-        // Extract boxes count reports array from the response data
-        const boxesCountReports = response.data.reports as BoxesCountReport[];
-        setData(boxesCountReports || []); // Ensure we always set an array
+        // Extract user charge fee reports array from the response data
+        const userChargeFeeReports = response.data
+          .reports as UserChargeFeeReport[];
+        setData(userChargeFeeReports || []); // Ensure we always set an array
         setPagination(response.data.pagination);
       } catch (error) {
-        console.error("Error fetching boxes count reports:", error);
-        toast.error("Failed to fetch boxes count reports", {
+        console.error("Error fetching user charge fee reports:", error);
+        toast.error("Failed to fetch user charge fee reports", {
           description:
             error instanceof Error ? error.message : "Unknown error occurred",
         });
@@ -101,13 +175,15 @@ export default function BoxesCountTable() {
     []
   );
 
-  // Handle search form submission (like orders table)
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Handle user selection change
+  const handleUserSelectionChange = (userId: string) => {
+    setSelectedUserId(userId);
+    setUserSearchOpen(false);
+    setUserSearch("");
     // Reset to page 1 when searching
     setPagination((prev) => ({ ...prev, page: 1 }));
 
-    const params: BoxesCountQueryParams = {
+    const params: UserChargeFeeQueryParams = {
       page: 1,
       limit: pagination.limit,
     };
@@ -119,12 +195,17 @@ export default function BoxesCountTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchBoxesCountReports(params, searchQuery);
+    fetchUserChargeFeeReports(params, userId);
   };
+
+  // Initial load and fetch users
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   // Initial load and date range changes (like orders table)
   useEffect(() => {
-    const params: BoxesCountQueryParams = {
+    const params: UserChargeFeeQueryParams = {
       page: 1,
       limit: pagination.limit,
     };
@@ -137,15 +218,17 @@ export default function BoxesCountTable() {
     }
 
     setPagination((prev) => ({ ...prev, page: 1 }));
-    setSearchQuery(""); // Reset search query on date/limit changes
-    fetchBoxesCountReports(params, ""); // Reset search on date/limit changes
-  }, [dateRange, pagination.limit, fetchBoxesCountReports]);
+    setSelectedUserId(""); // Reset user selection on date/limit changes
+    setUserSearch(""); // Reset user search state
+    setUserSearchOpen(false); // Close the combobox
+    fetchUserChargeFeeReports(params, ""); // Reset search on date/limit changes
+  }, [dateRange, pagination.limit, fetchUserChargeFeeReports]);
 
   // Pagination handlers (like orders table)
   const handlePageChange = (newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage }));
 
-    const params: BoxesCountQueryParams = {
+    const params: UserChargeFeeQueryParams = {
       page: newPage,
       limit: pagination.limit,
     };
@@ -157,14 +240,14 @@ export default function BoxesCountTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchBoxesCountReports(params, searchQuery);
+    fetchUserChargeFeeReports(params, selectedUserId);
   };
 
   const handleLimitChange = (newLimit: string) => {
     const newLimitValue = parseInt(newLimit);
     setPagination((prev) => ({ ...prev, limit: newLimitValue, page: 1 }));
 
-    const params: BoxesCountQueryParams = {
+    const params: UserChargeFeeQueryParams = {
       page: 1,
       limit: newLimitValue,
     };
@@ -176,7 +259,7 @@ export default function BoxesCountTable() {
       params.end_date = format(dateRange.to, "yyyy-MM-dd");
     }
 
-    fetchBoxesCountReports(params, searchQuery);
+    fetchUserChargeFeeReports(params, selectedUserId);
   };
 
   const handleDateRangeChange = (range: DateRange | undefined) => {
@@ -184,12 +267,66 @@ export default function BoxesCountTable() {
     // Note: The useEffect will handle the actual data fetching when dateRange changes
   };
 
+  // Render expanded row content
+  const renderExpandedContent = (userChargeReport: UserChargeFeeReport) => {
+    const complainDetails = userChargeReport.complain_details || [];
+
+    if (complainDetails.length === 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        <div className="p-4 bg-muted/30">
+          <h4 className="text-sm font-semibold mb-3 text-muted-foreground">
+            Complain Details ({complainDetails.length} complaints)
+          </h4>
+          <div className="space-y-3">
+            {complainDetails.map((detail, index) => (
+              <div key={index} className="border rounded-lg p-3 bg-background">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Code:</span>
+                    <p className="font-mono">{detail.complain_code}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Tracking:</span>
+                    <p className="font-mono">{detail.tracking}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Order ID:</span>
+                    <p className="font-mono">{detail.order_ginee_id}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Fee Charge:</span>
+                    <p className="font-mono">
+                      Rp. {formatCurrency(detail.fee_charge)}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Updated:</span>
+                    <p className="font-mono">
+                      {format(
+                        new Date(detail.complain_updated_at),
+                        "dd MMM yyyy HH:mm:ss"
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleGenerateAndPrintReport = async () => {
     try {
       setIsLoading(true);
 
       // First, fetch all data (without pagination limits for the PDF)
-      const params: BoxesCountQueryParams = {};
+      const params: UserChargeFeeQueryParams = {};
 
       if (dateRange?.from) {
         params.start_date = format(dateRange.from, "yyyy-MM-dd");
@@ -199,22 +336,26 @@ export default function BoxesCountTable() {
       }
 
       // Fetch all data for PDF (not limited by table pagination)
-      let allReportData: BoxesCountReport[] = [];
+      let allReportData: UserChargeFeeReport[] = [];
       let currentPage = 1;
       let hasMoreData = true;
 
+      // Log the filter being applied
+      const userFilter = selectedUserId.trim() || undefined;
+      console.log("PDF Generation - User Filter:", userFilter ? `User ID: ${userFilter}` : "All Users");
+
       while (hasMoreData) {
-        const response = await reportApi.getBoxesCountReports(
+        const response = await reportApi.getUserChargeFeeReports(
           currentPage,
           100, // Use reasonable page size for API calls
           params.start_date,
           params.end_date,
-          searchQuery.trim() || undefined
+          userFilter
         );
 
         if (!response.success) {
           throw new Error(
-            response.message || "Failed to fetch boxes count reports"
+            response.message || "Failed to fetch user charge fee reports"
           );
         }
 
@@ -224,13 +365,17 @@ export default function BoxesCountTable() {
         // Check if we have more data to fetch
         const totalPages = Math.ceil(response.data.pagination.total / 100);
         hasMoreData = currentPage < totalPages;
+        
+        console.log(`PDF Generation - Page ${currentPage}/${totalPages}: Fetched ${pageData.length} records, Total so far: ${allReportData.length}`);
         currentPage++;
       }
+
+      console.log(`PDF Generation Complete - Total records fetched: ${allReportData.length}`);
 
       const reportData = allReportData;
 
       if (reportData.length === 0) {
-        let message = "No boxes count reports found";
+        let message = "No user charge fee reports found";
         const filters = [];
 
         if (dateRange?.from) {
@@ -239,8 +384,13 @@ export default function BoxesCountTable() {
         if (dateRange?.to) {
           filters.push(`to: ${format(dateRange.to, "dd MMM yyyy")}`);
         }
-        if (searchQuery) {
-          filters.push(`search: ${searchQuery}`);
+        if (selectedUserId) {
+          const selectedUser = users.find(
+            (u) => u.id.toString() === selectedUserId
+          );
+          filters.push(
+            `user: ${selectedUser ? selectedUser.username : selectedUserId}`
+          );
         }
 
         if (filters.length > 0) {
@@ -260,7 +410,7 @@ export default function BoxesCountTable() {
       // Add title
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      const titleText = "Boxes Count Reports";
+      const titleText = "User Charge Fee Reports";
       doc.text(titleText, 14, 15);
 
       // Add filters info
@@ -275,6 +425,19 @@ export default function BoxesCountTable() {
             "dd MMMM yyyy"
           )}`,
         ]);
+      }
+
+      // Add user filter information
+      if (selectedUserId) {
+        const selectedUser = users.find(
+          (u) => u.id.toString() === selectedUserId
+        );
+        filterData.push([
+          "User Filter",
+          selectedUser ? selectedUser.full_name : `User ID: ${selectedUserId}`,
+        ]);
+      } else {
+        filterData.push(["User Filter", "All Users"]);
       }
 
       filterData.push(["Total Records", `${reportData.length}`]);
@@ -321,15 +484,20 @@ export default function BoxesCountTable() {
       // Add main table
       autoTable(doc, {
         head: [
-          ["No", "Code", "Name", "Ribbon Count", "Online Count", "Total Count"],
+          [
+            "No",
+            "Username",
+            "Full Name",
+            "Total Complaints",
+            "Total Fee Charge",
+          ],
         ],
         body: reportData.map((item, index) => [
           index + 1,
-          item.box_code,
-          item.box_name,
-          item.ribbon_count,
-          item.online_count,
-          item.total_count,
+          item.username,
+          item.full_name,
+          item.total_complaints,
+          `Rp. ${formatCurrency(item.total_fee_charge)}`,
         ]),
         startY: filterData.length > 0 ? 25 + filterData.length * 8 + 10 : 45,
         theme: "grid",
@@ -351,11 +519,10 @@ export default function BoxesCountTable() {
         },
         columnStyles: {
           0: { cellWidth: 10 }, // No
-          1: { cellWidth: 27 }, // Box Code
-          2: { cellWidth: 40 }, // Box Name
-          3: { cellWidth: 35 }, // Total Count
-          4: { cellWidth: 35 }, // Ribbon Count
-          5: { cellWidth: 35 }, // Online Count
+          1: { cellWidth: 42 }, // Username
+          2: { cellWidth: 50 }, // Full Name
+          3: { cellWidth: 30 }, // Total Complaints
+          4: { cellWidth: 50 }, // Total Fee Charge
         },
       });
 
@@ -392,57 +559,99 @@ export default function BoxesCountTable() {
 
   const totalPages = Math.ceil(pagination.total / pagination.limit);
 
-  const columns: ColumnDef<BoxesCountReport>[] = [
+  const columns: ColumnDef<UserChargeFeeReport>[] = [
     {
-      accessorKey: "box_code",
+      id: "expand",
       header: () => (
-        <div className="text-sm text-center font-semibold">Box Code</div>
+        <div className="text-sm text-center font-semibold w-12"></div>
+      ),
+      cell: ({ row }) => {
+        const userChargeReport = row.original;
+        const complainDetails = userChargeReport.complain_details || [];
+        const hasDetails = complainDetails.length > 0;
+        const isExpanded = expandedRows.has(userChargeReport.user_id);
+
+        if (!hasDetails) {
+          return <div className="w-12"></div>;
+        }
+
+        return (
+          <div className="flex justify-start">
+            <Button
+              onClick={() => toggleRowExpansion(userChargeReport.user_id)}
+              className="h-8 w-8 p-0"
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "user_id",
+      header: () => (
+        <div className="text-sm text-center font-semibold">User ID</div>
       ),
       cell: ({ row }) => (
         <div className="font-mono text-sm text-center">
-          {row.getValue("box_code")}
+          {row.getValue("user_id")}
         </div>
       ),
     },
     {
-      accessorKey: "box_name",
+      accessorKey: "username",
       header: () => (
-        <div className="text-sm text-center font-semibold">Box Name</div>
+        <div className="text-sm text-center font-semibold">Username</div>
       ),
       cell: ({ row }) => (
-        <div className="text-sm text-center">{row.getValue("box_name")}</div>
+        <div className="text-sm text-center">{row.getValue("username")}</div>
       ),
     },
     {
-      accessorKey: "total_count",
+      accessorKey: "full_name",
       header: () => (
-        <div className="text-sm text-center font-semibold">Total Count</div>
+        <div className="text-sm text-center font-semibold">Full Name</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm text-center">{row.getValue("full_name")}</div>
+      ),
+    },
+    {
+      accessorKey: "email",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Email</div>
+      ),
+      cell: ({ row }) => (
+        <div className="text-sm text-center">{row.getValue("email")}</div>
+      ),
+    },
+    {
+      accessorKey: "total_complaints",
+      header: () => (
+        <div className="text-sm text-center font-semibold">
+          Total Complaints
+        </div>
       ),
       cell: ({ row }) => (
         <div className="text-sm text-center font-medium">
-          {row.getValue("total_count")}
+          {row.getValue("total_complaints")}
         </div>
       ),
     },
     {
-      accessorKey: "ribbon_count",
+      accessorKey: "total_fee_charge",
       header: () => (
-        <div className="text-sm text-center font-semibold">Ribbon Count</div>
-      ),
-      cell: ({ row }) => (
-        <div className="text-sm text-center">
-          {row.getValue("ribbon_count")}
+        <div className="text-sm text-center font-semibold">
+          Total Fee Charge
         </div>
       ),
-    },
-    {
-      accessorKey: "online_count",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Online Count</div>
-      ),
       cell: ({ row }) => (
-        <div className="text-sm text-center">
-          {row.getValue("online_count")}
+        <div className="font-mono text-sm text-center font-medium">
+          Rp. {formatCurrency(row.getValue("total_fee_charge") || 0)}
         </div>
       ),
     },
@@ -469,15 +678,111 @@ export default function BoxesCountTable() {
         <div className="flex justify-start gap-2 items-center">
           {/* Filters */}
           <div className="flex justify-start gap-2 items-center">
-            <form onSubmit={handleSearch} className="flex gap-2 items-center">
-              <Input
-                placeholder="Search boxes..."
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="max-w-sm"
-              />
-            </form>
+            <Popover open={userSearchOpen} onOpenChange={setUserSearchOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={userSearchOpen}
+                  className="w-[280px] justify-between"
+                  disabled={isLoadingUsers}
+                >
+                  {getSelectedUserText(selectedUserId)}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[280px] p-0">
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Search by username or full name..."
+                    value={userSearch}
+                    onValueChange={setUserSearch}
+                  />
+                  <CommandList>
+                    <CommandEmpty>
+                      {isLoadingUsers
+                        ? "Loading users..."
+                        : userSearch
+                        ? `No users found for "${userSearch}"`
+                        : "No users found."}
+                    </CommandEmpty>
+                    <CommandGroup>
+                      {/* Add "All Users" option */}
+                      {(() => {
+                        const searchTerm = userSearch.toLowerCase();
+
+                        // Show "All Users" option when no search or when "all" matches
+                        const showAllUsers =
+                          !searchTerm || "all users".includes(searchTerm);
+
+                        const filteredUsers = users.filter((user) => {
+                          if (!searchTerm) return true; // Show all when no search
+
+                          const usernameMatch = user.username
+                            .toLowerCase()
+                            .includes(searchTerm);
+                          const fullNameMatch = user.full_name
+                            .toLowerCase()
+                            .includes(searchTerm);
+                          const emailMatch = user.email
+                            .toLowerCase()
+                            .includes(searchTerm);
+
+                          return usernameMatch || fullNameMatch || emailMatch;
+                        });
+
+                        return (
+                          <>
+                            {showAllUsers && (
+                              <CommandItem
+                                value="all-users"
+                                onSelect={() => handleUserSelectionChange("")}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedUserId === ""
+                                      ? "opacity-100"
+                                      : "opacity-0"
+                                  )}
+                                />
+                                All Users
+                              </CommandItem>
+                            )}
+                            {filteredUsers
+                              .slice(0, 50) // Limit to 50 results for performance
+                              .map((user) => (
+                                <CommandItem
+                                  key={user.id}
+                                  value={user.id.toString()}
+                                  onSelect={() =>
+                                    handleUserSelectionChange(
+                                      user.id.toString()
+                                    )
+                                  }
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedUserId === user.id.toString()
+                                        ? "opacity-100"
+                                        : "opacity-0"
+                                    )}
+                                  />
+                                  {user.full_name}
+                                </CommandItem>
+                              ))}
+                          </>
+                        );
+                      })()}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
+
+          {/* Date Range Picker */}
           <div className="flex justify-start gap-2 items-center">
             <DateRangePicker
               date={dateRange}
@@ -503,7 +808,7 @@ export default function BoxesCountTable() {
               ) : (
                 <>
                   <Printer className="w-4 h-4 mr-2" />
-                  Print Boxes Count Reports
+                  Print User Charge Fee Reports
                 </>
               )}
             </Button>
@@ -589,7 +894,7 @@ export default function BoxesCountTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading boxes count reports...
+                    Loading user charge fee reports...
                   </div>
                 </TableCell>
               </TableRow>
@@ -609,6 +914,14 @@ export default function BoxesCountTable() {
                       </TableCell>
                     ))}
                   </TableRow>
+                  {/* Expanded row content */}
+                  {expandedRows.has(row.original.user_id) && (
+                    <TableRow>
+                      <TableCell colSpan={columns.length} className="p-0">
+                        {renderExpandedContent(row.original)}
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </React.Fragment>
               ))
             ) : (
@@ -617,7 +930,7 @@ export default function BoxesCountTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No boxes count reports found.
+                  No user charge fee reports found.
                 </TableCell>
               </TableRow>
             )}
@@ -630,7 +943,7 @@ export default function BoxesCountTable() {
         <div className="text-sm text-muted-foreground">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} boxes count reports
+          {pagination.total} user charge fee reports
         </div>
         <div className="flex items-center gap-2">
           <Button

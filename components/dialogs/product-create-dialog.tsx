@@ -16,7 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, PackageOpen } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -189,19 +189,17 @@ export function ProductCreateDialog({
               />
 
               <div className="flex justify-end gap-2">
-                <RippleButton
+                <Button
                   type="button"
-                  size="sm"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   className="cursor-pointer"
                 >
                   Cancel
-                </RippleButton>
-                <RippleButton
+                </Button>
+                <Button
                   type="submit"
                   variant="default"
-                  size="sm"
                   disabled={isLoading}
                   className="cursor-pointer"
                 >
@@ -211,7 +209,7 @@ export function ProductCreateDialog({
                     <PackageOpen className="mr-2 h-4 w-4" />
                   )}
                   Create New Product
-                </RippleButton>
+                </Button>
               </div>
             </form>
           </Form>

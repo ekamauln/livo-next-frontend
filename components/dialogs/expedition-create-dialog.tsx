@@ -16,7 +16,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -235,19 +234,17 @@ export function ExpeditionCreateDialog({
               />
 
               <div className="flex justify-end gap-2">
-                <RippleButton
+                <Button
                   type="button"
-                  size="sm"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   className="cursor-pointer"
                 >
                   Cancel
-                </RippleButton>
-                <RippleButton
+                </Button>
+                <Button
                   type="submit"
                   variant="default"
-                  size="sm"
                   disabled={isLoading}
                   className="cursor-pointer"
                 >
@@ -257,7 +254,7 @@ export function ExpeditionCreateDialog({
                     <BusFront className="mr-2 h-4 w-4" />
                   )}
                   Create New Expedition
-                </RippleButton>
+                </Button>
               </div>
             </form>
           </Form>

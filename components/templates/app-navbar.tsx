@@ -24,7 +24,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
@@ -303,6 +303,12 @@ export default function AppNavbar() {
                     Boxes Count Reports
                   </Link>
                 </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/reports/user-charge-fee-reports">
+                    <ShoppingBag className="h-4 w-4" />
+                    User Charge Fee Reports
+                  </Link>
+                </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>
@@ -355,15 +361,14 @@ export default function AppNavbar() {
           orientation="vertical"
           className="data-[orientation=vertical]:h-6"
         />
-        <RippleButton
+        <Button
           onClick={handleLogout}
           variant="destructive"
-          size="sm"
           className="flex items-center gap-2 cursor-pointer"
         >
           <LogOut className="size-4" />
           <span>Logout</span>
-        </RippleButton>
+        </Button>
       </div>
     </header>
   );

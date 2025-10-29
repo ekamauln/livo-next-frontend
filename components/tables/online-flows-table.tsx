@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
@@ -388,9 +388,9 @@ export default function OnlineFlowsTable() {
           <div className="flex justify-end text-right">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <RippleButton variant="ghost" className="h-8 w-8 p-0">
+                <Button variant="ghost" className="h-8 w-8 p-0">
                   <MoreHorizontal className="h-4 w-4" />
-                </RippleButton>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem
@@ -474,9 +474,9 @@ export default function OnlineFlowsTable() {
           <div className="flex justify-start items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <RippleButton variant="outline" size="sm" className="ml-auto">
+                <Button variant="outline" className="ml-auto">
                   Show / Hide
-                </RippleButton>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {table
@@ -574,16 +574,15 @@ export default function OnlineFlowsTable() {
           {pagination.total} online flows
         </div>
         <div className="flex items-center gap-2">
-          <RippleButton
+          <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
             disabled={pagination.page <= 1 || isLoading}
             className="cursor-pointer"
           >
             <ChevronLeft className="h-4 w-4" />
             Previous
-          </RippleButton>
+          </Button>
           <div className="flex items-center gap-1">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               let pageNumber;
@@ -605,31 +604,29 @@ export default function OnlineFlowsTable() {
               if (pageNumber < 1 || pageNumber > totalPages) return null;
 
               return (
-                <RippleButton
+                <Button
                   key={pageNumber}
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => handlePageChange(pageNumber)}
                   disabled={isLoading}
                   className="w-10 cursor-pointer"
                 >
                   {pageNumber}
-                </RippleButton>
+                </Button>
               );
             })}
           </div>
-          <RippleButton
+          <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page >= totalPages || isLoading}
             className="cursor-pointer"
           >
             Next
             <ChevronRight className="h-4 w-4" />
-          </RippleButton>
+          </Button>
         </div>
       </div>
 

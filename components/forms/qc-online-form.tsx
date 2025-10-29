@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Trash2, ChevronsUpDown, Check } from "lucide-react";
 import { playSoundQcOnline } from "@/lib/sounds/qc-online-sound";
 import { qcOnlineApi } from "@/lib/api/qcOnlineApi";
@@ -360,8 +360,7 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
                             }
                           >
                             <PopoverTrigger asChild>
-                              <RippleButton
-                                size="sm"
+                              <Button
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={boxSearchOpen[index] || false}
@@ -372,7 +371,7 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
                               >
                                 {getSelectedBoxText(boxField.value)}
                                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                              </RippleButton>
+                              </Button>
                             </PopoverTrigger>
                             <PopoverContent className="w-full p-0">
                               <Command shouldFilter={false}>
@@ -498,8 +497,7 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
                 </div>
                 <div className="flex gap-1">
                   {index === fields.length - 1 && (
-                    <RippleButton
-                      size="sm"
+                    <Button
                       type="button"
                       variant="outline"
                       onClick={addBoxDetail}
@@ -512,11 +510,10 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
                       }
                     >
                       <Plus className="h-4 w-4" />
-                    </RippleButton>
+                    </Button>
                   )}
                   {fields.length > 1 && (
-                    <RippleButton
-                      size="sm"
+                    <Button
                       type="button"
                       variant="outline"
                       onClick={() => removeBoxDetail(index)}
@@ -524,15 +521,14 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
                       className="px-2"
                     >
                       <Trash2 className="h-4 w-4" />
-                    </RippleButton>
+                    </Button>
                   )}
                 </div>
               </div>
             ))}
           </div>
 
-          <RippleButton
-            size="sm"
+          <Button
             type="submit"
             disabled={
               form.formState.isSubmitting ||
@@ -545,7 +541,7 @@ export function QcOnlineForm({ onQcOnlineCreated }: QcOnlineFormProps) {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Create QC-Online
-          </RippleButton>
+          </Button>
         </form>
       </FocusScope>
     </Form>

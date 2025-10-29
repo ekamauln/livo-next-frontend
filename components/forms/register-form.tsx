@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -163,10 +163,9 @@ export function RegisterForm() {
                               }
                               {...field}
                             />
-                            <RippleButton
+                            <Button
                               type="button"
                               variant="ghost"
-                              size="sm"
                               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                               disabled={isLoading}
@@ -176,7 +175,7 @@ export function RegisterForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </RippleButton>
+                            </Button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -205,10 +204,9 @@ export function RegisterForm() {
                               }
                               {...field}
                             />
-                            <RippleButton
+                            <Button
                               type="button"
                               variant="ghost"
-                              size="sm"
                               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                               onClick={() =>
                                 setShowConfirmPassword(!showConfirmPassword)
@@ -220,7 +218,7 @@ export function RegisterForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </RippleButton>
+                            </Button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -229,8 +227,7 @@ export function RegisterForm() {
                   />
                 </div>
 
-                <RippleButton
-                  size="sm"
+                <Button
                   type="submit"
                   className="w-full cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                   disabled={isLoading}
@@ -246,7 +243,7 @@ export function RegisterForm() {
                       Sign Up
                     </div>
                   )}
-                </RippleButton>
+                </Button>
 
                 <div className="text-center text-sm">
                   Already have an account?{" "}

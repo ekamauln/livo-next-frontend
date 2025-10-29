@@ -40,7 +40,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -479,22 +479,20 @@ export function OrderDialog({
                                     {detail.product_name}
                                   </CardTitle>
                                   <div className="flex items-center gap-2">
-                                    <RippleButton
+                                    <Button
                                       variant="outline"
-                                      size="sm"
                                       onClick={() => handleEditDetail(detail)}
                                       disabled={!isOperationAllowed()}
                                       className="h-8 w-8 p-0 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                                     >
                                       <Edit className="h-3 w-3" />
-                                    </RippleButton>
-                                    <RippleButton
+                                    </Button>
+                                    <Button
                                       variant={
                                         deleteConfirmingId === detail.id
                                           ? "destructive"
                                           : "outline"
                                       }
-                                      size="sm"
                                       onClick={() =>
                                         detail.id &&
                                         handleDeleteClick(detail.id)
@@ -514,7 +512,7 @@ export function OrderDialog({
                                       }
                                     >
                                       <Trash2 className="h-3 w-3" />
-                                    </RippleButton>
+                                    </Button>
                                   </div>
                                 </div>
                                 <Separator
@@ -597,8 +595,7 @@ export function OrderDialog({
                                   onOpenChange={setProductSearchOpen}
                                 >
                                   <PopoverTrigger asChild>
-                                    <RippleButton
-                                      size="sm"
+                                    <Button
                                       variant="outline"
                                       role="combobox"
                                       aria-expanded={productSearchOpen}
@@ -609,7 +606,7 @@ export function OrderDialog({
                                         Search products to auto-fill details...
                                       </div>
                                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                    </RippleButton>
+                                    </Button>
                                   </PopoverTrigger>
                                   <PopoverContent className="w-full p-0">
                                     <Command>
@@ -740,17 +737,15 @@ export function OrderDialog({
                               </div>
 
                               <div className="flex justify-end gap-2">
-                                <RippleButton
-                                  size="sm"
+                                <Button
                                   type="button"
                                   variant="outline"
                                   onClick={() => form.reset()}
                                   className="cursor-pointer"
                                 >
                                   Reset Form
-                                </RippleButton>
-                                <RippleButton
-                                  size="sm"
+                                </Button>
+                                <Button
                                   type="submit"
                                   disabled={updating || !isOperationAllowed()}
                                   className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
@@ -759,7 +754,7 @@ export function OrderDialog({
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                   )}
                                   Add Detail
-                                </RippleButton>
+                                </Button>
                               </div>
                             </form>
                           </Form>
@@ -872,8 +867,7 @@ export function OrderDialog({
                                 </div>
 
                                 <div className="flex justify-end gap-2">
-                                  <RippleButton
-                                    size="sm"
+                                  <Button
                                     type="button"
                                     variant="outline"
                                     onClick={() => {
@@ -884,9 +878,8 @@ export function OrderDialog({
                                     className="cursor-pointer"
                                   >
                                     Cancel
-                                  </RippleButton>
-                                  <RippleButton
-                                    size="sm"
+                                  </Button>
+                                  <Button
                                     type="submit"
                                     disabled={updating || !isOperationAllowed()}
                                     className="cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
@@ -895,7 +888,7 @@ export function OrderDialog({
                                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     )}
                                     Update Detail
-                                  </RippleButton>
+                                  </Button>
                                 </div>
                               </form>
                             </Form>

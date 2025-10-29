@@ -10,7 +10,7 @@ import {
 import { useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import { toast } from "sonner";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -466,14 +466,14 @@ export default function OrdersBulkImport() {
               className="hidden"
             />
             <div className="flex items-center gap-3">
-              <RippleButton
+              <Button
                 onClick={() => fileInputRef.current?.click()}
                 variant="outline"
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Upload className="size-4" />
                 <span className="font-bold">Browse</span>
-              </RippleButton>
+              </Button>
               {selectedFile && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <FileSpreadsheet size={16} />
@@ -527,13 +527,13 @@ export default function OrdersBulkImport() {
       </div>
 
       {/* Convert Button */}
-      <RippleButton
+      <Button
         onClick={convertExcelToJson}
         disabled={!selectedFile || isConverting}
         className="w-full cursor-pointer"
       >
         {isConverting ? "Converting..." : "Convert"}
-      </RippleButton>
+      </Button>
 
       {/* Output Section */}
       {outputJson && (
@@ -541,15 +541,15 @@ export default function OrdersBulkImport() {
           <div className="flex justify-between items-center mb-4">
             <Label className="text-lg font-semibold">Output JSON:</Label>
             <div className="flex gap-2">
-              <RippleButton
+              <Button
                 onClick={copyToClipboard}
                 variant="outline"
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <Copy className="size-4" />
                 <span className="font-bold">Copy</span>
-              </RippleButton>
-              <RippleButton
+              </Button>
+              <Button
                 onClick={sendToApi}
                 variant="outline"
                 disabled={isSending}
@@ -557,7 +557,7 @@ export default function OrdersBulkImport() {
               >
                 <Send className="size-4" />
                 {isSending ? "Sending..." : "Send to API"}
-              </RippleButton>
+              </Button>
             </div>
           </div>
 

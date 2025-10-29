@@ -34,7 +34,7 @@ import {
   ScanBarcode,
   ScanQrCode,
 } from "lucide-react";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useForm } from "react-hook-form";
@@ -591,10 +591,9 @@ export function ProductDialog({
                                       <span className="text-sm text-muted-foreground">
                                         or
                                       </span>
-                                      <RippleButton
+                                      <Button
                                         type="button"
                                         variant="outline"
-                                        size="sm"
                                         disabled={uploading}
                                         onClick={() =>
                                           document
@@ -611,7 +610,7 @@ export function ProductDialog({
                                         {uploading
                                           ? "Uploading..."
                                           : "Upload Image"}
-                                      </RippleButton>
+                                      </Button>
                                       <input
                                         id="file-upload"
                                         type="file"
@@ -645,17 +644,15 @@ export function ProductDialog({
                           />
 
                           <div className="flex justify-end gap-2">
-                            <RippleButton
-                              size="sm"
+                            <Button
                               type="button"
                               variant="outline"
                               className="cursor-pointer"
                               onClick={() => setActiveTab("detail")}
                             >
                               Cancel
-                            </RippleButton>
-                            <RippleButton
-                              size="sm"
+                            </Button>
+                            <Button
                               type="submit"
                               disabled={updating}
                               className="cursor-pointer"
@@ -664,7 +661,7 @@ export function ProductDialog({
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
                               Update Product
-                            </RippleButton>
+                            </Button>
                           </div>
                         </form>
                       </Form>
@@ -700,8 +697,7 @@ export function ProductDialog({
                               alt="1D Barcode"
                               className="border"
                             />
-                            <RippleButton
-                              size="sm"
+                            <Button
                               className="cursor-pointer"
                               onClick={() =>
                                 downloadBarcode(
@@ -712,7 +708,7 @@ export function ProductDialog({
                             >
                               <Download className="h-4 w-4 mr-2" />
                               Download 1D Barcode
-                            </RippleButton>
+                            </Button>
                           </>
                         ) : (
                           <div className="text-center py-4">
@@ -754,8 +750,7 @@ export function ProductDialog({
                               alt="QR Code"
                               className="border"
                             />
-                            <RippleButton
-                              size="sm"
+                            <Button
                               className="cursor-pointer"
                               onClick={() =>
                                 downloadBarcode(
@@ -766,7 +761,7 @@ export function ProductDialog({
                             >
                               <Download className="h-4 w-4 mr-2" />
                               Download 2D Barcode
-                            </RippleButton>
+                            </Button>
                           </>
                         ) : (
                           <div className="text-center py-4">

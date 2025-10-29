@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { playSoundMbRibbon } from "@/lib/sounds/mb-ribbon-sound";
 import { mbRibbonApi } from "@/lib/api/mbRibbonApi";
@@ -176,8 +176,7 @@ export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
             )}
           />
 
-          <RippleButton
-            size="sm"
+          <Button
             type="submit"
             disabled={
               form.formState.isSubmitting || !form.watch("tracking").trim()
@@ -188,7 +187,7 @@ export function MbRibbonForm({ onMbRibbonCreated }: MbRibbonFormProps) {
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
             Create MB-Ribbon
-          </RippleButton>
+          </Button>
         </form>
       </FocusScope>
     </Form>

@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { outboundApi } from "@/lib/api/outboundApi";
 import { ApiError } from "@/lib/api/types";
@@ -101,7 +101,8 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
       // Check if response exists and has expected structure
       if (response && response.success) {
         // Play sound based on expedition_slug from response data
-        const expeditionSlug = response.data?.expedition_slug || outboundData.expedition_slug;
+        const expeditionSlug =
+          response.data?.expedition_slug || outboundData.expedition_slug;
         playSoundOutbound(expeditionSlug);
         toast.success("Outbound created successfully!");
         form.reset(); // Reset form using React Hook Form
@@ -229,8 +230,7 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
               )}
             />
 
-            <RippleButton
-              size="sm"
+            <Button
               type="submit"
               disabled={
                 form.formState.isSubmitting || !form.watch("tracking").trim()
@@ -241,7 +241,7 @@ export function OutboundForm({ onOutboundCreated }: OutboundFormProps) {
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               )}
               Create Outbound
-            </RippleButton>
+            </Button>
           </form>
         </FocusScope>
       </Form>

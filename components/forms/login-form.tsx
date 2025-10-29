@@ -11,7 +11,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, LogIn } from "lucide-react";
@@ -104,10 +104,9 @@ export function LoginForm() {
                               }
                               {...field}
                             />
-                            <RippleButton
+                            <Button
                               type="button"
                               variant="ghost"
-                              size="sm"
                               className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                               onClick={() => setShowPassword(!showPassword)}
                               disabled={isLoading}
@@ -117,7 +116,7 @@ export function LoginForm() {
                               ) : (
                                 <Eye className="h-4 w-4" />
                               )}
-                            </RippleButton>
+                            </Button>
                           </div>
                         </FormControl>
                         <FormMessage />
@@ -126,8 +125,7 @@ export function LoginForm() {
                   />
                 </div>
 
-                <RippleButton
-                  size="sm"
+                <Button
                   type="submit"
                   className="w-full cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
                   disabled={isLoading}
@@ -143,7 +141,7 @@ export function LoginForm() {
                       Sign In
                     </div>
                   )}
-                </RippleButton>
+                </Button>
 
                 <div className="text-center text-sm">
                   Don&apos;t have an account?{" "}

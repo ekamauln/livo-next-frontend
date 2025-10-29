@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Loader2, UserPlus } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -253,10 +253,9 @@ export function UserCreateDialog({
                           }
                           {...field}
                         />
-                        <RippleButton
+                        <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() => setShowPassword(!showPassword)}
                           disabled={isLoading}
@@ -266,7 +265,7 @@ export function UserCreateDialog({
                           ) : (
                             <Eye className="h-4 w-4" />
                           )}
-                        </RippleButton>
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -292,10 +291,9 @@ export function UserCreateDialog({
                           }
                           {...field}
                         />
-                        <RippleButton
+                        <Button
                           type="button"
                           variant="ghost"
-                          size="sm"
                           className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                           onClick={() =>
                             setShowConfirmPassword(!showConfirmPassword)
@@ -307,7 +305,7 @@ export function UserCreateDialog({
                           ) : (
                             <Eye className="h-4 w-4" />
                           )}
-                        </RippleButton>
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -316,19 +314,17 @@ export function UserCreateDialog({
               />
 
               <div className="flex justify-end gap-2">
-                <RippleButton
+                <Button
                   type="button"
-                  size="sm"
                   variant="outline"
                   onClick={() => onOpenChange(false)}
                   className="cursor-pointer"
                 >
                   Cancel
-                </RippleButton>
-                <RippleButton
+                </Button>
+                <Button
                   type="submit"
                   variant="default"
-                  size="sm"
                   disabled={isLoading}
                   className="cursor-pointer"
                 >
@@ -338,7 +334,7 @@ export function UserCreateDialog({
                     <UserPlus className="mr-2 h-4 w-4" />
                   )}
                   Create New User
-                </RippleButton>
+                </Button>
               </div>
             </form>
           </Form>

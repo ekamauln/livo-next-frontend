@@ -58,7 +58,6 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { orderApi } from "@/lib/api/orderApi";
 import { OrderDialog } from "@/components/dialogs/order-dialog";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 
 // Status badge color mapping
 const getStatusBadgeStyle = (status: string) => {
@@ -362,7 +361,7 @@ export default function OrdersTable() {
 
         return (
           <div className="flex justify-start">
-            <RippleButton
+            <Button
               onClick={() => toggleRowExpansion(order.id)}
               className="h-8 w-8 p-0"
             >
@@ -371,7 +370,7 @@ export default function OrdersTable() {
               ) : (
                 <ChevronRightIcon className="h-4 w-4" />
               )}
-            </RippleButton>
+            </Button>
           </div>
         );
       },
@@ -630,9 +629,9 @@ export default function OrdersTable() {
           <div className="flex justify-start items-center gap-2">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <RippleButton variant="outline" size="sm" className="ml-auto">
+                <Button variant="outline" className="ml-auto">
                   Show / Hide
-                </RippleButton>
+                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {table
@@ -741,7 +740,6 @@ export default function OrdersTable() {
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page - 1)}
             disabled={pagination.page <= 1 || isLoading}
             className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
@@ -775,7 +773,6 @@ export default function OrdersTable() {
                   variant={
                     pageNumber === pagination.page ? "default" : "outline"
                   }
-                  size="sm"
                   onClick={() => handlePageChange(pageNumber)}
                   disabled={isLoading}
                   className="w-10 cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"
@@ -787,7 +784,6 @@ export default function OrdersTable() {
           </div>
           <Button
             variant="outline"
-            size="sm"
             onClick={() => handlePageChange(pagination.page + 1)}
             disabled={pagination.page >= totalPages || isLoading}
             className="cursor-pointer hover:translate-y-[-4px] transition duration-300 ease-in-out"

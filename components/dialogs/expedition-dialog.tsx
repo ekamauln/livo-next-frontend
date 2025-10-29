@@ -24,7 +24,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Loader2, Package, Settings, PackageOpen } from "lucide-react";
-import { RippleButton } from "@/components/ui/shadcn-io/ripple-button";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -463,17 +462,15 @@ export function ExpeditionDialog({
                           />
 
                           <div className="flex justify-end gap-2">
-                            <RippleButton
-                              size="sm"
+                            <Button
                               type="button"
                               variant="outline"
                               className="cursor-pointer"
                               onClick={() => setActiveTab("detail")}
                             >
                               Cancel
-                            </RippleButton>
-                            <RippleButton
-                              size="sm"
+                            </Button>
+                            <Button
                               type="submit"
                               disabled={updating}
                               className="cursor-pointer"
@@ -482,7 +479,7 @@ export function ExpeditionDialog({
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
                               Update Product
-                            </RippleButton>
+                            </Button>
                           </div>
                         </form>
                       </Form>
