@@ -1,4 +1,8 @@
-import { OutboundReportResponse, ReturnReportResponse } from "@/types/report";
+import {
+  ComplainReportResponse,
+  OutboundReportResponse,
+  ReturnReportResponse,
+} from "@/types/report";
 import { apiRequest } from "@/lib/api/types";
 
 export const reportApi = {
@@ -48,5 +52,21 @@ export const reportApi = {
     }`;
 
     return apiRequest<ReturnReportResponse>(endpoint);
+  },
+
+  getComplainReports: async (
+    date?: string
+  ): Promise<ComplainReportResponse> => {
+    const params = new URLSearchParams();
+
+    // Add date parameter if provided
+    if (date) params.append("date", date);
+
+    const queryString = params.toString();
+    const endpoint = `/reports/handout-complains${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return apiRequest<ComplainReportResponse>(endpoint);
   },
 };

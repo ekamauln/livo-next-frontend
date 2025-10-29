@@ -164,6 +164,8 @@ export default function HandoutOutbound() {
         format(new Date(), "dd MMMM yyyy - HH:mm"),
       ]);
 
+      filterData.push(["Picker", ""]);
+
       if (filterData.length > 0) {
         autoTable(doc, {
           body: filterData,
@@ -187,6 +189,12 @@ export default function HandoutOutbound() {
             fontStyle: "bold",
           },
           headStyles: { fillColor: [255, 255, 255], textColor: 0 },
+          didParseCell: function (data) {
+            // Add more height to the picker row (last row)
+            if (data.row.index === filterData.length - 1) {
+              data.cell.styles.minCellHeight = 15; // Increase height for picker row
+            }
+          },
         });
       }
 
@@ -199,7 +207,7 @@ export default function HandoutOutbound() {
           format(new Date(item.created_at), "dd MMM yyyy - HH:mm:ss"),
           `${item.user.full_name}`,
         ]),
-        startY: filterData.length > 0 ? 25 + filterData.length * 8 + 3 : 45,
+        startY: filterData.length > 0 ? 25 + filterData.length * 8 + 10 : 45,
         theme: "grid",
         styles: {
           fontSize: 10,

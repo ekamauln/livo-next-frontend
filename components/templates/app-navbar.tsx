@@ -277,6 +277,12 @@ export default function AppNavbar() {
                 </MenubarItem>
                 <MenubarSeparator />
                 <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/complains/handout-complains">
+                    <ShoppingBag className="h-4 w-4" />
+                    Handout Complains
+                  </Link>
+                </MenubarItem>
+                <MenubarItem asChild className="cursor-pointer">
                   <Link href="/complains/handout-returns">
                     <ShoppingBag className="h-4 w-4" />
                     Handout Returns

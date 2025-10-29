@@ -129,3 +129,99 @@ export interface ReturnReportResponse {
     total: number;
   };
 }
+
+export interface ComplainReport {
+  id: number;
+  code: string;
+  tracking: string;
+  order_id: string;
+  channel_id: number;
+  store_id: number;
+  user_id: number;
+  description: string;
+  solution: string;
+  total_fee: number;
+  checked: boolean;
+  created_at: string;
+  updated_at: string;
+  product_details: ComplainReportProductDetail[];
+  user_details: ComplainReportUserDetail[];
+  channel: ComplainReportChannel;
+  store: ComplainReportStore;
+}
+
+export interface ComplainReportProductDetail {
+  id: number;
+  complain_id: number;
+  product_id: number;
+  quantity: number;
+  created_at: string;
+  updated_at: string;
+  product: ComplainReportProduct;
+}
+
+export interface ComplainReportProduct {
+  id: number;
+  sku: string;
+  name: string;
+  image: string;
+  variant: string;
+  location: string;
+  barcode: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComplainReportUserDetail {
+  id: number;
+  complain_id: number;
+  user_id: number;
+  fee_charge: number;
+  created_at: string;
+  updated_at: string;
+  user: ComplainReportUser;
+}
+
+export interface ComplainReportUser {
+  id: number;
+  username: string;
+  email: string;
+  full_name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  roles: ComplainReportUserRole[];
+}
+
+export interface ComplainReportUserRole {
+  id: number;
+  name: string;
+  description: string;
+  assigned_by: string;
+  assigned_at: string;
+}
+
+export interface ComplainReportChannel {
+  id: number;
+  code: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComplainReportStore {
+  id: number;
+  code: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ComplainReportResponse {
+  success: boolean;
+  message: string;
+  data: {
+    complains: ComplainReport[];
+    total: number;
+  };
+}
