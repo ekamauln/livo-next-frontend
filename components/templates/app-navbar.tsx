@@ -290,6 +290,21 @@ export default function AppNavbar() {
                 </MenubarItem>
               </MenubarContent>
             </MenubarMenu>
+
+            {/* Reports menu */}
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer">
+                Reports
+              </MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem asChild className="cursor-pointer">
+                  <Link href="/reports/boxes-count-reports">
+                    <ShoppingBag className="h-4 w-4" />
+                    Boxes Count Reports
+                  </Link>
+                </MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
           </Menubar>
         </div>
       </div>

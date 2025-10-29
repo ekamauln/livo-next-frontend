@@ -225,3 +225,27 @@ export interface ComplainReportResponse {
     total: number;
   };
 }
+
+export interface BoxesCountReport {
+  box_id: number;
+  box_code: string;
+  box_name: string;
+  total_count: number;
+  ribbon_count: number;
+  online_count: number;
+}
+
+export interface BoxesCountReportPagination {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface BoxesCountReportResponse {
+  success: boolean;
+  message: string;
+  data: {
+    reports: BoxesCountReport[];
+    pagination: BoxesCountReportPagination;
+  };
+}

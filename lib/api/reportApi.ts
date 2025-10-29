@@ -2,6 +2,7 @@ import {
   ComplainReportResponse,
   OutboundReportResponse,
   ReturnReportResponse,
+  BoxesCountReportResponse,
 } from "@/types/report";
 import { apiRequest } from "@/lib/api/types";
 
@@ -68,5 +69,33 @@ export const reportApi = {
     }`;
 
     return apiRequest<ComplainReportResponse>(endpoint);
+  },
+
+  getBoxesCountReports: async (
+    page?: number,
+    limit?: number,
+    startDate?: string,
+    endDate?: string,
+    search?: string
+  ): Promise<BoxesCountReportResponse> => {
+    const params = new URLSearchParams();
+
+    // Add pagination parameters
+    if (page) params.append("page", page.toString());
+    if (limit) params.append("limit", limit.toString());
+
+    // Add date range parameters
+    if (startDate) params.append("start_date", startDate);
+    if (endDate) params.append("end_date", endDate);
+
+    // Add search parameter if provided
+    if (search) params.append("search", search);
+
+    const queryString = params.toString();
+    const endpoint = `/reports/boxes-count${
+      queryString ? `?${queryString}` : ""
+    }`;
+
+    return apiRequest<BoxesCountReportResponse>(endpoint);
   },
 };
