@@ -1,15 +1,28 @@
 import { Store } from "@/types/store";
-import { ApiResponse, PaginatedResponse } from "@/types/auth";
+import { ApiResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
+
+interface StoresPaginatedResponse {
+  success: boolean;
+  message: string;
+  data: {
+    stores: Store[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+    };
+  };
+}
 
 export const storeApi = {
   getStores: async (
     page: number = 1,
     limit: number = 10,
     search?: string
-  ): Promise<PaginatedResponse<Store>> => {
+  ): Promise<StoresPaginatedResponse> => {
     const searchParam = search ? `&search=${encodeURIComponent(search)}` : "";
-    return apiRequest<PaginatedResponse<Store>>(
+    return apiRequest<StoresPaginatedResponse>(
       `/stores?page=${page}&limit=${limit}${searchParam}`
     );
   },

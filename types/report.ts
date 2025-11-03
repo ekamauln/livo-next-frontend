@@ -226,6 +226,18 @@ export interface ComplainReportResponse {
   };
 }
 
+export interface BoxesCountReportDetail {
+  tracking: string;
+  order_id: string;
+  box_name: string;
+  quantity: number;
+  user_id: number;
+  username: string;
+  full_name: string;
+  created_at: string;
+  source: string;
+}
+
 export interface BoxesCountReport {
   box_id: number;
   box_code: string;
@@ -233,6 +245,7 @@ export interface BoxesCountReport {
   total_count: number;
   ribbon_count: number;
   online_count: number;
+  details: BoxesCountReportDetail[];
 }
 
 export interface BoxesCountReportPagination {

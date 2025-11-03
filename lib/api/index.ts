@@ -16,6 +16,8 @@ export { returnApi } from "@/lib/api/returnApi";
 export { channelApi } from "@/lib/api/channelApi";
 export { storeApi } from "@/lib/api/storeApi";
 export { complainApi } from "@/lib/api/complainApi";
+export { reportApi } from "@/lib/api/reportApi";
+export { ribbonFlowApi } from "@/lib/api/ribbonFlowApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility

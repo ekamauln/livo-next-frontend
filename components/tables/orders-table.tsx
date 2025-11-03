@@ -58,6 +58,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { orderApi } from "@/lib/api/orderApi";
 import { OrderDialog } from "@/components/dialogs/order-dialog";
+import { OrderCreateDialog } from "../dialogs/order-create-dialog";
 
 // Status badge color mapping
 const getStatusBadgeStyle = (status: string) => {
@@ -605,6 +606,26 @@ export default function OrdersTable() {
         </div>
 
         <div className="flex justify-start items-center gap-2">
+          {/* Create Order Dialog */}
+          <OrderCreateDialog
+            onSuccess={() => {
+              // Refresh the data to show the new order
+              const params: OrdersQueryParams = {
+                page: pagination.page,
+                limit: pagination.limit,
+              };
+
+              if (dateRange?.from) {
+                params.start_date = format(dateRange.from, "yyyy-MM-dd");
+              }
+              if (dateRange?.to) {
+                params.end_date = format(dateRange.to, "yyyy-MM-dd");
+              }
+
+              fetchOrders(params, searchQuery);
+            }}
+          />
+
           {/* Pagination limit */}
           <div className="flex justify-start items-center gap-2">
             <span className="text-sm text-muted-foreground">Show:</span>

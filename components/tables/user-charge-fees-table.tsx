@@ -23,9 +23,9 @@ import {
   ChevronRight,
   Printer,
   ChevronDown,
-  ChevronUp,
   ChevronsUpDown,
   Check,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   Select,
@@ -68,6 +68,7 @@ import { ApiError } from "@/lib/api/types";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import React from "react";
+import ExcelJS from "exceljs";
 
 export default function UserChargeFeesTable() {
   const [data, setData] = useState<UserChargeFeeReport[]>([]);
@@ -321,6 +322,323 @@ export default function UserChargeFeesTable() {
     );
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setIsLoading(true);
+
+      // First, fetch all data (without pagination limits for the Excel)
+      const params: UserChargeFeeQueryParams = {};
+
+      if (dateRange?.from) {
+        params.start_date = format(dateRange.from, "yyyy-MM-dd");
+      }
+      if (dateRange?.to) {
+        params.end_date = format(dateRange.to, "yyyy-MM-dd");
+      }
+
+      // Fetch all data for Excel (not limited by table pagination)
+      let allReportData: UserChargeFeeReport[] = [];
+      let currentPage = 1;
+      let hasMoreData = true;
+
+      // Log the filter being applied
+      const userFilter = selectedUserId.trim() || undefined;
+
+      while (hasMoreData) {
+        const response = await reportApi.getUserChargeFeeReports(
+          currentPage,
+          100, // Use reasonable page size for API calls
+          params.start_date,
+          params.end_date,
+          userFilter
+        );
+
+        if (!response.success) {
+          throw new Error(
+            response.message || "Failed to fetch user charge fee reports"
+          );
+        }
+
+        const pageData = response.data.reports || [];
+        allReportData = [...allReportData, ...pageData];
+
+        // Check if we have more data to fetch
+        const totalPages = Math.ceil(response.data.pagination.total / 100);
+        hasMoreData = currentPage < totalPages;
+        currentPage++;
+      }
+
+      const reportData = allReportData;
+
+      if (reportData.length === 0) {
+        let message = "No user charge fee reports found";
+        const filters = [];
+
+        if (dateRange?.from) {
+          filters.push(`from: ${format(dateRange.from, "dd MMM yyyy")}`);
+        }
+        if (dateRange?.to) {
+          filters.push(`to: ${format(dateRange.to, "dd MMM yyyy")}`);
+        }
+        if (selectedUserId) {
+          const selectedUser = users.find(
+            (u) => u.id.toString() === selectedUserId
+          );
+          filters.push(
+            `user: ${selectedUser ? selectedUser.username : selectedUserId}`
+          );
+        }
+
+        if (filters.length > 0) {
+          message += ` for ${filters.join(", ")}`;
+        }
+
+        message +=
+          ". Try adjusting your filters or selecting a different date range.";
+
+        toast.warning(message);
+        return;
+      }
+
+      // Create a new workbook with ExcelJS
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "Livotech System";
+      workbook.created = new Date();
+
+      // Define border style
+      const borderStyle: Partial<ExcelJS.Borders> = {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      };
+
+      // SHEET 1: Filter Information
+      const sheet1 = workbook.addWorksheet("Information");
+
+      // Add title
+      sheet1.mergeCells("A1:B1");
+      const titleCell = sheet1.getCell("A1");
+      titleCell.value = "User Charge Fee Reports";
+      titleCell.font = { bold: true, size: 14 };
+      titleCell.alignment = { horizontal: "center", vertical: "middle" };
+      titleCell.border = borderStyle;
+
+      // Add filter information
+      let currentRow = 3;
+      if (dateRange?.from && dateRange?.to) {
+        const periodRow = sheet1.getRow(currentRow);
+        periodRow.getCell(1).value = "Periode";
+        periodRow.getCell(1).font = { bold: true };
+        periodRow.getCell(1).border = borderStyle;
+        periodRow.getCell(2).value = `${format(
+          dateRange.from,
+          "dd MMMM yyyy"
+        )} - ${format(dateRange.to, "dd MMMM yyyy")}`;
+        periodRow.getCell(2).border = borderStyle;
+        currentRow++;
+      }
+
+      // Add user filter information
+      const userFilterRow = sheet1.getRow(currentRow);
+      userFilterRow.getCell(1).value = "User Filter";
+      userFilterRow.getCell(1).font = { bold: true };
+      userFilterRow.getCell(1).border = borderStyle;
+      if (selectedUserId) {
+        const selectedUser = users.find(
+          (u) => u.id.toString() === selectedUserId
+        );
+        userFilterRow.getCell(2).value = selectedUser
+          ? selectedUser.full_name
+          : `User ID: ${selectedUserId}`;
+      } else {
+        userFilterRow.getCell(2).value = "All Users";
+      }
+      userFilterRow.getCell(2).border = borderStyle;
+      currentRow++;
+
+      const totalRow = sheet1.getRow(currentRow);
+      totalRow.getCell(1).value = "Total Records";
+      totalRow.getCell(1).font = { bold: true };
+      totalRow.getCell(1).border = borderStyle;
+      totalRow.getCell(2).value = reportData.length;
+      totalRow.getCell(2).border = borderStyle;
+      currentRow++;
+
+      const generatedRow = sheet1.getRow(currentRow);
+      generatedRow.getCell(1).value = "Generated";
+      generatedRow.getCell(1).font = { bold: true };
+      generatedRow.getCell(1).border = borderStyle;
+      generatedRow.getCell(2).value = format(new Date(), "dd MMMM yyyy - HH:mm");
+      generatedRow.getCell(2).border = borderStyle;
+      currentRow++;
+
+      const checkerRow = sheet1.getRow(currentRow);
+      checkerRow.getCell(1).value = "Checker";
+      checkerRow.getCell(1).font = { bold: true };
+      checkerRow.getCell(1).border = borderStyle;
+      checkerRow.getCell(2).value = "";
+      checkerRow.getCell(2).border = borderStyle;
+
+      // Set column widths for Sheet 1
+      sheet1.getColumn(1).width = 20;
+      sheet1.getColumn(2).width = 50;
+
+      // SHEET 2: Users Charged Fee Summary
+      const sheet2 = workbook.addWorksheet("Users Charged Fee");
+
+      // Add headers
+      const headers = [
+        "No",
+        "Username",
+        "Full Name",
+        "Total Complaints",
+        "Total Fee Charge",
+      ];
+      const headerRow = sheet2.addRow(headers);
+      headerRow.font = { bold: true };
+      headerRow.alignment = { horizontal: "center", vertical: "middle" };
+      headerRow.eachCell((cell) => {
+        cell.border = borderStyle;
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+      });
+
+      // Add data rows
+      reportData.forEach((item, index) => {
+        const dataRow = sheet2.addRow([
+          index + 1,
+          item.username,
+          item.full_name,
+          item.total_complaints,
+          `Rp. ${formatCurrency(item.total_fee_charge)}`,
+        ]);
+        dataRow.alignment = { horizontal: "center", vertical: "middle" };
+        dataRow.eachCell((cell) => {
+          cell.border = borderStyle;
+        });
+      });
+
+      // Set column widths for Sheet 2
+      sheet2.getColumn(1).width = 8; // No
+      sheet2.getColumn(2).width = 20; // Username
+      sheet2.getColumn(3).width = 25; // Full Name
+      sheet2.getColumn(4).width = 18; // Total Complaints
+      sheet2.getColumn(5).width = 20; // Total Fee Charge
+
+      // SHEET 3: Details Users Charged Fee
+      const allComplainDetails: Array<{
+        full_name: string;
+        order_id: string;
+        fee_charge: number;
+        updated_at: string;
+      }> = [];
+
+      reportData.forEach((userReport) => {
+        if (
+          userReport.complain_details &&
+          userReport.complain_details.length > 0
+        ) {
+          userReport.complain_details.forEach((complainDetail) => {
+            allComplainDetails.push({
+              full_name: userReport.full_name,
+              order_id: complainDetail.order_ginee_id,
+              fee_charge: complainDetail.fee_charge,
+              updated_at: complainDetail.complain_updated_at,
+            });
+          });
+        }
+      });
+
+      if (allComplainDetails.length > 0) {
+        const sheet3 = workbook.addWorksheet("Details Users Charged Fee");
+
+        // Add headers
+        const detailHeaders = [
+          "No",
+          "Full Name",
+          "Order ID",
+          "Fee Charge",
+          "Updated",
+        ];
+        const detailHeaderRow = sheet3.addRow(detailHeaders);
+        detailHeaderRow.font = { bold: true };
+        detailHeaderRow.alignment = { horizontal: "center", vertical: "middle" };
+        detailHeaderRow.eachCell((cell) => {
+          cell.border = borderStyle;
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFE0E0E0" },
+          };
+        });
+
+        // Add detail rows
+        allComplainDetails.forEach((detail, index) => {
+          const detailRow = sheet3.addRow([
+            index + 1,
+            detail.full_name,
+            detail.order_id,
+            `Rp. ${formatCurrency(detail.fee_charge)}`,
+            format(new Date(detail.updated_at), "dd MMMM yyyy"),
+          ]);
+          detailRow.alignment = { horizontal: "center", vertical: "middle" };
+          detailRow.eachCell((cell) => {
+            cell.border = borderStyle;
+          });
+        });
+
+        // Set column widths for Sheet 3
+        sheet3.getColumn(1).width = 8; // No
+        sheet3.getColumn(2).width = 25; // Full Name
+        sheet3.getColumn(3).width = 25; // Order ID
+        sheet3.getColumn(4).width = 20; // Fee Charge
+        sheet3.getColumn(5).width = 20; // Updated
+      }
+
+      // Generate and download Excel file
+      const fileName = `User_Charge_Fee_Report_${format(
+        new Date(),
+        "yyyyMMdd_HHmmss"
+      )}.xlsx`;
+
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      link.click();
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        `Excel file exported successfully with ${reportData.length} records`
+      );
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+
+      let errorMessage = "Failed to export to Excel. Please try again.";
+      if (error instanceof ApiError) {
+        if (error.status === 401) {
+          errorMessage = "Session expired. Please login again.";
+        } else if (error.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.status === 0) {
+          errorMessage = "Network error. Please check your connection.";
+        }
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleGenerateAndPrintReport = async () => {
     try {
       setIsLoading(true);
@@ -488,6 +806,13 @@ export default function UserChargeFeesTable() {
         });
       }
 
+      // Add "Users Charged Fee" title before main table
+      const mainTableStartY =
+        filterData.length > 0 ? 25 + filterData.length * 8 + 25 : 45;
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text("Users Charged Fee", 14, mainTableStartY - 5);
+
       // Add main table
       autoTable(doc, {
         head: [
@@ -506,7 +831,7 @@ export default function UserChargeFeesTable() {
           item.total_complaints,
           `Rp. ${formatCurrency(item.total_fee_charge)}`,
         ]),
-        startY: filterData.length > 0 ? 25 + filterData.length * 8 + 10 : 45,
+        startY: mainTableStartY,
         theme: "grid",
         styles: {
           fontSize: 10,
@@ -567,6 +892,11 @@ export default function UserChargeFeesTable() {
 
       // Add complain details table if there are any details
       if (allComplainDetails.length > 0) {
+        // Add "Details Users Charged Fee" title before details table
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("Details Users Charged Fee", 14, detailYPosition + 20);
+
         autoTable(doc, {
           head: [["No", "Full Name", "Order ID", "Fee Charge", "Updated"]],
           body: allComplainDetails.map((detail, index) => [
@@ -576,7 +906,7 @@ export default function UserChargeFeesTable() {
             `Rp. ${formatCurrency(detail.fee_charge)}`,
             format(new Date(detail.updated_at), "dd MMMM yyyy"),
           ]),
-          startY: detailYPosition + 10,
+          startY: detailYPosition + 25,
           theme: "grid",
           styles: {
             fontSize: 9,
@@ -660,9 +990,9 @@ export default function UserChargeFeesTable() {
               className="h-8 w-8 p-0"
             >
               {isExpanded ? (
-                <ChevronUp className="h-4 w-4" />
-              ) : (
                 <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
               )}
             </Button>
           </div>
@@ -871,7 +1201,28 @@ export default function UserChargeFeesTable() {
         </div>
 
         <div className="flex justify-start gap-2 items-center">
-          {/* Print Boxes Count Reports */}
+          {/* Export to Excel */}
+          <div className="flex justify-start items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={handleExportToExcel}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export to Excel
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Print User Charge Fee Reports */}
           <div className="flex justify-start items-center gap-2">
             <Button
               className="ml-auto"
