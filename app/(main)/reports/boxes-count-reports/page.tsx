@@ -15,9 +15,7 @@ import BoxesCountTable from "@/components/tables/boxes-count-table";
 
 export default function MbOnlines() {
   return (
-    <ProtectedRoute
-      requiredRoles={["superadmin", "admin", "coordinator", "mb-online"]}
-    >
+    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

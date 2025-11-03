@@ -15,9 +15,7 @@ import PcOnlinesTable from "@/components/tables/pc-onlines-table";
 
 export default function PcOnlines() {
   return (
-    <ProtectedRoute
-      requiredRoles={["superadmin", "admin", "coordinator", "pc-online"]}
-    >
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator", "pc-online"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

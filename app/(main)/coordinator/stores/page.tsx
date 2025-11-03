@@ -15,7 +15,7 @@ import StoresTable from "@/components/tables/stores-table";
 
 export default function Stores() {
   return (
-    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

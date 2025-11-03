@@ -15,7 +15,7 @@ import ProductsTable from "@/components/tables/products-table";
 
 export default function Products() {
   return (
-    <ProtectedRoute requiredRoles={["superadmin", "admin", "coordinator"]}>
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

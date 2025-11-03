@@ -15,9 +15,7 @@ import MbOnlinesTable from "@/components/tables/mb-onlines-table";
 
 export default function MbOnlines() {
   return (
-    <ProtectedRoute
-      requiredRoles={["superadmin", "admin", "coordinator", "mb-online"]}
-    >
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator", "mb-online"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

@@ -15,9 +15,7 @@ import UserChargeFeesTable from "@/components/tables/user-charge-fees-table";
 
 export default function UserChargeFeesReports() {
   return (
-    <ProtectedRoute
-      requiredRoles={["superadmin", "admin", "coordinator", "mb-online"]}
-    >
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">

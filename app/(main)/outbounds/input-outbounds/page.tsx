@@ -15,9 +15,7 @@ import OutboundsTable from "@/components/tables/outbounds-table";
 
 export default function Outbounds() {
   return (
-    <ProtectedRoute
-      requiredRoles={["superadmin", "admin", "coordinator", "outbound"]}
-    >
+    <ProtectedRoute requiredRoles={["superadmin", "coordinator", "outbound"]}>
       <div>
         <header className="flex h-16 items-center gap-2">
           <div className="flex items-center gap-2 px-4">
