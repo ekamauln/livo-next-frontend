@@ -239,13 +239,7 @@ export default function AppNavbar() {
                   Online
                 </MenubarTrigger>
                 <MenubarContent>
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                    "mb-online",
-                  ]) && (
+                  {hasAnyRole(["superadmin", "coordinator", "mb-online"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/mb-onlines">
                         <ShoppingBag className="h-4 w-4" />
@@ -253,13 +247,7 @@ export default function AppNavbar() {
                       </Link>
                     </MenubarItem>
                   )}
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                    "qc-online",
-                  ]) && (
+                  {hasAnyRole(["superadmin", "coordinator", "qc-online"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/qc-onlines">
                         <ShoppingBag className="h-4 w-4" />
@@ -267,13 +255,7 @@ export default function AppNavbar() {
                       </Link>
                     </MenubarItem>
                   )}
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                    "packing",
-                  ]) && (
+                  {hasAnyRole(["superadmin", "coordinator", "packing"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/pc-onlines">
                         <ShoppingBag className="h-4 w-4" />
@@ -281,13 +263,22 @@ export default function AppNavbar() {
                       </Link>
                     </MenubarItem>
                   )}
-                  <MenubarSeparator />
-                  <MenubarItem asChild className="cursor-pointer">
-                    <Link href="/onlines/online-flows">
-                      <ShoppingBag className="h-4 w-4" />
-                      Online Flows
-                    </Link>
-                  </MenubarItem>
+                  {hasAnyRole(["superadmin", "coordinator"]) && (
+                    <MenubarSeparator />
+                  )}
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/onlines/online-flows">
+                        <ShoppingBag className="h-4 w-4" />
+                        Online Flows
+                      </Link>
+                    </MenubarItem>
+                  )}
                 </MenubarContent>
               </MenubarMenu>
             )}
@@ -305,13 +296,7 @@ export default function AppNavbar() {
                   Outbounds
                 </MenubarTrigger>
                 <MenubarContent>
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                    "outbound",
-                  ]) && (
+                  {hasAnyRole(["superadmin", "coordinator", "outbound"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/outbounds/input-outbounds">
                         <ShoppingBag className="h-4 w-4" />
@@ -319,7 +304,9 @@ export default function AppNavbar() {
                       </Link>
                     </MenubarItem>
                   )}
-                  <MenubarSeparator />
+                  {hasAnyRole(["superadmin", "coordinator", "outbound"]) && (
+                    <MenubarSeparator />
+                  )}
                   {hasAnyRole([
                     "superadmin",
                     "coordinator",
@@ -350,62 +337,52 @@ export default function AppNavbar() {
                   Complains
                 </MenubarTrigger>
                 <MenubarContent>
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                  ]) && (
-                    <>
-                      <MenubarItem asChild className="cursor-pointer">
-                        <Link href="/complains/input-complains">
-                          <ShoppingBag className="h-4 w-4" />
-                          Input Complains
-                        </Link>
-                      </MenubarItem>
-                      <MenubarItem asChild className="cursor-pointer">
-                        <Link href="/complains/input-returns">
-                          <ShoppingBag className="h-4 w-4" />
-                          Input Returns
-                        </Link>
-                      </MenubarItem>
-                      <MenubarSeparator />
-                    </>
-                  )}
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/complains/input-complains">
+                      <ShoppingBag className="h-4 w-4" />
+                      Input Complains
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/complains/input-returns">
+                      <ShoppingBag className="h-4 w-4" />
+                      Input Returns
+                    </Link>
+                  </MenubarItem>
+                  <MenubarSeparator />
+
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/data-complains">
                       <ShoppingBag className="h-4 w-4" />
                       Data Complains
                     </Link>
                   </MenubarItem>
-                  {hasAnyRole([
-                    "superadmin",
-                    "coordinator",
-                    "admin",
-                    "admin-retur",
-                  ]) && (
-                    <>
-                      <MenubarSeparator />
-                      <MenubarItem asChild className="cursor-pointer">
-                        <Link href="/complains/handout-complains">
-                          <ShoppingBag className="h-4 w-4" />
-                          Handout Complains
-                        </Link>
-                      </MenubarItem>
-                      <MenubarItem asChild className="cursor-pointer">
-                        <Link href="/complains/handout-returns">
-                          <ShoppingBag className="h-4 w-4" />
-                          Handout Returns
-                        </Link>
-                      </MenubarItem>
-                    </>
-                  )}
+
+                  <MenubarSeparator />
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/complains/handout-complains">
+                      <ShoppingBag className="h-4 w-4" />
+                      Handout Complains
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/complains/handout-returns">
+                      <ShoppingBag className="h-4 w-4" />
+                      Handout Returns
+                    </Link>
+                  </MenubarItem>
                 </MenubarContent>
               </MenubarMenu>
             )}
 
             {/* Reports menu - visible to superadmin, coordinator, admin, finance */}
-            {hasAnyRole(["superadmin", "coordinator", "admin", "finance"]) && (
+            {hasAnyRole([
+              "superadmin",
+              "coordinator",
+              "admin",
+              "admin-retur",
+              "finance",
+            ]) && (
               <MenubarMenu>
                 <MenubarTrigger className="cursor-pointer">
                   Reports
