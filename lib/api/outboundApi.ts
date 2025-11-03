@@ -6,6 +6,16 @@ import {
 import { ApiResponse, PaginatedResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
 
+interface OutboundChartData {
+  month: string;
+  year: number;
+  daily_counts: Array<{
+    date: string;
+    count: number;
+  }> | null;
+  total_count: number;
+}
+
 export const outboundApi = {
   getOutbounds: async (
     page: number = 1,
@@ -45,5 +55,9 @@ export const outboundApi = {
     return apiRequest<ApiResponse<Outbound>>(`/outbounds/${id}`, {
       method: "DELETE",
     });
+  },
+
+  getOutboundChart: async (): Promise<ApiResponse<OutboundChartData>> => {
+    return apiRequest<ApiResponse<OutboundChartData>>("/outbounds/chart");
   },
 };

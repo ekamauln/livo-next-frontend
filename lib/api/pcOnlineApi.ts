@@ -2,6 +2,13 @@ import { PcOnline, CreatePcOnlineRequest } from "@/types/pc-online";
 import { ApiResponse, PaginatedResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
 
+interface PcOnlineChartData {
+  month: string;
+  year: number;
+  daily_counts: Array<{ date: string; count: number }> | null;
+  total_count: number;
+}
+
 export const pcOnlineApi = {
   getPcOnlines: async (
     page: number = 1,
@@ -25,5 +32,9 @@ export const pcOnlineApi = {
       method: "POST",
       body: JSON.stringify(pcOnlineData),
     });
+  },
+
+  getPcOnlineChart: async (): Promise<ApiResponse<PcOnlineChartData>> => {
+    return apiRequest<ApiResponse<PcOnlineChartData>>("/pc-onlines/chart");
   },
 };

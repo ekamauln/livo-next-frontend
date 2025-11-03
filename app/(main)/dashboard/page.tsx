@@ -13,6 +13,15 @@ import { useAuth } from "@/contexts/auth-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Highlighter } from "@/components/ui/highlighter";
+import { UserChargeFeeWidget } from "@/components/widgets/user-charge-fee-widget";
+import { MbOnlinesChartWidget } from "@/components/widgets/mb-onlines-chart-widget";
+import { OutboundsChartWidget } from "@/components/widgets/outbounds-chart-widget";
+import { QcOnlinesChartWidget } from "@/components/widgets/qc-onlines-chart-widget";
+import { PcOnlinesChartWidget } from "@/components/widgets/pc-onlines-chart-widget";
+import { MbRibbonsChartWidget } from "@/components/widgets/mb-ribbons-chart-widget";
+import { QcRibbonsChartWidget } from "@/components/widgets/qc-ribbons-chart-widget";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { format } from "date-fns/format";
 
 // Role-specific badge styling
 const getRoleBadgeStyle = (roleName: string) => {
@@ -76,43 +85,65 @@ export default function Page() {
         </div>
 
         <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-2">
+            {/* User Information */}
             <Card>
               <CardHeader>
                 <CardTitle>User Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Username
-                    </p>
-                    <p className="text-sm">{user?.username}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Email
-                    </p>
-                    <p className="text-sm">{user?.email}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Full Name
-                    </p>
-                    <p className="text-sm">{user?.full_name}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </p>
-                    <Badge variant={user?.is_active ? "default" : "secondary"}>
-                      {user?.is_active ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
+                <div className="border rounded-md gap-4">
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="w-1/4">ID</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          {user?.id}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="w-1/4">Username</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          {user?.username}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="w-1/4">Email</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          {user?.email}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="w-1/4">Full Name</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          {user?.full_name}
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="w-1/4">Status</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          <Badge
+                            variant={user?.is_active ? "default" : "secondary"}
+                          >
+                            {user?.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                      <TableRow>
+                        <TableCell className="w-1/4">Created</TableCell>
+                        <TableCell className="w-3/4 text-wrap">
+                          {user?.created_at
+                            ? format(user.created_at, "dd MMMM yyyy - HH:mm")
+                            : "-"}
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
               </CardContent>
             </Card>
 
+            {/* Assigned Roles */}
             <Card>
               <CardHeader>
                 <CardTitle>Assigned Roles</CardTitle>
@@ -142,6 +173,48 @@ export default function Page() {
               </CardContent>
             </Card>
           </div>
+
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            {/* MB Onlines Chart Widget */}
+            <div>
+              <MbOnlinesChartWidget />
+            </div>
+
+            {/* QC Onlines Chart Widget */}
+            <div>
+              <QcOnlinesChartWidget />
+            </div>
+
+            {/* PC Onlines Chart Widget */}
+            <div>
+              <PcOnlinesChartWidget />
+            </div>
+          </div>
+
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            {/* MB Ribbons Chart Widget */}
+            <div>
+              <MbRibbonsChartWidget />
+            </div>
+
+            {/* QC Ribbons Chart Widget */}
+            <div>
+              <QcRibbonsChartWidget />
+            </div>
+
+            {/* Outbounds Chart Widget */}
+            <div>
+              <OutboundsChartWidget />
+            </div>
+          </div>
+
+          {/* User Charge Fee Widget */}
+          {user?.id && (
+            <div>
+              <UserChargeFeeWidget userId={user.id} />
+            </div>
+          )}
+
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>
       </div>

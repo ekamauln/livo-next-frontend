@@ -64,7 +64,7 @@ export default function AppNavbar() {
   const { theme, setTheme } = useTheme();
   const { startTransition } = useThemeTransition();
   const [mounted, setMounted] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, hasAnyRole } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -104,213 +104,328 @@ export default function AppNavbar() {
         <Separator orientation="vertical" className="mr-2 h-4" />
         <div>
           <Menubar>
-            {/* Admin menus */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                Coordinator Menu
-              </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/boxes">
-                    <PackageOpen className="h-4 w-4" />
-                    Boxes
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/channels">
-                    <Tv className="h-4 w-4" />
-                    Channels
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/expeditions">
-                    <Truck className="h-4 w-4" />
-                    Expeditions
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/products">
-                    <Package className="h-4 w-4" />
-                    Products
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/stores">
-                    <Store className="h-4 w-4" />
-                    Stores
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/coordinator/users">
-                    <SquareUser className="h-4 w-4" />
-                    Users
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Coordinator Menu - visible to superadmin, coordinator, admin */}
+            {hasAnyRole(["superadmin", "coordinator"]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Coordinator Menu
+                </MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/boxes">
+                      <PackageOpen className="h-4 w-4" />
+                      Boxes
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/channels">
+                      <Tv className="h-4 w-4" />
+                      Channels
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/expeditions">
+                      <Truck className="h-4 w-4" />
+                      Expeditions
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/products">
+                      <Package className="h-4 w-4" />
+                      Products
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/stores">
+                      <Store className="h-4 w-4" />
+                      Stores
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/coordinator/users">
+                      <SquareUser className="h-4 w-4" />
+                      Users
+                    </Link>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Orders menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">Orders</MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/orders/orders">
-                    <ScrollText className="h-4 w-4" />
-                    Orders
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/orders/orders-import">
-                    <FolderUp className="h-4 w-4" />
-                    Orders Import
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Orders menu - visible to superadmin, coordinator, admin, picker */}
+            {hasAnyRole(["superadmin", "coordinator", "admin"]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Orders
+                </MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/orders/orders">
+                      <ScrollText className="h-4 w-4" />
+                      Orders
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/orders/orders-import">
+                      <FolderUp className="h-4 w-4" />
+                      Orders Import
+                    </Link>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Ribbons menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                Ribbons
-              </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/ribbons/mb-ribbons">
-                    <ShoppingBag className="h-4 w-4" />
-                    MB Ribbons
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/ribbons/qc-ribbons">
-                    <ShoppingBag className="h-4 w-4" />
-                    QC Ribbons
-                  </Link>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/ribbons/ribbon-flows">
-                    <ShoppingBag className="h-4 w-4" />
-                    Ribbon Flows
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Ribbons menu - visible to superadmin, coordinator, admin, mb-ribbon, qc-ribbon */}
+            {hasAnyRole([
+              "superadmin",
+              "coordinator",
+              "admin",
+              "admin-retur",
+              "mb-ribbon",
+              "qc-ribbon",
+            ]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Ribbons
+                </MenubarTrigger>
+                <MenubarContent>
+                  {hasAnyRole(["superadmin", "coordinator", "mb-ribbon"]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/ribbons/mb-ribbons">
+                        <ShoppingBag className="h-4 w-4" />
+                        MB Ribbons
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  {hasAnyRole(["superadmin", "coordinator", "qc-ribbon"]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/ribbons/qc-ribbons">
+                        <ShoppingBag className="h-4 w-4" />
+                        QC Ribbons
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  {hasAnyRole(["superadmin", "coordinator"]) && (
+                    <MenubarSeparator />
+                  )}
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/ribbons/ribbon-flows">
+                        <ShoppingBag className="h-4 w-4" />
+                        Ribbon Flows
+                      </Link>
+                    </MenubarItem>
+                  )}
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Onlines menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">Online</MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/onlines/mb-onlines">
-                    <ShoppingBag className="h-4 w-4" />
-                    MB Onlines
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/onlines/qc-onlines">
-                    <ShoppingBag className="h-4 w-4" />
-                    QC Onlines
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/onlines/pc-onlines">
-                    <ShoppingBag className="h-4 w-4" />
-                    PC Onlines
-                  </Link>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/onlines/online-flows">
-                    <ShoppingBag className="h-4 w-4" />
-                    Online Flows
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Onlines menu - visible to superadmin, coordinator, admin, mb-online, qc-online, packing */}
+            {hasAnyRole([
+              "superadmin",
+              "coordinator",
+              "admin",
+              "admin-retur",
+              "mb-online",
+              "qc-online",
+              "packing",
+            ]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Online
+                </MenubarTrigger>
+                <MenubarContent>
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                    "mb-online",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/onlines/mb-onlines">
+                        <ShoppingBag className="h-4 w-4" />
+                        MB Onlines
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                    "qc-online",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/onlines/qc-onlines">
+                        <ShoppingBag className="h-4 w-4" />
+                        QC Onlines
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                    "packing",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/onlines/pc-onlines">
+                        <ShoppingBag className="h-4 w-4" />
+                        PC Onlines
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  <MenubarSeparator />
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/onlines/online-flows">
+                      <ShoppingBag className="h-4 w-4" />
+                      Online Flows
+                    </Link>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Outbounds menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                Outbounds
-              </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/outbounds/input-outbounds">
-                    <ShoppingBag className="h-4 w-4" />
-                    Input Outbounds
-                  </Link>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/outbounds/handout-outbounds">
-                    <ShoppingBag className="h-4 w-4" />
-                    Handout Outbounds
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Outbounds menu - visible to superadmin, coordinator, admin, outbound */}
+            {hasAnyRole([
+              "superadmin",
+              "coordinator",
+              "admin",
+              "admin-retur",
+              "outbound",
+            ]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Outbounds
+                </MenubarTrigger>
+                <MenubarContent>
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                    "outbound",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/outbounds/input-outbounds">
+                        <ShoppingBag className="h-4 w-4" />
+                        Input Outbounds
+                      </Link>
+                    </MenubarItem>
+                  )}
+                  <MenubarSeparator />
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                  ]) && (
+                    <MenubarItem asChild className="cursor-pointer">
+                      <Link href="/outbounds/handout-outbounds">
+                        <ShoppingBag className="h-4 w-4" />
+                        Handout Outbounds
+                      </Link>
+                    </MenubarItem>
+                  )}
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Complains menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                Complains
-              </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/input-complains">
-                    <ShoppingBag className="h-4 w-4" />
-                    Input Complains
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/input-returns">
-                    <ShoppingBag className="h-4 w-4" />
-                    Input Returns
-                  </Link>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/data-complains">
-                    <ShoppingBag className="h-4 w-4" />
-                    Data Complains
-                  </Link>
-                </MenubarItem>
-                <MenubarSeparator />
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/handout-complains">
-                    <ShoppingBag className="h-4 w-4" />
-                    Handout Complains
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/complains/handout-returns">
-                    <ShoppingBag className="h-4 w-4" />
-                    Handout Returns
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Complains menu - visible to all roles except guest */}
+            {hasAnyRole([
+              "superadmin",
+              "coordinator",
+              "admin",
+              "admin-retur",
+              "finance",
+            ]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Complains
+                </MenubarTrigger>
+                <MenubarContent>
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                  ]) && (
+                    <>
+                      <MenubarItem asChild className="cursor-pointer">
+                        <Link href="/complains/input-complains">
+                          <ShoppingBag className="h-4 w-4" />
+                          Input Complains
+                        </Link>
+                      </MenubarItem>
+                      <MenubarItem asChild className="cursor-pointer">
+                        <Link href="/complains/input-returns">
+                          <ShoppingBag className="h-4 w-4" />
+                          Input Returns
+                        </Link>
+                      </MenubarItem>
+                      <MenubarSeparator />
+                    </>
+                  )}
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/complains/data-complains">
+                      <ShoppingBag className="h-4 w-4" />
+                      Data Complains
+                    </Link>
+                  </MenubarItem>
+                  {hasAnyRole([
+                    "superadmin",
+                    "coordinator",
+                    "admin",
+                    "admin-retur",
+                  ]) && (
+                    <>
+                      <MenubarSeparator />
+                      <MenubarItem asChild className="cursor-pointer">
+                        <Link href="/complains/handout-complains">
+                          <ShoppingBag className="h-4 w-4" />
+                          Handout Complains
+                        </Link>
+                      </MenubarItem>
+                      <MenubarItem asChild className="cursor-pointer">
+                        <Link href="/complains/handout-returns">
+                          <ShoppingBag className="h-4 w-4" />
+                          Handout Returns
+                        </Link>
+                      </MenubarItem>
+                    </>
+                  )}
+                </MenubarContent>
+              </MenubarMenu>
+            )}
 
-            {/* Reports menu */}
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer">
-                Reports
-              </MenubarTrigger>
-              <MenubarContent>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/reports/boxes-count-reports">
-                    <ShoppingBag className="h-4 w-4" />
-                    Boxes Count Reports
-                  </Link>
-                </MenubarItem>
-                <MenubarItem asChild className="cursor-pointer">
-                  <Link href="/reports/user-charge-fee-reports">
-                    <ShoppingBag className="h-4 w-4" />
-                    User Charge Fee Reports
-                  </Link>
-                </MenubarItem>
-              </MenubarContent>
-            </MenubarMenu>
+            {/* Reports menu - visible to superadmin, coordinator, admin, finance */}
+            {hasAnyRole(["superadmin", "coordinator", "admin", "finance"]) && (
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer">
+                  Reports
+                </MenubarTrigger>
+                <MenubarContent>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/reports/boxes-count-reports">
+                      <ShoppingBag className="h-4 w-4" />
+                      Boxes Count Reports
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/reports/user-charge-fee-reports">
+                      <ShoppingBag className="h-4 w-4" />
+                      User Charge Fee Reports
+                    </Link>
+                  </MenubarItem>
+                </MenubarContent>
+              </MenubarMenu>
+            )}
           </Menubar>
         </div>
       </div>

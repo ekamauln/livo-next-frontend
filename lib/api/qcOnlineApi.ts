@@ -2,6 +2,13 @@ import { QcOnline, CreateQcOnlineRequest } from "@/types/qc-online";
 import { ApiResponse, PaginatedResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
 
+interface QcOnlineChartData {
+  month: string;
+  year: number;
+  daily_counts: Array<{ date: string; count: number }> | null;
+  total_count: number;
+}
+
 export const qcOnlineApi = {
   getQcOnlines: async (
     page: number = 1,
@@ -25,5 +32,9 @@ export const qcOnlineApi = {
       method: "POST",
       body: JSON.stringify(qcOnlineData),
     });
+  },
+
+  getQcOnlineChart: async (): Promise<ApiResponse<QcOnlineChartData>> => {
+    return apiRequest<ApiResponse<QcOnlineChartData>>("/qc-onlines/chart");
   },
 };

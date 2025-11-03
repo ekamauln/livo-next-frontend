@@ -2,6 +2,16 @@ import { MbOnline } from "@/types/mb-online";
 import { ApiResponse, PaginatedResponse } from "@/types/auth";
 import { apiRequest } from "@/lib/api/types";
 
+interface MbOnlineChartData {
+  month: string;
+  year: number;
+  daily_counts: Array<{
+    date: string;
+    count: number;
+  }> | null;
+  total_count: number;
+}
+
 export const mbOnlineApi = {
   getMbOnlines: async (
     page: number = 1,
@@ -25,5 +35,9 @@ export const mbOnlineApi = {
       method: "POST",
       body: JSON.stringify(mbOnlineData),
     });
+  },
+
+  getMbOnlineChart: async (): Promise<ApiResponse<MbOnlineChartData>> => {
+    return apiRequest<ApiResponse<MbOnlineChartData>>("/mb-onlines/chart");
   },
 };
