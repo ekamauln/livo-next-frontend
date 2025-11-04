@@ -154,9 +154,15 @@ export function ReturnDialog({
       } catch (error) {
         console.error("Error fetching return details:", error);
         if (error instanceof ApiError) {
-          toast.error("Failed to fetch return details", {
-            description: error.message,
-          });
+          if (error.status === 400) {
+            toast.error("Invalid request", {
+              description: error.message || "The request data is invalid. Please check and try again.",
+            });
+          } else {
+            toast.error("Failed to fetch return details", {
+              description: error.message,
+            });
+          }
         } else {
           toast.error("Failed to fetch return details", {
             description:
@@ -218,9 +224,15 @@ export function ReturnDialog({
     } catch (error) {
       console.error("Error updating return data:", error);
       if (error instanceof ApiError) {
-        toast.error("Failed to update return data", {
-          description: error.message,
-        });
+        if (error.status === 400) {
+          toast.error("Invalid data", {
+            description: error.message || "The submitted data is invalid. Please check all fields and try again.",
+          });
+        } else {
+          toast.error("Failed to update return data", {
+            description: error.message,
+          });
+        }
       } else {
         toast.error("Failed to update return data", {
           description:
@@ -280,9 +292,15 @@ export function ReturnDialog({
     } catch (error) {
       console.error("Error updating return admin data:", error);
       if (error instanceof ApiError) {
-        toast.error("Failed to update return admin data", {
-          description: error.message,
-        });
+        if (error.status === 400) {
+          toast.error("Invalid admin data", {
+            description: error.message || "The submitted admin data is invalid. Please check all fields and try again.",
+          });
+        } else {
+          toast.error("Failed to update return admin data", {
+            description: error.message,
+          });
+        }
       } else {
         toast.error("Failed to update return admin data", {
           description:

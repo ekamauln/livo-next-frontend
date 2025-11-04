@@ -162,9 +162,31 @@ axiosInstance.interceptors.response.use(
 
     // Handle other errors
     if (error.response) {
-      const errorMessage =
-        (error.response.data as { message?: string })?.message ||
-        "Request failed";
+      // Try to extract error message from various possible response structures
+      const responseData = error.response.data as {
+        success?: boolean;
+        message?: string;
+        error?: string;
+        errors?: string[] | Record<string, string[]>;
+      };
+      let errorMessage = "Request failed";
+      
+      if (typeof responseData === 'string') {
+        errorMessage = responseData as string;
+      } else if (responseData?.error) {
+        // Prioritize 'error' field as it often contains more detailed information
+        errorMessage = responseData.error;
+      } else if (responseData?.message) {
+        errorMessage = responseData.message;
+      } else if (responseData?.errors) {
+        // Handle validation errors (array or object)
+        if (Array.isArray(responseData.errors)) {
+          errorMessage = responseData.errors.join(', ');
+        } else if (typeof responseData.errors === 'object') {
+          errorMessage = Object.values(responseData.errors).flat().join(', ');
+        }
+      }
+      
       throw new ApiError(error.response.status, errorMessage);
     } else if (error.request) {
       throw new ApiError(0, "Network error");

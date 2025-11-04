@@ -43,6 +43,7 @@ import { Store } from "@/types/store";
 import { channelApi } from "@/lib/api/channelApi";
 import { storeApi } from "@/lib/api/storeApi";
 import { returnApi } from "@/lib/api/returnApi";
+import { ApiError } from "@/lib/api/types";
 import { Separator } from "@/components/ui/separator";
 
 // Zod form schema
@@ -142,8 +143,23 @@ export function ReturnCreateDialog({
         returnBaseCreateForm.reset();
         onOpenChange(false);
       }
-    } catch {
-      toast.error("Failed to create return. Please try again.");
+    } catch (error) {
+      console.error("Error creating return:", error);
+      if (error instanceof ApiError) {
+        if (error.status === 400) {
+          toast.error("Invalid data", {
+            description: error.message || "The submitted data is invalid. Please check all fields and try again.",
+          });
+        } else {
+          toast.error("Failed to create return", {
+            description: error.message || "Please try again.",
+          });
+        }
+      } else {
+        toast.error("Failed to create return", {
+          description: error instanceof Error ? error.message : "Please try again.",
+        });
+      }
     } finally {
       setIsLoading(false);
     }
