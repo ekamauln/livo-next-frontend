@@ -223,7 +223,9 @@ export default function OnlineFlowsTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("tracking")}
+        </div>
       ),
     },
     {
@@ -234,7 +236,7 @@ export default function OnlineFlowsTable() {
       cell: ({ row }) => {
         const onlineFlow = row.original;
         return (
-          <div className="font-mono text-sm">
+          <div className="font-mono text-sm text-center">
             {onlineFlow.order.order_ginee_id}
           </div>
         );

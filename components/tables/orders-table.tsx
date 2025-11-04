@@ -30,6 +30,7 @@ import {
   MoreHorizontal,
   Eye,
   Edit,
+  Plus,
 } from "lucide-react";
 import Image from "next/image";
 import {
@@ -58,7 +59,7 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { orderApi } from "@/lib/api/orderApi";
 import { OrderDialog } from "@/components/dialogs/order-dialog";
-import { OrderCreateDialog } from "../dialogs/order-create-dialog";
+import { OrderCreateDialog } from "@/components/dialogs/order-create-dialog";
 
 // Status badge color mapping
 const getStatusBadgeStyle = (status: string) => {
@@ -223,6 +224,7 @@ export default function OrdersTable() {
   const [orderDialogTab, setOrderDialogTab] = useState<
     "details" | "edit" | "add"
   >("details");
+  const [createOrderDialogOpen, setCreateOrderDialogOpen] = useState(false);
 
   // Toggle row expansion
   const toggleRowExpansion = (rowId: number) => {
@@ -382,7 +384,9 @@ export default function OrdersTable() {
         <div className="text-sm text-center font-semibold">Order ID</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("order_id")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("order_id")}
+        </div>
       ),
     },
     {
@@ -391,7 +395,7 @@ export default function OrdersTable() {
         <div className="text-sm text-center font-semibold">Status</div>
       ),
       cell: ({ row }) => (
-        <div className="text-center text-sm">
+        <div className="flex justify-center items-center flex-wrap text-center text-sm">
           <Badge
             variant="default"
             className={getStatusBadgeStyle(row.getValue("status"))}
@@ -407,7 +411,7 @@ export default function OrdersTable() {
         <div className="text-sm text-center font-semibold">Store</div>
       ),
       cell: ({ row }) => (
-        <div className="max-w-32 truncate">
+        <div className="max-w-32 truncate text-center">
           {row.getValue("store") || "N/A"}
         </div>
       ),
@@ -430,7 +434,7 @@ export default function OrdersTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-xs">
+        <div className="font-mono text-sm text-center">
           {row.getValue("tracking") || "N/A"}
         </div>
       ),
@@ -606,25 +610,18 @@ export default function OrdersTable() {
         </div>
 
         <div className="flex justify-start items-center gap-2">
-          {/* Create Order Dialog */}
-          <OrderCreateDialog
-            onSuccess={() => {
-              // Refresh the data to show the new order
-              const params: OrdersQueryParams = {
-                page: pagination.page,
-                limit: pagination.limit,
-              };
-
-              if (dateRange?.from) {
-                params.start_date = format(dateRange.from, "yyyy-MM-dd");
-              }
-              if (dateRange?.to) {
-                params.end_date = format(dateRange.to, "yyyy-MM-dd");
-              }
-
-              fetchOrders(params, searchQuery);
-            }}
-          />
+          {/* Create Order Button */}
+          <div className="flex justify-start items-center gap-2">
+            <Button
+              variant="default"
+              className="cursor-pointer rounded-md"
+              onClick={() => setCreateOrderDialogOpen(true)}
+            >
+              <div className="flex items-center gap-2 justify-center">
+                <Plus className="w-4 h-4" /> <span>Add Order</span>
+              </div>
+            </Button>
+          </div>
 
           {/* Pagination limit */}
           <div className="flex justify-start items-center gap-2">
@@ -822,6 +819,28 @@ export default function OrdersTable() {
         onOpenChange={setOrderDialogOpen}
         initialTab={orderDialogTab}
         onOrderUpdate={handleOrderUpdate}
+      />
+
+      {/* Create Order Dialog */}
+      <OrderCreateDialog
+        open={createOrderDialogOpen}
+        onOpenChange={setCreateOrderDialogOpen}
+        onSuccess={() => {
+          // Refresh the data to show the new order
+          const params: OrdersQueryParams = {
+            page: pagination.page,
+            limit: pagination.limit,
+          };
+
+          if (dateRange?.from) {
+            params.start_date = format(dateRange.from, "yyyy-MM-dd");
+          }
+          if (dateRange?.to) {
+            params.end_date = format(dateRange.to, "yyyy-MM-dd");
+          }
+
+          fetchOrders(params, searchQuery);
+        }}
       />
     </div>
   );

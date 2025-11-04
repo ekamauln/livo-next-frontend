@@ -43,6 +43,7 @@ import { MbOnlineForm } from "@/components/forms/mb-online-form";
 import { MbOnlineStatus } from "@/components/status/mb-online-status";
 import React from "react";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 
 export default function MbOnlinesTable() {
   const [data, setData] = useState<MbOnline[]>([]);
@@ -153,7 +154,9 @@ export default function MbOnlinesTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("tracking")}
+        </div>
       ),
     },
     {
@@ -166,10 +169,10 @@ export default function MbOnlinesTable() {
         return (
           <div className="text-sm">
             {order ? (
-              <div>
+              <div className="text-center">
                 <div className="font-mono text-xs">{order.order_id}</div>
                 <div className="text-xs text-muted-foreground">
-                  {order.status}
+                  <Badge>{order.status}</Badge>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {order.store}
@@ -190,7 +193,7 @@ export default function MbOnlinesTable() {
       cell: ({ row }) => {
         const user = row.original.user;
         return (
-          <div className="text-sm">
+          <div className="text-sm text-center">
             {user ? (
               <div>
                 <div className="font-medium">{user.full_name}</div>

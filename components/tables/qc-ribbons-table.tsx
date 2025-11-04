@@ -241,7 +241,9 @@ export default function QcRibbonsTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("tracking")}
+        </div>
       ),
     },
     {
@@ -252,7 +254,7 @@ export default function QcRibbonsTable() {
       cell: ({ row }) => {
         const order = row.original.order;
         return (
-          <div className="text-sm">
+          <div className="text-sm text-center">
             {order ? (
               <div>
                 <div className="font-mono text-xs">{order.order_id}</div>
@@ -278,7 +280,7 @@ export default function QcRibbonsTable() {
       cell: ({ row }) => {
         const user = row.original.user;
         return (
-          <div className="text-sm">
+          <div className="text-sm text-center">
             {user ? (
               <div>
                 <div className="font-medium">{user.full_name}</div>

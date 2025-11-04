@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, X, Loader2 } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import {
+  Loader2,
+  X,
+  ChevronsUpDown,
+  Check,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -9,7 +14,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +37,6 @@ import { productApi } from "@/lib/api/productApi";
 import { storeApi } from "@/lib/api/storeApi";
 import type { Product } from "@/types/product";
 import type { Store } from "@/types/store";
-import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderDetail {
@@ -45,11 +48,16 @@ interface OrderDetail {
 }
 
 interface OrderCreateDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
 
-export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
-  const [open, setOpen] = useState(false);
+export function OrderCreateDialog({
+  open,
+  onOpenChange,
+  onSuccess,
+}: OrderCreateDialogProps) {
   const [loading, setLoading] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [loadingStores, setLoadingStores] = useState(false);
@@ -154,6 +162,18 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
     }
   };
 
+  // Reset form
+  const resetForm = useCallback(() => {
+    setOrderId("");
+    setBuyer("");
+    setSelectedStore(null);
+    setOrderDetails([]);
+    setTracking(generateTrackingNumber());
+    setProducts([]);
+    setProductSearches({});
+    setProductOpenStates({});
+  }, []);
+
   useEffect(() => {
     if (open) {
       fetchStores();
@@ -161,8 +181,11 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
       setProducts([]); // Clear products on open
       setProductSearches({}); // Clear search states
       setProductOpenStates({}); // Clear open states
+    } else {
+      // Reset form when dialog closes
+      resetForm();
     }
-  }, [open]);
+  }, [open, resetForm]);
 
   // Add order detail
   const addOrderDetail = () => {
@@ -208,18 +231,6 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
           : detail
       )
     );
-  };
-
-  // Reset form
-  const resetForm = () => {
-    setOrderId("");
-    setBuyer("");
-    setSelectedStore(null);
-    setOrderDetails([]);
-    setTracking(generateTrackingNumber());
-    setProducts([]);
-    setProductSearches({});
-    setProductOpenStates({});
   };
 
   // Handle submit
@@ -287,7 +298,7 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
 
       if (response.success) {
         toast.success("Order created successfully");
-        setOpen(false);
+        onOpenChange(false);
         resetForm();
         onSuccess?.();
       }
@@ -302,13 +313,7 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Order
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="min-w-[700px] max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Order</DialogTitle>
@@ -444,7 +449,7 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
                 Order Details <span className="text-red-500">*</span>
               </Label>
               <Button type="button" variant="outline" onClick={addOrderDetail}>
-                <Plus className="mr-2 h-4 w-4" />
+                <span className="mr-2">+</span>
                 Add Item
               </Button>
             </div>
@@ -603,7 +608,7 @@ export function OrderCreateDialog({ onSuccess }: OrderCreateDialogProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => onOpenChange(false)}
               disabled={loading}
             >
               Cancel

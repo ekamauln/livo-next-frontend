@@ -40,9 +40,10 @@ import { QcOnline } from "@/types/qc-online";
 import { qcOnlineApi } from "@/lib/api/qcOnlineApi";
 import { ApiError } from "@/lib/api/types";
 import React from "react";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import { QcOnlineForm } from "@/components/forms/qc-online-form";
 import { QcOnlineStatus } from "@/components/status/qc-online-status";
+import { Badge } from "@/components/ui/badge";
 
 export default function QcOnlinesTable() {
   const [data, setData] = useState<QcOnline[]>([]);
@@ -241,7 +242,9 @@ export default function QcOnlinesTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("tracking")}
+        </div>
       ),
     },
     {
@@ -252,12 +255,12 @@ export default function QcOnlinesTable() {
       cell: ({ row }) => {
         const order = row.original.order;
         return (
-          <div className="text-sm">
+          <div className="text-sm text-center">
             {order ? (
               <div>
                 <div className="font-mono text-xs">{order.order_id}</div>
                 <div className="text-xs text-muted-foreground">
-                  {order.status}
+                  <Badge>{order.status}</Badge>
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {order.store}
@@ -278,7 +281,7 @@ export default function QcOnlinesTable() {
       cell: ({ row }) => {
         const user = row.original.user;
         return (
-          <div className="text-sm">
+          <div className="text-sm text-center">
             {user ? (
               <div>
                 <div className="font-medium">{user.full_name}</div>
