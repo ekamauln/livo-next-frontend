@@ -27,6 +27,7 @@ import {
   CalendarIcon,
   Check,
   ChevronsUpDown,
+  FileSpreadsheet,
   FileText,
   Loader2,
 } from "lucide-react";
@@ -38,6 +39,7 @@ import { reportApi } from "@/lib/api/reportApi";
 import { ApiError } from "@/lib/api/types";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import ExcelJS from "exceljs";
 
 const RETURN_TYPES = [
   { value: "double", label: "Double" },
@@ -248,6 +250,201 @@ export default function HandoutReturn() {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setIsLoading(true);
+
+      // Fetch the data
+      const dateParam = date ? format(date, "yyyy-MM-dd") : undefined;
+      const returnTypeParam = selectedReturnType || undefined;
+
+      const response = await reportApi.getReturnReports(
+        dateParam,
+        undefined,
+        returnTypeParam
+      );
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch return reports");
+      }
+
+      const reportData: ReturnReport[] = response.data.returns || [];
+
+      if (reportData.length === 0) {
+        let message = "No return reports found";
+        const filters = [];
+
+        if (date) {
+          filters.push(`date: ${format(date, "dd MMM yyyy")}`);
+        }
+
+        if (selectedReturnType) {
+          filters.push(`return type: ${selectedReturnTypeName}`);
+        }
+
+        if (filters.length > 0) {
+          message += ` for ${filters.join(" and ")}`;
+        }
+
+        message +=
+          ". Try adjusting your filters or selecting a different date/return type.";
+
+        toast.warning(message);
+        return;
+      }
+
+      // Create workbook
+      const workbook = new ExcelJS.Workbook();
+
+      // Sheet 1: Information
+      const infoSheet = workbook.addWorksheet("Information");
+
+      // Add filter information
+      const infoData: string[][] = [];
+
+      if (date) {
+        infoData.push(["Date", format(date, "dd MMMM yyyy")]);
+      }
+
+      if (selectedReturnTypeName && selectedReturnType) {
+        infoData.push(["Return Type", selectedReturnTypeName]);
+      }
+
+      infoData.push(["Total Records", reportData.length.toString()]);
+
+      // Calculate total products
+      const totalProducts = reportData.reduce((total, item) => {
+        return (
+          total +
+          item.return_details.reduce((itemTotal, detail) => {
+            return itemTotal + detail.quantity;
+          }, 0)
+        );
+      }, 0);
+
+      infoData.push(["Total Products", totalProducts.toString()]);
+      infoData.push(["Generated", format(new Date(), "dd MMMM yyyy - HH:mm")]);
+      infoData.push(["Picker", ""]);
+
+      // Add data to sheet
+      infoData.forEach((row, index) => {
+        const excelRow = infoSheet.addRow(row);
+        excelRow.height = index === infoData.length - 1 ? 30 : 20;
+
+        // Style cells
+        excelRow.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.alignment = { vertical: "middle", horizontal: "center" };
+          cell.font = { bold: true };
+        });
+      });
+
+      // Set column widths
+      infoSheet.columns = [{ width: 20 }, { width: 50 }];
+
+      // Sheet 2: Return Data
+      const dataSheet = workbook.addWorksheet("Return Data");
+
+      // Add headers
+      const headers = ["No", "Order Ginee ID", "Product Name", "Quantity"];
+      const headerRow = dataSheet.addRow(headers);
+
+      // Style header row
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = { vertical: "middle", horizontal: "center" };
+        cell.font = { bold: true };
+      });
+
+      // Add data rows
+      let rowNumber = 1;
+      reportData.forEach((item) => {
+        item.return_details.forEach((detail) => {
+          const row = dataSheet.addRow([
+            rowNumber++,
+            item.order_id,
+            detail.product.name,
+            detail.quantity,
+          ]);
+
+          // Style data row
+          row.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            cell.alignment = { vertical: "middle", horizontal: "center" };
+          });
+        });
+      });
+
+      // Set column widths
+      dataSheet.columns = [
+        { width: 8 },
+        { width: 25 },
+        { width: 40 },
+        { width: 12 },
+      ];
+
+      // Generate file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Handout_Return_Report_${format(
+        new Date(),
+        "yyyyMMdd_HHmmss"
+      )}.xlsx`;
+      link.click();
+
+      // Cleanup
+      window.URL.revokeObjectURL(url);
+
+      toast.success(
+        `Excel file exported successfully with ${reportData.length} records`
+      );
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+
+      let errorMessage = "Failed to export to Excel. Please try again.";
+      if (error instanceof ApiError) {
+        if (error.status === 401) {
+          errorMessage = "Session expired. Please login again.";
+        } else if (error.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.status === 0) {
+          errorMessage = "Network error. Please check your connection.";
+        }
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const selectedReturnTypeName =
     RETURN_TYPES.find((type) => type.value === selectedReturnType)?.label ||
     selectedReturnType;
@@ -267,7 +464,7 @@ export default function HandoutReturn() {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Filter Form */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Date Picker */}
             <div className="space-y-2">
               <Popover>
@@ -355,7 +552,25 @@ export default function HandoutReturn() {
             </div>
 
             {/* Action Button */}
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-2">
+              <Button
+                onClick={handleExportToExcel}
+                disabled={isLoading || !selectedReturnType}
+                variant="outline"
+                className="min-w-[200px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    Export to Excel
+                  </>
+                )}
+              </Button>
               <Button
                 onClick={handleGenerateAndPrintReport}
                 disabled={isLoading || !selectedReturnType}
