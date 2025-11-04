@@ -18,6 +18,7 @@ import {
 import {
   CalendarIcon,
   FileText,
+  FileSpreadsheet,
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -28,6 +29,7 @@ import { reportApi } from "@/lib/api/reportApi";
 import { ApiError } from "@/lib/api/types";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import ExcelJS from "exceljs";
 
 export default function HandoutComplain() {
   const [date, setDate] = useState<Date | undefined>(new Date());
@@ -203,6 +205,188 @@ export default function HandoutComplain() {
     }
   };
 
+  const handleExportToExcel = async () => {
+    try {
+      setIsLoading(true);
+
+      // Fetch the data
+      const dateParam = date ? format(date, "yyyy-MM-dd") : undefined;
+
+      const response = await reportApi.getComplainReports(dateParam);
+
+      if (!response.success) {
+        throw new Error(response.message || "Failed to fetch complain reports");
+      }
+
+      const reportData: ComplainReport[] = response.data.complains || [];
+
+      if (reportData.length === 0) {
+        let message = "No complain reports found";
+        
+        if (date) {
+          message += ` for date: ${format(date, "dd MMM yyyy")}`;
+        }
+
+        message +=
+          ". Try adjusting your filters or selecting a different date.";
+
+        toast.warning(message);
+        return;
+      }
+
+      // Create workbook and worksheets
+      const workbook = new ExcelJS.Workbook();
+      const infoSheet = workbook.addWorksheet("Information");
+      const dataSheet = workbook.addWorksheet("Complain Data");
+
+      // Sheet 1: Information
+      const infoData = [];
+
+      if (date) {
+        infoData.push(["Date", format(date, "dd MMMM yyyy")]);
+      }
+
+      infoData.push(["Total Records", reportData.length]);
+
+      // Calculate total products (sum of all quantities)
+      const totalProducts = reportData.reduce((total, item) => {
+        return total + item.product_details.reduce((itemTotal, detail) => {
+          return itemTotal + detail.quantity;
+        }, 0);
+      }, 0);
+
+      infoData.push(["Total Products", totalProducts]);
+
+      infoData.push([
+        "Generated",
+        format(new Date(), "dd MMMM yyyy - HH:mm"),
+      ]);
+
+      infoData.push(["Picker", ""]);
+
+      // Add data to info sheet
+      infoData.forEach((row, index) => {
+        const excelRow = infoSheet.addRow(row);
+        
+        // Style all cells
+        excelRow.eachCell((cell) => {
+          cell.border = {
+            top: { style: "thin" },
+            left: { style: "thin" },
+            bottom: { style: "thin" },
+            right: { style: "thin" },
+          };
+          cell.alignment = { horizontal: "center", vertical: "middle" };
+        });
+
+        // Make first column bold
+        excelRow.getCell(1).font = { bold: true };
+
+        // Add extra height to picker row (last row)
+        if (index === infoData.length - 1) {
+          excelRow.height = 30;
+        }
+      });
+
+      // Set column widths for info sheet
+      infoSheet.getColumn(1).width = 20;
+      infoSheet.getColumn(2).width = 50;
+
+      // Sheet 2: Complain Data
+      // Add headers
+      const headerRow = dataSheet.addRow([
+        "No",
+        "Order ID",
+        "Product Name",
+        "Quantity",
+      ]);
+
+      // Style header
+      headerRow.eachCell((cell) => {
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FFE0E0E0" },
+        };
+        cell.font = { bold: true };
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+        cell.alignment = { horizontal: "center", vertical: "middle" };
+      });
+
+      // Flatten the data to show complain product details
+      let rowNumber = 1;
+      reportData.forEach((item) => {
+        item.product_details.forEach((detail) => {
+          const dataRow = dataSheet.addRow([
+            rowNumber,
+            item.order_id,
+            detail.product.name,
+            detail.quantity,
+          ]);
+
+          // Style data cells
+          dataRow.eachCell((cell) => {
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+            cell.alignment = { horizontal: "center", vertical: "middle" };
+          });
+
+          rowNumber++;
+        });
+      });
+
+      // Set column widths for data sheet
+      dataSheet.getColumn(1).width = 8;
+      dataSheet.getColumn(2).width = 25;
+      dataSheet.getColumn(3).width = 40;
+      dataSheet.getColumn(4).width = 12;
+
+      // Generate Excel file
+      const buffer = await workbook.xlsx.writeBuffer();
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      // Download file
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Handout_Complain_Report_${format(new Date(), "yyyyMMdd_HHmmss")}.xlsx`;
+      link.click();
+
+      // Cleanup
+      URL.revokeObjectURL(url);
+
+      toast.success(`Exported ${reportData.length} records to Excel`);
+    } catch (error) {
+      console.error("Error exporting to Excel:", error);
+
+      let errorMessage = "Failed to export to Excel. Please try again.";
+      if (error instanceof ApiError) {
+        if (error.status === 401) {
+          errorMessage = "Session expired. Please login again.";
+        } else if (error.status >= 500) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.status === 0) {
+          errorMessage = "Network error. Please check your connection.";
+        }
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -246,7 +430,25 @@ export default function HandoutComplain() {
             </div>
 
             {/* Action Button */}
-            <div className="flex justify-start">
+            <div className="flex justify-start gap-2">
+              <Button
+                onClick={handleExportToExcel}
+                disabled={isLoading}
+                variant="outline"
+                className="min-w-[200px]"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <FileSpreadsheet className="mr-2 h-4 w-4" />
+                    Export to Excel
+                  </>
+                )}
+              </Button>
               <Button
                 onClick={handleGenerateAndPrintReport}
                 disabled={isLoading}
