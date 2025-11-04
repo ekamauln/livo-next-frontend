@@ -201,7 +201,7 @@ export function UserChargeFeeWidget({ userId }: UserChargeFeeWidgetProps) {
                       <TableHead className="text-center">Order ID</TableHead>
                       <TableHead className="text-center">Tracking</TableHead>
                       <TableHead className="text-center">Fee Charge</TableHead>
-                      <TableHead className="text-center">Updated At</TableHead>
+                      <TableHead className="text-center">Updated</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
