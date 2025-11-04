@@ -20,6 +20,8 @@ import {
 import { Loader2, ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import {
   Select,
@@ -72,6 +74,7 @@ export default function ComplainsTable() {
     to: new Date(), // Today
   });
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  const [showOnlyWithSolution, setShowOnlyWithSolution] = useState(true);
 
   // Toggle row expansion
   const toggleRowExpansion = (rowId: number) => {
@@ -627,8 +630,13 @@ export default function ComplainsTable() {
     },
   ];
 
+  // Filter data based on solution
+  const filteredData = showOnlyWithSolution
+    ? data.filter((complain) => complain.solution && complain.solution.trim() !== '')
+    : data;
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     onSortingChange: setSorting,
     onColumnVisibilityChange: setColumnVisibility,
@@ -665,6 +673,21 @@ export default function ComplainsTable() {
               onDateChange={setDateRange}
               className="w-auto"
             />
+          </div>
+
+          {/* Solution Filter Toggle */}
+          <div className="flex items-center space-x-2 border rounded-md px-3 py-2">
+            <Switch
+              id="solution-filter"
+              checked={showOnlyWithSolution}
+              onCheckedChange={setShowOnlyWithSolution}
+            />
+            <Label
+              htmlFor="solution-filter"
+              className="text-sm font-medium cursor-pointer"
+            >
+              With Solution
+            </Label>
           </div>
         </div>
 
