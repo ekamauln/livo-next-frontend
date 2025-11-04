@@ -351,7 +351,9 @@ export default function ReturnsTable() {
         <div className="text-sm text-center font-semibold">New Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("new_tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("new_tracking")}
+        </div>
       ),
     },
     {
@@ -371,7 +373,7 @@ export default function ReturnsTable() {
         <div className="text-sm text-center font-semibold">Order ID</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">
+        <div className="font-mono text-sm text-center">
           {row.getValue("order_id") || "-"}
         </div>
       ),

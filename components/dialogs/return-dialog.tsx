@@ -423,13 +423,15 @@ export function ReturnDialog({
                           <Table>
                             <TableBody>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   New Tracking
                                 </TableCell>
-                                <TableCell>{returnData.new_tracking}</TableCell>
+                                <TableCell className="max-w-md">
+                                  {returnData.new_tracking}
+                                </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Old Tracking
                                 </TableCell>
                                 <TableCell>
@@ -437,21 +439,19 @@ export function ReturnDialog({
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
-                                  Channel
-                                </TableCell>
+                                <TableCell className="w-1/4">Channel</TableCell>
                                 <TableCell>
                                   {returnData.channel?.name}
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Store ID
                                 </TableCell>
                                 <TableCell>{returnData.store?.name}</TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Return Type
                                 </TableCell>
                                 <TableCell>
@@ -459,7 +459,7 @@ export function ReturnDialog({
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Return Reason
                                 </TableCell>
                                 <TableCell className="break-words whitespace-normal max-w-md">
@@ -467,7 +467,7 @@ export function ReturnDialog({
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Return Number
                                 </TableCell>
                                 <TableCell>
@@ -475,7 +475,7 @@ export function ReturnDialog({
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
+                                <TableCell className="w-1/4">
                                   Scrap Number
                                 </TableCell>
                                 <TableCell>
@@ -483,9 +483,7 @@ export function ReturnDialog({
                                 </TableCell>
                               </TableRow>
                               <TableRow>
-                                <TableCell className="font-medium">
-                                  Created
-                                </TableCell>
+                                <TableCell className="w-1/4">Created</TableCell>
                                 <TableCell>
                                   {format(
                                     new Date(returnData.created_at),

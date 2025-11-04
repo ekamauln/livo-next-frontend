@@ -42,7 +42,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { Package, Edit, Save, X, Plus, Trash2, Check, ChevronsUpDown } from "lucide-react";
+import {
+  Package,
+  Edit,
+  Save,
+  X,
+  Plus,
+  Trash2,
+  Check,
+  ChevronsUpDown,
+} from "lucide-react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -75,8 +84,9 @@ const editFormSchema = z.object({
         return userIds.length === new Set(userIds).size;
       },
       {
-        message: "Duplicate users are not allowed. Each user can only be assigned once.",
-        path: ["user_details"]
+        message:
+          "Duplicate users are not allowed. Each user can only be assigned once.",
+        path: ["user_details"],
       }
     ),
 });
@@ -104,8 +114,10 @@ export function ComplainDialog({
   const [updating, setUpdating] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [userSearchOpen, setUserSearchOpen] = useState<{[key: number]: boolean}>({});
-  const [userSearch, setUserSearch] = useState<{[key: number]: string}>({});
+  const [userSearchOpen, setUserSearchOpen] = useState<{
+    [key: number]: boolean;
+  }>({});
+  const [userSearch, setUserSearch] = useState<{ [key: number]: string }>({});
 
   // Complain data form
   const editForm = useForm<EditFormValues>({
@@ -128,41 +140,47 @@ export function ComplainDialog({
     if (!searchTerm.trim()) {
       return users;
     }
-    
-    return users.filter(user => 
-      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+
+    return users.filter(
+      (user) =>
+        user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
   // Check if user is already added
   const isUserAlreadyAdded = (userId: number) => {
     const currentUserDetails = editForm.getValues("user_details");
-    return currentUserDetails.some(detail => detail.user_id === userId);
+    return currentUserDetails.some((detail) => detail.user_id === userId);
   };
 
   // Handle user selection with duplicate check
   const handleUserSelection = (userId: number, index: number) => {
     if (isUserAlreadyAdded(userId)) {
-      const selectedUser = users.find(u => u.id === userId);
+      const selectedUser = users.find((u) => u.id === userId);
       toast.error("Duplicate User", {
-        description: `${selectedUser?.full_name || 'This user'} is already added to the user details.`,
+        description: `${
+          selectedUser?.full_name || "This user"
+        } is already added to the user details.`,
       });
       return;
     }
 
-    const selectedUser = users.find(u => u.id === userId);
-    
+    const selectedUser = users.find((u) => u.id === userId);
+
     // Update the form
     editForm.setValue(`user_details.${index}.user_id`, userId);
     if (selectedUser) {
-      editForm.setValue(`user_details.${index}.user_name`, selectedUser.full_name);
+      editForm.setValue(
+        `user_details.${index}.user_name`,
+        selectedUser.full_name
+      );
     }
-    
+
     // Close the combobox and clear search
-    setUserSearchOpen(prev => ({ ...prev, [index]: false }));
-    setUserSearch(prev => ({ ...prev, [index]: "" }));
+    setUserSearchOpen((prev) => ({ ...prev, [index]: false }));
+    setUserSearch((prev) => ({ ...prev, [index]: "" }));
   };
 
   // Fetch users for dropdown
@@ -354,7 +372,7 @@ export function ComplainDialog({
           </DialogTitle>
           <DialogDescription>
             {complain
-              ? `View and manage complain details for tracking ${complain.tracking}`
+              ? `View and manage complain details for tracking ${complain.tracking}.`
               : "View and manage complain details"}
           </DialogDescription>
         </DialogHeader>
@@ -734,10 +752,16 @@ export function ComplainDialog({
                                   onClick={() => {
                                     if (users.length > 0) {
                                       // Find first available user that hasn't been added
-                                      const currentUserDetails = editForm.getValues("user_details");
-                                      const usedUserIds = currentUserDetails.map(detail => detail.user_id);
-                                      const availableUser = users.find(user => !usedUserIds.includes(user.id));
-                                      
+                                      const currentUserDetails =
+                                        editForm.getValues("user_details");
+                                      const usedUserIds =
+                                        currentUserDetails.map(
+                                          (detail) => detail.user_id
+                                        );
+                                      const availableUser = users.find(
+                                        (user) => !usedUserIds.includes(user.id)
+                                      );
+
                                       if (availableUser) {
                                         const newIndex = fields.length;
                                         append({
@@ -745,10 +769,14 @@ export function ComplainDialog({
                                           fee_charge: 0,
                                           user_name: availableUser.full_name,
                                         });
-                                        setUserSearch(prev => ({ ...prev, [newIndex]: "" }));
+                                        setUserSearch((prev) => ({
+                                          ...prev,
+                                          [newIndex]: "",
+                                        }));
                                       } else {
                                         toast.error("No Available Users", {
-                                          description: "All users have already been added to the user details.",
+                                          description:
+                                            "All users have already been added to the user details.",
                                         });
                                       }
                                     }
@@ -773,24 +801,35 @@ export function ComplainDialog({
                                         <FormItem className="flex-1">
                                           <FormControl>
                                             <Popover
-                                              open={userSearchOpen[index] || false}
+                                              open={
+                                                userSearchOpen[index] || false
+                                              }
                                               onOpenChange={(open) => {
-                                                setUserSearchOpen(prev => ({ ...prev, [index]: open }));
+                                                setUserSearchOpen((prev) => ({
+                                                  ...prev,
+                                                  [index]: open,
+                                                }));
                                               }}
                                             >
                                               <PopoverTrigger asChild>
                                                 <Button
                                                   variant="outline"
                                                   role="combobox"
-                                                  aria-expanded={userSearchOpen[index] || false}
+                                                  aria-expanded={
+                                                    userSearchOpen[index] ||
+                                                    false
+                                                  }
                                                   className="w-full justify-between"
                                                   disabled={updating}
                                                 >
                                                   {userField.value
                                                     ? (() => {
-                                                        const selectedUser = users.find(
-                                                          (u) => u.id === userField.value
-                                                        );
+                                                        const selectedUser =
+                                                          users.find(
+                                                            (u) =>
+                                                              u.id ===
+                                                              userField.value
+                                                          );
                                                         return selectedUser
                                                           ? `${selectedUser.full_name} (${selectedUser.username})`
                                                           : "Select user...";
@@ -803,9 +842,14 @@ export function ComplainDialog({
                                                 <Command>
                                                   <CommandInput
                                                     placeholder="Search users..."
-                                                    value={userSearch[index] || ""}
+                                                    value={
+                                                      userSearch[index] || ""
+                                                    }
                                                     onValueChange={(value) => {
-                                                      setUserSearch(prev => ({ ...prev, [index]: value }));
+                                                      setUserSearch((prev) => ({
+                                                        ...prev,
+                                                        [index]: value,
+                                                      }));
                                                     }}
                                                   />
                                                   <CommandList>
@@ -815,21 +859,38 @@ export function ComplainDialog({
                                                         : "No users found."}
                                                     </CommandEmpty>
                                                     <CommandGroup>
-                                                      {getFilteredUsers(index).map((user) => {
-                                                        const isAlreadyAdded = isUserAlreadyAdded(user.id);
-                                                        const isCurrentSelection = userField.value === user.id;
-                                                        
+                                                      {getFilteredUsers(
+                                                        index
+                                                      ).map((user) => {
+                                                        const isAlreadyAdded =
+                                                          isUserAlreadyAdded(
+                                                            user.id
+                                                          );
+                                                        const isCurrentSelection =
+                                                          userField.value ===
+                                                          user.id;
+
                                                         return (
                                                           <CommandItem
                                                             key={user.id}
                                                             value={`${user.full_name} ${user.username} ${user.email}`}
                                                             onSelect={() => {
-                                                              handleUserSelection(user.id, index);
-                                                              userField.onChange(user.id);
+                                                              handleUserSelection(
+                                                                user.id,
+                                                                index
+                                                              );
+                                                              userField.onChange(
+                                                                user.id
+                                                              );
                                                             }}
-                                                            disabled={isAlreadyAdded && !isCurrentSelection}
+                                                            disabled={
+                                                              isAlreadyAdded &&
+                                                              !isCurrentSelection
+                                                            }
                                                             className={cn(
-                                                              isAlreadyAdded && !isCurrentSelection && "opacity-50 cursor-not-allowed"
+                                                              isAlreadyAdded &&
+                                                                !isCurrentSelection &&
+                                                                "opacity-50 cursor-not-allowed"
                                                             )}
                                                           >
                                                             <Check
@@ -842,20 +903,32 @@ export function ComplainDialog({
                                                             />
                                                             <div className="flex flex-col flex-1">
                                                               <div className="flex items-center justify-between">
-                                                                <span className={cn(
-                                                                  "font-medium",
-                                                                  isAlreadyAdded && !isCurrentSelection && "text-muted-foreground"
-                                                                )}>
-                                                                  {user.full_name}
+                                                                <span
+                                                                  className={cn(
+                                                                    "font-medium",
+                                                                    isAlreadyAdded &&
+                                                                      !isCurrentSelection &&
+                                                                      "text-muted-foreground"
+                                                                  )}
+                                                                >
+                                                                  {
+                                                                    user.full_name
+                                                                  }
                                                                 </span>
-                                                                {isAlreadyAdded && !isCurrentSelection && (
-                                                                  <Badge variant="secondary" className="text-xs ml-2">
-                                                                    Already Added
-                                                                  </Badge>
-                                                                )}
+                                                                {isAlreadyAdded &&
+                                                                  !isCurrentSelection && (
+                                                                    <Badge
+                                                                      variant="secondary"
+                                                                      className="text-xs ml-2"
+                                                                    >
+                                                                      Already
+                                                                      Added
+                                                                    </Badge>
+                                                                  )}
                                                               </div>
                                                               <span className="text-sm text-muted-foreground">
-                                                                {user.username} • {user.email}
+                                                                {user.username}{" "}
+                                                                • {user.email}
                                                               </span>
                                                             </div>
                                                           </CommandItem>
@@ -917,7 +990,10 @@ export function ComplainDialog({
                               {/* Display form-level errors for duplicate users */}
                               {editForm.formState.errors.user_details?.root && (
                                 <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
-                                  {editForm.formState.errors.user_details.root.message}
+                                  {
+                                    editForm.formState.errors.user_details.root
+                                      .message
+                                  }
                                 </div>
                               )}
                             </div>

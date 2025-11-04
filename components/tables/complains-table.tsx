@@ -419,7 +419,9 @@ export default function ComplainsTable() {
         <div className="text-sm text-center font-semibold">Tracking</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("tracking")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("tracking")}
+        </div>
       ),
     },
     {
@@ -428,7 +430,7 @@ export default function ComplainsTable() {
         <div className="text-sm text-center font-semibold">Order ID</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">
+        <div className="font-mono text-sm text-center">
           {row.getValue("order_id") || "-"}
         </div>
       ),
