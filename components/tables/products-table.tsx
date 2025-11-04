@@ -182,7 +182,7 @@ export default function ProductsTable() {
         <div className="text-sm text-center font-semibold">Variant</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">
+        <div className="font-mono text-sm text-center">
           <Badge variant="secondary">{row.getValue("variant")}</Badge>
         </div>
       ),

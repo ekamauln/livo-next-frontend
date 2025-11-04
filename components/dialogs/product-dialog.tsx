@@ -363,7 +363,7 @@ export function ProductDialog({
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            <span className="truncate">
+            <span className="truncate w-7/8">
               {loading
                 ? "Loading..."
                 : product
@@ -373,7 +373,7 @@ export function ProductDialog({
           </DialogTitle>
           <DialogDescription>
             {product
-              ? `Manage product details for ${product.sku}`
+              ? `Manage product details for ${product.sku}.`
               : "View and manage product information"}
           </DialogDescription>
         </DialogHeader>
@@ -426,7 +426,7 @@ export function ProductDialog({
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <PackageOpen className="h-5 w-5 flex-shrink-0" />
-                        <span className="truncate">Detail Information</span>
+                        Detail Information
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -453,8 +453,10 @@ export function ProductDialog({
                             </TableRow>
                             <TableRow>
                               <TableCell className="w-1/4">Name</TableCell>
-                              <TableCell className="text-wrap">
-                                {product.name}
+                              <TableCell className="max-w-md">
+                                <span className="w-3/4 text-wrap break-words">
+                                  {product.name}
+                                </span>
                               </TableCell>
                             </TableRow>
                             <TableRow>
@@ -525,9 +527,7 @@ export function ProductDialog({
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Settings className="h-5 w-5 flex-shrink-0" />
-                        <span className="truncate">
-                          Edit Product Information
-                        </span>
+                        Edit Product Information
                       </CardTitle>
                       <Separator
                         orientation="horizontal"
@@ -675,7 +675,7 @@ export function ProductDialog({
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <ScanBarcode className="h-5 w-5 flex-shrink-0" />
-                        <span className="truncate">Generate 1D Barcode</span>
+                        Generate 1D Barcode
                       </CardTitle>
                       <Separator
                         orientation="horizontal"

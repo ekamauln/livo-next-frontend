@@ -164,7 +164,7 @@ export function BoxDialog({
           </DialogTitle>
           <DialogDescription>
             {box
-              ? `Manage box details for ${box.code}`
+              ? `Manage box details for ${box.code}.`
               : "View and manage box information"}
           </DialogDescription>
         </DialogHeader>
@@ -307,7 +307,7 @@ export function BoxDialog({
                               {updating && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
-                              Update Product
+                              Update Box
                             </Button>
                           </div>
                         </form>

@@ -144,7 +144,9 @@ export default function StoresTable() {
         <div className="text-sm text-center font-semibold">Name</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("name")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("name")}
+        </div>
       ),
     },
     {

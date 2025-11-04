@@ -469,7 +469,7 @@ export function UserDialog({
           </DialogTitle>
           <DialogDescription>
             {user
-              ? `Manage user account and settings for ${user.email}`
+              ? `Manage user account and settings for ${user.email}.`
               : "View and manage user details"}
           </DialogDescription>
         </DialogHeader>
@@ -574,8 +574,8 @@ export function UserDialog({
                             </TableRow>
                             <TableRow>
                               <TableCell className="w-1/4">Roles</TableCell>
-                              <TableCell>
-                                <div className="flex flex-wrap gap-2 text-wrap">
+                              <TableCell className="max-w-md">
+                                <div className="flex flex-wrap gap-2 text-wrap items-center">
                                   {user.roles.map((role) => (
                                     <Badge
                                       key={role.id}

@@ -38,7 +38,7 @@ export default function Products() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
-                  Users
+                  Products
                 </BreadcrumbPage>
               </BreadcrumbList>
             </Breadcrumb>

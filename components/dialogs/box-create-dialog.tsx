@@ -144,7 +144,7 @@ export function BoxCreateDialog({
                   ) : (
                     <PackagePlus className="mr-2 h-4 w-4" />
                   )}
-                  Create New Product
+                  Create New Box
                 </Button>
               </div>
             </form>

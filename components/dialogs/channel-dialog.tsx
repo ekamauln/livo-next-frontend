@@ -168,7 +168,7 @@ export function ChannelDialog({
           </DialogTitle>
           <DialogDescription>
             {channel
-              ? `Manage channel details for ${channel.code}`
+              ? `Manage channel details for ${channel.code}.`
               : "View and manage channel information"}
           </DialogDescription>
         </DialogHeader>
@@ -313,7 +313,7 @@ export function ChannelDialog({
                               {updating && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
-                              Update Product
+                              Update Channel
                             </Button>
                           </div>
                         </form>

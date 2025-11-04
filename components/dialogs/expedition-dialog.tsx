@@ -194,7 +194,7 @@ export function ExpeditionDialog({
           </DialogTitle>
           <DialogDescription>
             {expedition
-              ? `Manage expedition details for ${expedition.code}`
+              ? `Manage expedition details for ${expedition.code}.`
               : "View and manage expedition information"}
           </DialogDescription>
         </DialogHeader>
@@ -478,7 +478,7 @@ export function ExpeditionDialog({
                               {updating && (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               )}
-                              Update Product
+                              Update Expedition
                             </Button>
                           </div>
                         </form>

@@ -166,7 +166,7 @@ export default function UsersTable() {
         <div className="text-sm text-center font-semibold">Username</div>
       ),
       cell: ({ row }) => (
-        <div className="text-sm">{row.getValue("username")}</div>
+        <div className="text-sm text-center">{row.getValue("username")}</div>
       ),
     },
     {
@@ -174,7 +174,9 @@ export default function UsersTable() {
       header: () => (
         <div className="text-sm text-center font-semibold">Email</div>
       ),
-      cell: ({ row }) => <div className="text-sm">{row.getValue("email")}</div>,
+      cell: ({ row }) => (
+        <div className="text-sm text-center">{row.getValue("email")}</div>
+      ),
     },
     {
       accessorKey: "full_name",
@@ -182,7 +184,7 @@ export default function UsersTable() {
         <div className="text-sm text-center font-semibold">Name</div>
       ),
       cell: ({ row }) => (
-        <div className="text-sm">{row.getValue("full_name")}</div>
+        <div className="text-sm text-center">{row.getValue("full_name")}</div>
       ),
     },
     {
@@ -206,7 +208,7 @@ export default function UsersTable() {
       cell: ({ row }) => {
         const roles = row.getValue("roles") as Role[];
         return (
-          <div className="flex gap-1 flex-wrap text-wrap">
+          <div className="flex gap-1 flex-wrap text-wrap justify-center">
             {roles.map((role) => (
               <Badge
                 key={role.id}
@@ -224,7 +226,7 @@ export default function UsersTable() {
       accessorKey: "created_at",
       header: () => <div className="text-center font-semibold">Created</div>,
       cell: ({ row }) => (
-        <div className="text-sm text-center">
+        <div className="text-xs text-muted-foreground text-center">
           {format(new Date(row.getValue("created_at")), "dd MMM yyyy")}
           <br />
           {format(new Date(row.getValue("created_at")), "HH:mm:ss")}

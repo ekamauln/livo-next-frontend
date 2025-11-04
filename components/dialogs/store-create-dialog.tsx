@@ -144,7 +144,7 @@ export function StoreCreateDialog({
                   ) : (
                     <StoreIcon className="mr-2 h-4 w-4" />
                   )}
-                  Create New Product
+                  Create New Store
                 </Button>
               </div>
             </form>

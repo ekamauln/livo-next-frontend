@@ -164,7 +164,7 @@ export function StoreDialog({
           </DialogTitle>
           <DialogDescription>
             {store
-              ? `Manage store details for ${store.code}`
+              ? `Manage store details for ${store.code}.`
               : "View and manage store information"}
           </DialogDescription>
         </DialogHeader>

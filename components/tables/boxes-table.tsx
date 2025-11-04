@@ -140,7 +140,9 @@ export default function BoxesTable() {
         <div className="text-sm text-center font-semibold">Name</div>
       ),
       cell: ({ row }) => (
-        <div className="font-mono text-sm">{row.getValue("name")}</div>
+        <div className="font-mono text-sm text-center">
+          {row.getValue("name")}
+        </div>
       ),
     },
     {
@@ -152,7 +154,7 @@ export default function BoxesTable() {
         const date = new Date(row.getValue("created_at"));
         return (
           <div className="text-xs text-muted-foreground text-center">
-            {format(date, "dd MMM yyyy")}
+            {format(date, "dd MMMM yyyy")}
             <br />
             {format(date, "HH:mm:ss")}
           </div>
