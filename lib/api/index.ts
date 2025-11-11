@@ -18,6 +18,7 @@ export { storeApi } from "@/lib/api/storeApi";
 export { complainApi } from "@/lib/api/complainApi";
 export { reportApi } from "@/lib/api/reportApi";
 export { ribbonFlowApi } from "@/lib/api/ribbonFlowApi";
+export { pickOrderApi } from "@/lib/api/pickOrderApi";
 export { ApiError, apiRequest, API_BASE_URL } from "@/lib/api/types";
 
 // Export types for backward compatibility
@@ -72,3 +73,4 @@ export type {
   CreateComplain,
   UpdateComplain,
 } from "@/types/complain";
+export type { PickOrder, PickOrderDetail } from "@/types/pick-order";

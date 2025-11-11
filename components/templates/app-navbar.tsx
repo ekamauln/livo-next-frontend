@@ -9,12 +9,16 @@ import {
   MenubarTrigger,
 } from "@/components/ui/menubar";
 import {
+  BookCheck,
+  BookOpenCheck,
+  FileCheck,
   FolderUp,
+  Globe,
   LogOut,
   Package,
   PackageOpen,
+  Ribbon,
   ScrollText,
-  ShoppingBag,
   SquareUser,
   Store,
   Truck,
@@ -191,7 +195,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "mb-ribbon"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/ribbons/mb-ribbons">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Ribbon className="h-4 w-4" />
                         MB Ribbons
                       </Link>
                     </MenubarItem>
@@ -199,7 +203,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "qc-ribbon"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/ribbons/qc-ribbons">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Ribbon className="h-4 w-4" />
                         QC Ribbons
                       </Link>
                     </MenubarItem>
@@ -215,7 +219,7 @@ export default function AppNavbar() {
                   ]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/ribbons/ribbon-flows">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Ribbon className="h-4 w-4" />
                         Ribbon Flows
                       </Link>
                     </MenubarItem>
@@ -242,7 +246,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "mb-online"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/mb-onlines">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         MB Onlines
                       </Link>
                     </MenubarItem>
@@ -250,7 +254,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "qc-online"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/qc-onlines">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         QC Onlines
                       </Link>
                     </MenubarItem>
@@ -258,7 +262,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "packing"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/pc-onlines">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         PC Onlines
                       </Link>
                     </MenubarItem>
@@ -274,7 +278,7 @@ export default function AppNavbar() {
                   ]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/onlines/online-flows">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Globe className="h-4 w-4" />
                         Online Flows
                       </Link>
                     </MenubarItem>
@@ -299,7 +303,7 @@ export default function AppNavbar() {
                   {hasAnyRole(["superadmin", "coordinator", "outbound"]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/outbounds/input-outbounds">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Truck className="h-4 w-4" />
                         Input Outbounds
                       </Link>
                     </MenubarItem>
@@ -315,7 +319,7 @@ export default function AppNavbar() {
                   ]) && (
                     <MenubarItem asChild className="cursor-pointer">
                       <Link href="/outbounds/handout-outbounds">
-                        <ShoppingBag className="h-4 w-4" />
+                        <Truck className="h-4 w-4" />
                         Handout Outbounds
                       </Link>
                     </MenubarItem>
@@ -339,13 +343,13 @@ export default function AppNavbar() {
                 <MenubarContent>
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/input-complains">
-                      <ShoppingBag className="h-4 w-4" />
+                      <BookOpenCheck className="h-4 w-4" />
                       Input Complains
                     </Link>
                   </MenubarItem>
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/input-returns">
-                      <ShoppingBag className="h-4 w-4" />
+                      <BookCheck className="h-4 w-4" />
                       Input Returns
                     </Link>
                   </MenubarItem>
@@ -353,7 +357,7 @@ export default function AppNavbar() {
 
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/data-complains">
-                      <ShoppingBag className="h-4 w-4" />
+                      <BookOpenCheck className="h-4 w-4" />
                       Data Complains
                     </Link>
                   </MenubarItem>
@@ -361,13 +365,13 @@ export default function AppNavbar() {
                   <MenubarSeparator />
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/handout-complains">
-                      <ShoppingBag className="h-4 w-4" />
+                      <BookOpenCheck className="h-4 w-4" />
                       Handout Complains
                     </Link>
                   </MenubarItem>
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/complains/handout-returns">
-                      <ShoppingBag className="h-4 w-4" />
+                      <BookCheck className="h-4 w-4" />
                       Handout Returns
                     </Link>
                   </MenubarItem>
@@ -390,13 +394,19 @@ export default function AppNavbar() {
                 <MenubarContent>
                   <MenubarItem asChild className="cursor-pointer">
                     <Link href="/reports/boxes-count-reports">
-                      <ShoppingBag className="h-4 w-4" />
+                      <FileCheck className="h-4 w-4" />
                       Boxes Count Reports
                     </Link>
                   </MenubarItem>
                   <MenubarItem asChild className="cursor-pointer">
+                    <Link href="/reports/pick-order-reports">
+                      <FileCheck className="h-4 w-4" />
+                      Pick Order Reports
+                    </Link>
+                  </MenubarItem>
+                  <MenubarItem asChild className="cursor-pointer">
                     <Link href="/reports/user-charge-fee-reports">
-                      <ShoppingBag className="h-4 w-4" />
+                      <FileCheck className="h-4 w-4" />
                       User Charge Fee Reports
                     </Link>
                   </MenubarItem>

@@ -469,7 +469,10 @@ export default function UserChargeFeesTable() {
       generatedRow.getCell(1).value = "Generated";
       generatedRow.getCell(1).font = { bold: true };
       generatedRow.getCell(1).border = borderStyle;
-      generatedRow.getCell(2).value = format(new Date(), "dd MMMM yyyy - HH:mm");
+      generatedRow.getCell(2).value = format(
+        new Date(),
+        "dd MMMM yyyy - HH:mm"
+      );
       generatedRow.getCell(2).border = borderStyle;
       currentRow++;
 
@@ -566,7 +569,10 @@ export default function UserChargeFeesTable() {
         ];
         const detailHeaderRow = sheet3.addRow(detailHeaders);
         detailHeaderRow.font = { bold: true };
-        detailHeaderRow.alignment = { horizontal: "center", vertical: "middle" };
+        detailHeaderRow.alignment = {
+          horizontal: "center",
+          vertical: "middle",
+        };
         detailHeaderRow.eachCell((cell) => {
           cell.border = borderStyle;
           cell.fill = {
@@ -1237,7 +1243,7 @@ export default function UserChargeFeesTable() {
               ) : (
                 <>
                   <Printer className="w-4 h-4 mr-2" />
-                  Print User Charge Fee Reports
+                  Print Reports
                 </>
               )}
             </Button>

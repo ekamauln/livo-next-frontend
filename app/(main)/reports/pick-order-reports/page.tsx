@@ -11,9 +11,9 @@ import { House } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { ProtectedRoute } from "@/contexts/protected-route";
-import BoxesCountTable from "@/components/tables/boxes-count-table";
+import PickOrdersTable from "@/components/tables/pick-orders-table";
 
-export default function BoxesCountPage() {
+export default function PickOrdersPage() {
   return (
     <ProtectedRoute requiredRoles={["superadmin", "coordinator", "finance"]}>
       <div>
@@ -38,7 +38,7 @@ export default function BoxesCountPage() {
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />
                 <BreadcrumbPage className="hidden md:block">
-                  Boxes Count Reports
+                  Pick Order Reports
                 </BreadcrumbPage>
               </BreadcrumbList>
             </Breadcrumb>
@@ -47,9 +47,9 @@ export default function BoxesCountPage() {
 
         <div className="w-full p-4 pt-0">
           <Card className="p-6 space-y-2">
-            <h1 className="text-2xl font-semibold">Boxes Count Reports</h1>
+            <h1 className="text-2xl font-semibold">Pick Order Reports</h1>
             <Separator className="mt-0" />
-            <BoxesCountTable />
+            <PickOrdersTable />
           </Card>
         </div>
       </div>

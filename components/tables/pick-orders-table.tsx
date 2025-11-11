@@ -21,10 +21,12 @@ import {
   Loader2,
   ChevronLeft,
   ChevronRight,
-  Printer,
   ChevronDown,
   FileSpreadsheet,
+  Printer,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
 import {
   Select,
   SelectContent,
@@ -45,21 +47,23 @@ import { Input } from "@/components/ui/input";
 import { DateRangePicker } from "@/components/custom-ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { format } from "date-fns";
-import { BoxesCountReport } from "@/types/report";
-import { reportApi } from "@/lib/api/reportApi";
+import { PickOrder } from "@/types/pick-order";
+import { pickOrderApi } from "@/lib/api/pickOrderApi";
 import { ApiError } from "@/lib/api/types";
+import React from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import React from "react";
 import ExcelJS from "exceljs";
 
-export default function BoxesCountTable() {
-  const [data, setData] = useState<BoxesCountReport[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export default function PickOrdersTable() {
+  const [data, setData] = useState<PickOrder[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    updated_at: false,
+    id: false,
+  });
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [pagination, setPagination] = useState({
     page: 1,
     limit: 10,
@@ -69,165 +73,141 @@ export default function BoxesCountTable() {
     from: new Date(new Date().getFullYear(), new Date().getMonth(), 1), // First day of current month
     to: new Date(), // Today
   });
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
-  // Define query params interface for boxes count reports
-  interface BoxesCountQueryParams {
-    page?: number;
-    limit?: number;
-    start_date?: string;
-    end_date?: string;
-  }
+  // Dialog state
+  // const [selectedPickOrderId, setSelectedPickOrderId] = useState<number | null>(
+  //   null
+  // );
+  // const [pickOrderDialogOpen, setPickOrderDialogOpen] = useState(false);
 
-  // Fetch boxes count reports data
-  const fetchBoxesCountReports = useCallback(
-    async (params: BoxesCountQueryParams = {}, search: string = "") => {
+  // Toggle row expansion
+  const toggleRowExpansion = (rowId: number) => {
+    const newExpandedRows = new Set(expandedRows);
+    if (newExpandedRows.has(rowId)) {
+      newExpandedRows.delete(rowId);
+    } else {
+      newExpandedRows.add(rowId);
+    }
+    setExpandedRows(newExpandedRows);
+  };
+
+  // Fetch pick orders data
+  const fetchData = useCallback(
+    async (page: number = 1, search: string = "") => {
       try {
         setIsLoading(true);
 
-        const response = await reportApi.getBoxesCountReports(
-          params.page || 1,
-          params.limit || 10,
-          params.start_date,
-          params.end_date,
-          search.trim() || undefined
-        );
+        // Build date parameters
+        const start_date = dateRange?.from
+          ? format(dateRange.from, "yyyy-MM-dd")
+          : undefined;
+        const end_date = dateRange?.to
+          ? format(dateRange.to, "yyyy-MM-dd")
+          : undefined;
 
-        // Extract boxes count reports array from the response data
-        const boxesCountReports = response.data.reports as BoxesCountReport[];
-        setData(boxesCountReports || []); // Ensure we always set an array
+        const response = await pickOrderApi.getPickOrders(
+          page,
+          pagination.limit,
+          search,
+          start_date,
+          end_date
+        );
+        // Extract pick order array from the response data
+        const pickOrders = response.data.pick_orders as PickOrder[];
+        setData(pickOrders);
         setPagination(response.data.pagination);
       } catch (error) {
-        console.error("Error fetching boxes count reports:", error);
-        toast.error("Failed to fetch boxes count reports", {
-          description:
-            error instanceof Error ? error.message : "Unknown error occurred",
-        });
-        setData([]); // Ensure data is always an array even on error
+        // Only log unexpected errors to console to reduce noise
+        if (error instanceof ApiError) {
+          if (error.status >= 500 || error.status === 0) {
+            console.error("Server/Network error fetching pick orders:", error);
+          } else {
+            console.debug(
+              "Client error fetching pick orders:",
+              error.message,
+              "Status:",
+              error.status
+            );
+          }
+        } else {
+          console.error("Unexpected error fetching pick orders:", error);
+        }
+
+        let errorMessage = "Failed to fetch pick orders. Please try again.";
+
+        if (error instanceof ApiError) {
+          if (error.status === 401) {
+            errorMessage = "Session expired. Please login again.";
+          } else if (error.status >= 500) {
+            errorMessage = "Server error. Please try again later.";
+          } else if (error.status === 0) {
+            errorMessage = "Network error. Please check your connection.";
+          }
+        }
+
+        toast.error(errorMessage);
       } finally {
         setIsLoading(false);
       }
     },
-    []
+    [pagination.limit, dateRange]
   );
 
-  // Handle search form submission (like orders table)
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Reset to page 1 when searching
-    setPagination((prev) => ({ ...prev, page: 1 }));
-
-    const params: BoxesCountQueryParams = {
-      page: 1,
-      limit: pagination.limit,
-    };
-
-    if (dateRange?.from) {
-      params.start_date = format(dateRange.from, "yyyy-MM-dd");
-    }
-    if (dateRange?.to) {
-      params.end_date = format(dateRange.to, "yyyy-MM-dd");
-    }
-
-    fetchBoxesCountReports(params, searchQuery);
+    fetchData(1, searchQuery);
   };
 
-  // Initial load and date range changes (like orders table)
-  useEffect(() => {
-    const params: BoxesCountQueryParams = {
-      page: 1,
-      limit: pagination.limit,
-    };
-
-    if (dateRange?.from) {
-      params.start_date = format(dateRange.from, "yyyy-MM-dd");
-    }
-    if (dateRange?.to) {
-      params.end_date = format(dateRange.to, "yyyy-MM-dd");
-    }
-
-    setPagination((prev) => ({ ...prev, page: 1 }));
-    setSearchQuery(""); // Reset search query on date/limit changes
-    fetchBoxesCountReports(params, ""); // Reset search on date/limit changes
-  }, [dateRange, pagination.limit, fetchBoxesCountReports]);
-
-  // Pagination handlers (like orders table)
   const handlePageChange = (newPage: number) => {
     setPagination((prev) => ({ ...prev, page: newPage }));
-
-    const params: BoxesCountQueryParams = {
-      page: newPage,
-      limit: pagination.limit,
-    };
-
-    if (dateRange?.from) {
-      params.start_date = format(dateRange.from, "yyyy-MM-dd");
-    }
-    if (dateRange?.to) {
-      params.end_date = format(dateRange.to, "yyyy-MM-dd");
-    }
-
-    fetchBoxesCountReports(params, searchQuery);
+    fetchData(newPage, searchQuery);
   };
 
   const handleLimitChange = (newLimit: string) => {
     const newLimitValue = parseInt(newLimit);
     setPagination((prev) => ({ ...prev, limit: newLimitValue, page: 1 }));
-
-    const params: BoxesCountQueryParams = {
-      page: 1,
-      limit: newLimitValue,
-    };
-
-    if (dateRange?.from) {
-      params.start_date = format(dateRange.from, "yyyy-MM-dd");
-    }
-    if (dateRange?.to) {
-      params.end_date = format(dateRange.to, "yyyy-MM-dd");
-    }
-
-    fetchBoxesCountReports(params, searchQuery);
+    fetchData(1, searchQuery);
   };
 
-  const handleDateRangeChange = (range: DateRange | undefined) => {
-    setDateRange(range);
-    // Note: The useEffect will handle the actual data fetching when dateRange changes
-  };
+  const totalPages = Math.ceil(pagination.total / pagination.limit);
 
+  // Export to Excel function
   const handleExportToExcel = async () => {
     try {
       setIsLoading(true);
 
-      // First, fetch all data (without pagination limits for the Excel)
-      const params: BoxesCountQueryParams = {};
-
-      if (dateRange?.from) {
-        params.start_date = format(dateRange.from, "yyyy-MM-dd");
-      }
-      if (dateRange?.to) {
-        params.end_date = format(dateRange.to, "yyyy-MM-dd");
-      }
+      // Build date parameters
+      const start_date = dateRange?.from
+        ? format(dateRange.from, "yyyy-MM-dd")
+        : undefined;
+      const end_date = dateRange?.to
+        ? format(dateRange.to, "yyyy-MM-dd")
+        : undefined;
 
       // Fetch all data for Excel (not limited by table pagination)
-      let allReportData: BoxesCountReport[] = [];
+      let allReportData: PickOrder[] = [];
       let currentPage = 1;
       let hasMoreData = true;
 
       while (hasMoreData) {
-        const response = await reportApi.getBoxesCountReports(
+        const response = await pickOrderApi.getPickOrders(
           currentPage,
           100, // Use reasonable page size for API calls
-          params.start_date,
-          params.end_date,
-          searchQuery.trim() || undefined
+          searchQuery,
+          start_date,
+          end_date
         );
 
         if (!response.success) {
-          throw new Error(
-            response.message || "Failed to fetch boxes count reports"
-          );
+          throw new Error(response.message || "Failed to fetch pick orders");
         }
 
-        const pageData = response.data.reports || [];
+        const pageData = response.data.pick_orders || [];
         allReportData = [...allReportData, ...pageData];
 
         // Check if we have more data to fetch
@@ -239,26 +219,16 @@ export default function BoxesCountTable() {
       const reportData = allReportData;
 
       if (reportData.length === 0) {
-        let message = "No boxes count reports found";
-        const filters = [];
+        let message = "No pick orders found";
 
-        if (dateRange?.from) {
-          filters.push(`from: ${format(dateRange.from, "dd MMM yyyy")}`);
-        }
-        if (dateRange?.to) {
-          filters.push(`to: ${format(dateRange.to, "dd MMM yyyy")}`);
+        if (dateRange?.from || dateRange?.to) {
+          message += " for the selected date range";
         }
         if (searchQuery) {
-          filters.push(`search: ${searchQuery}`);
+          message += ` matching "${searchQuery}"`;
         }
 
-        if (filters.length > 0) {
-          message += ` for ${filters.join(", ")}`;
-        }
-
-        message +=
-          ". Try adjusting your filters or selecting a different date range.";
-
+        message += ". Try adjusting your filters.";
         toast.warning(message);
         return;
       }
@@ -282,7 +252,7 @@ export default function BoxesCountTable() {
       // Add title
       sheet1.mergeCells("A1:B1");
       const titleCell = sheet1.getCell("A1");
-      titleCell.value = "Boxes Count Reports";
+      titleCell.value = "Pick Orders Report";
       titleCell.font = { bold: true, size: 14 };
       titleCell.alignment = { horizontal: "center", vertical: "middle" };
       titleCell.border = borderStyle;
@@ -291,7 +261,7 @@ export default function BoxesCountTable() {
       let currentRow = 3;
       if (dateRange?.from && dateRange?.to) {
         const periodRow = sheet1.getRow(currentRow);
-        periodRow.getCell(1).value = "Periode";
+        periodRow.getCell(1).value = "Period";
         periodRow.getCell(1).font = { bold: true };
         periodRow.getCell(1).border = borderStyle;
         periodRow.getCell(2).value = `${format(
@@ -299,6 +269,16 @@ export default function BoxesCountTable() {
           "dd MMMM yyyy"
         )} - ${format(dateRange.to, "dd MMMM yyyy")}`;
         periodRow.getCell(2).border = borderStyle;
+        currentRow++;
+      }
+
+      if (searchQuery) {
+        const searchRow = sheet1.getRow(currentRow);
+        searchRow.getCell(1).value = "Search Query";
+        searchRow.getCell(1).font = { bold: true };
+        searchRow.getCell(1).border = borderStyle;
+        searchRow.getCell(2).value = searchQuery;
+        searchRow.getCell(2).border = borderStyle;
         currentRow++;
       }
 
@@ -332,17 +312,19 @@ export default function BoxesCountTable() {
       sheet1.getColumn(1).width = 20;
       sheet1.getColumn(2).width = 50;
 
-      // SHEET 2: Box Count Summary
-      const sheet2 = workbook.addWorksheet("Boxes Count");
+      // SHEET 2: Pick Orders Summary
+      const sheet2 = workbook.addWorksheet("Pick Orders");
 
       // Add headers
       const headers = [
         "No",
-        "Box Code",
-        "Box Name",
-        "Ribbon Count",
-        "Online Count",
-        "Total Count",
+        "Order ID",
+        "Tracking",
+        "Channel",
+        "Store",
+        "Picker",
+        "Status",
+        "Picked At",
       ];
       const headerRow = sheet2.addRow(headers);
       headerRow.font = { bold: true };
@@ -360,11 +342,13 @@ export default function BoxesCountTable() {
       reportData.forEach((item, index) => {
         const dataRow = sheet2.addRow([
           index + 1,
-          item.box_code,
-          item.box_name,
-          item.ribbon_count,
-          item.online_count,
-          item.total_count,
+          item.order?.order_id || "-",
+          item.order?.tracking || "-",
+          item.order?.channel || "-",
+          item.order?.store || "-",
+          item.picker?.full_name || "-",
+          item.order?.status || "-",
+          format(new Date(item.created_at), "dd MMM yyyy HH:mm"),
         ]);
         dataRow.alignment = { horizontal: "center", vertical: "middle" };
         dataRow.eachCell((cell) => {
@@ -374,52 +358,56 @@ export default function BoxesCountTable() {
 
       // Set column widths for Sheet 2
       sheet2.getColumn(1).width = 8; // No
-      sheet2.getColumn(2).width = 15; // Box Code
-      sheet2.getColumn(3).width = 25; // Box Name
-      sheet2.getColumn(4).width = 15; // Ribbon Count
-      sheet2.getColumn(5).width = 15; // Online Count
-      sheet2.getColumn(6).width = 15; // Total Count
+      sheet2.getColumn(2).width = 20; // Order ID
+      sheet2.getColumn(3).width = 25; // Tracking
+      sheet2.getColumn(4).width = 15; // Channel
+      sheet2.getColumn(5).width = 20; // Store
+      sheet2.getColumn(6).width = 20; // Picker
+      sheet2.getColumn(7).width = 18; // Status
+      sheet2.getColumn(8).width = 20; // Picked At
 
-      // SHEET 3: Details Box Count
-      const allBoxDetails: Array<{
-        box_name: string;
-        tracking: string;
+      // SHEET 3: Pick Order Details
+      const allPickOrderDetails: Array<{
+        pick_order_id: number;
         order_id: string;
+        picker_name: string;
+        sku: string;
+        product_name: string;
+        variant: string;
         quantity: number;
-        full_name: string;
-        source: string;
-        created_at: string;
       }> = [];
 
-      reportData.forEach((boxReport) => {
-        if (boxReport.details && boxReport.details.length > 0) {
-          boxReport.details.forEach((detail) => {
-            allBoxDetails.push({
-              box_name: boxReport.box_name,
-              tracking: detail.tracking,
-              order_id: detail.order_id,
+      reportData.forEach((pickOrder) => {
+        if (
+          pickOrder.pick_order_details &&
+          pickOrder.pick_order_details.length > 0
+        ) {
+          pickOrder.pick_order_details.forEach((detail) => {
+            allPickOrderDetails.push({
+              pick_order_id: pickOrder.id,
+              order_id: pickOrder.order?.order_id || "-",
+              picker_name: pickOrder.picker?.full_name || "-",
+              sku: detail.sku,
+              product_name: detail.product_name,
+              variant: detail.variant || "-",
               quantity: detail.quantity,
-              full_name: detail.full_name,
-              source: detail.source,
-              created_at: detail.created_at,
             });
           });
         }
       });
 
-      if (allBoxDetails.length > 0) {
-        const sheet3 = workbook.addWorksheet("Details Boxes Count");
+      if (allPickOrderDetails.length > 0) {
+        const sheet3 = workbook.addWorksheet("Pick Order Details");
 
         // Add headers
         const detailHeaders = [
           "No",
-          "Box Name",
-          "Tracking",
           "Order ID",
+          "Picker",
+          "SKU",
+          "Product Name",
+          "Variant",
           "Quantity",
-          "User",
-          "Source",
-          "Created",
         ];
         const detailHeaderRow = sheet3.addRow(detailHeaders);
         detailHeaderRow.font = { bold: true };
@@ -437,16 +425,15 @@ export default function BoxesCountTable() {
         });
 
         // Add detail rows
-        allBoxDetails.forEach((detail, index) => {
+        allPickOrderDetails.forEach((detail, index) => {
           const detailRow = sheet3.addRow([
             index + 1,
-            detail.box_name,
-            detail.tracking,
             detail.order_id,
+            detail.picker_name,
+            detail.sku,
+            detail.product_name,
+            detail.variant,
             detail.quantity,
-            detail.full_name,
-            detail.source,
-            format(new Date(detail.created_at), "dd MMM yyyy - HH:mm:ss"),
           ]);
           detailRow.alignment = { horizontal: "center", vertical: "middle" };
           detailRow.eachCell((cell) => {
@@ -456,17 +443,16 @@ export default function BoxesCountTable() {
 
         // Set column widths for Sheet 3
         sheet3.getColumn(1).width = 8; // No
-        sheet3.getColumn(2).width = 20; // Box Name
-        sheet3.getColumn(3).width = 20; // Tracking
-        sheet3.getColumn(4).width = 20; // Order ID
-        sheet3.getColumn(5).width = 10; // Quantity
-        sheet3.getColumn(6).width = 25; // User
-        sheet3.getColumn(7).width = 15; // Source
-        sheet3.getColumn(8).width = 22; // Created
+        sheet3.getColumn(2).width = 20; // Order ID
+        sheet3.getColumn(3).width = 20; // Picker
+        sheet3.getColumn(4).width = 15; // SKU
+        sheet3.getColumn(5).width = 40; // Product Name
+        sheet3.getColumn(6).width = 15; // Variant
+        sheet3.getColumn(7).width = 10; // Quantity
       }
 
       // Generate and download Excel file
-      const fileName = `Boxes_Count_Report_${format(
+      const fileName = `Pick_Orders_Report_${format(
         new Date(),
         "yyyyMMdd_HHmmss"
       )}.xlsx`;
@@ -505,41 +491,38 @@ export default function BoxesCountTable() {
     }
   };
 
+  // Generate and Print PDF Report
   const handleGenerateAndPrintReport = async () => {
     try {
       setIsLoading(true);
 
-      // First, fetch all data (without pagination limits for the PDF)
-      const params: BoxesCountQueryParams = {};
-
-      if (dateRange?.from) {
-        params.start_date = format(dateRange.from, "yyyy-MM-dd");
-      }
-      if (dateRange?.to) {
-        params.end_date = format(dateRange.to, "yyyy-MM-dd");
-      }
+      // Build date parameters
+      const start_date = dateRange?.from
+        ? format(dateRange.from, "yyyy-MM-dd")
+        : undefined;
+      const end_date = dateRange?.to
+        ? format(dateRange.to, "yyyy-MM-dd")
+        : undefined;
 
       // Fetch all data for PDF (not limited by table pagination)
-      let allReportData: BoxesCountReport[] = [];
+      let allReportData: PickOrder[] = [];
       let currentPage = 1;
       let hasMoreData = true;
 
       while (hasMoreData) {
-        const response = await reportApi.getBoxesCountReports(
+        const response = await pickOrderApi.getPickOrders(
           currentPage,
           100, // Use reasonable page size for API calls
-          params.start_date,
-          params.end_date,
-          searchQuery.trim() || undefined
+          searchQuery,
+          start_date,
+          end_date
         );
 
         if (!response.success) {
-          throw new Error(
-            response.message || "Failed to fetch boxes count reports"
-          );
+          throw new Error(response.message || "Failed to fetch pick orders");
         }
 
-        const pageData = response.data.reports || [];
+        const pageData = response.data.pick_orders || [];
         allReportData = [...allReportData, ...pageData];
 
         // Check if we have more data to fetch
@@ -551,26 +534,16 @@ export default function BoxesCountTable() {
       const reportData = allReportData;
 
       if (reportData.length === 0) {
-        let message = "No boxes count reports found";
-        const filters = [];
+        let message = "No pick orders found";
 
-        if (dateRange?.from) {
-          filters.push(`from: ${format(dateRange.from, "dd MMM yyyy")}`);
-        }
-        if (dateRange?.to) {
-          filters.push(`to: ${format(dateRange.to, "dd MMM yyyy")}`);
+        if (dateRange?.from || dateRange?.to) {
+          message += " for the selected date range";
         }
         if (searchQuery) {
-          filters.push(`search: ${searchQuery}`);
+          message += ` matching "${searchQuery}"`;
         }
 
-        if (filters.length > 0) {
-          message += ` for ${filters.join(", ")}`;
-        }
-
-        message +=
-          ". Try adjusting your filters or selecting a different date range.";
-
+        message += ". Try adjusting your filters.";
         toast.warning(message);
         return;
       }
@@ -581,7 +554,7 @@ export default function BoxesCountTable() {
       // Add title
       doc.setFontSize(14);
       doc.setFont("helvetica", "bold");
-      const titleText = "Boxes Count Reports";
+      const titleText = "Pick Orders Report";
       doc.text(titleText, 14, 15);
 
       // Add filters info
@@ -590,12 +563,16 @@ export default function BoxesCountTable() {
 
       if (dateRange?.from && dateRange?.to) {
         filterData.push([
-          "Periode",
+          "Period",
           `${format(dateRange.from, "dd MMMM yyyy")} - ${format(
             dateRange.to,
             "dd MMMM yyyy"
           )}`,
         ]);
+      }
+
+      if (searchQuery) {
+        filterData.push(["Search Query", searchQuery]);
       }
 
       filterData.push(["Total Records", `${reportData.length}`]);
@@ -639,30 +616,28 @@ export default function BoxesCountTable() {
         });
       }
 
-      // Add "Box Count" title before main table
+      // Add "Pick Orders" title before main table
       const mainTableStartY =
         filterData.length > 0 ? 25 + filterData.length * 8 + 25 : 45;
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.text("Boxes Count", 14, mainTableStartY - 5);
+      doc.text("Pick Orders", 14, mainTableStartY - 5);
 
       // Add main table
       autoTable(doc, {
-        head: [
-          ["No", "Code", "Name", "Ribbon Count", "Online Count", "Total Count"],
-        ],
+        head: [["No", "Picked At", "Order ID", "Tracking", "Picker", "Status"]],
         body: reportData.map((item, index) => [
           index + 1,
-          item.box_code,
-          item.box_name,
-          item.ribbon_count,
-          item.online_count,
-          item.total_count,
+          format(new Date(item.created_at), "dd MMM yyyy HH:mm:ss"),
+          item.order?.order_id || "-",
+          item.order?.tracking || "-",
+          item.picker?.full_name || "-",
+          item.order?.status || "-",
         ]),
         startY: mainTableStartY,
         theme: "grid",
         styles: {
-          fontSize: 10,
+          fontSize: 9,
           cellPadding: 2,
           halign: "center",
           valign: "middle",
@@ -679,108 +654,161 @@ export default function BoxesCountTable() {
         },
         columnStyles: {
           0: { cellWidth: 10 }, // No
-          1: { cellWidth: 27 }, // Box Code
-          2: { cellWidth: 40 }, // Box Name
-          3: { cellWidth: 35 }, // Ribbon Count
-          4: { cellWidth: 35 }, // Online Count
-          5: { cellWidth: 35 }, // Total Count
+          1: { cellWidth: 40 }, // Picked At
+          2: { cellWidth: 35 }, // Order ID
+          3: { cellWidth: 38 }, // Tracking
+          4: { cellWidth: 30 }, // Picker
+          5: { cellWidth: 30 }, // Status
         },
       });
 
-      // Add detailed box items section
+      // Add detailed pick order details section
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const detailYPosition = (doc as any).lastAutoTable.finalY - 5;
+      const detailYPosition = (doc as any).lastAutoTable.finalY + 15;
 
-      // Create flat array of all box details
-      const allBoxDetails: Array<{
-        box_name: string;
-        tracking: string;
+      // Create flat array of all pick order details
+      const allPickOrderDetails: Array<{
+        pick_order_id: number;
         order_id: string;
+        picker_name: string;
+        sku: string;
+        product_name: string;
+        variant: string;
         quantity: number;
-        full_name: string;
-        source: string;
-        created_at: string;
       }> = [];
 
-      reportData.forEach((boxReport) => {
-        if (boxReport.details && boxReport.details.length > 0) {
-          boxReport.details.forEach((detail) => {
-            allBoxDetails.push({
-              box_name: boxReport.box_name,
-              tracking: detail.tracking,
-              order_id: detail.order_id,
+      reportData.forEach((pickOrder) => {
+        if (
+          pickOrder.pick_order_details &&
+          pickOrder.pick_order_details.length > 0
+        ) {
+          pickOrder.pick_order_details.forEach((detail) => {
+            allPickOrderDetails.push({
+              pick_order_id: pickOrder.id,
+              order_id: pickOrder.order?.order_id || "-",
+              picker_name: pickOrder.picker?.full_name || "-",
+              sku: detail.sku,
+              product_name: detail.product_name,
+              variant: detail.variant || "-",
               quantity: detail.quantity,
-              full_name: detail.full_name,
-              source: detail.source,
-              created_at: detail.created_at,
             });
           });
         }
       });
 
-      console.log(
-        `PDF Generation - Box Details: Found ${allBoxDetails.length} detail records`
-      );
+      // Add pick order details table if there are any details
+      if (allPickOrderDetails.length > 0) {
+        // Check if we need a new page
+        if (detailYPosition > 250) {
+          doc.addPage();
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.text("Pick Order Details", 14, 15);
 
-      // Add box details table if there are any details
-      if (allBoxDetails.length > 0) {
-        // Add "Details Box Count" title before details table
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("Details Boxes Count", 14, detailYPosition + 20);
-
-        autoTable(doc, {
-          head: [
-            [
-              "No",
-              "Box Name",
-              "Tracking",
-              "Order ID",
-              "Qty",
-              "User",
-              "Source",
-              "Created",
+          autoTable(doc, {
+            head: [
+              [
+                "No",
+                "Order ID",
+                "Picker",
+                "SKU",
+                "Product Name",
+                "Variant",
+                "Qty",
+              ],
             ],
-          ],
-          body: allBoxDetails.map((detail, index) => [
-            index + 1,
-            detail.box_name,
-            detail.tracking,
-            detail.order_id,
-            detail.quantity,
-            detail.full_name,
-            detail.source,
-            format(new Date(detail.created_at), "dd MMM yyyy - HH:mm:ss"),
-          ]),
-          startY: detailYPosition + 25,
-          theme: "grid",
-          styles: {
-            fontSize: 9,
-            cellPadding: 2,
-            halign: "center",
-            valign: "middle",
-            lineColor: [0, 0, 0],
-            lineWidth: 0.1,
-          },
-          headStyles: {
-            fillColor: [255, 255, 255],
-            textColor: 0,
-            lineColor: [0, 0, 0],
-            lineWidth: 0.1,
-            halign: "center",
-            valign: "middle",
-          },
-          columnStyles: {
-            0: { cellWidth: 10 }, // No
-            1: { cellWidth: 22 }, // Box Name
-            2: { cellWidth: 35 }, // Tracking
-            3: { cellWidth: 33 }, // Order ID
-            4: { cellWidth: 10 }, // Qty
-            5: { cellWidth: 25 }, // User
-            6: { cellWidth: 20 }, // Source
-            7: { cellWidth: 27 }, // Created
-          },
-        });
+            body: allPickOrderDetails.map((detail, index) => [
+              index + 1,
+              detail.order_id,
+              detail.picker_name,
+              detail.sku,
+              detail.product_name,
+              detail.variant,
+              detail.quantity,
+            ]),
+            startY: 20,
+            theme: "grid",
+            styles: {
+              fontSize: 8,
+              cellPadding: 2,
+              halign: "center",
+              valign: "middle",
+              lineColor: [0, 0, 0],
+              lineWidth: 0.1,
+            },
+            headStyles: {
+              fillColor: [255, 255, 255],
+              textColor: 0,
+              lineColor: [0, 0, 0],
+              lineWidth: 0.1,
+              halign: "center",
+              valign: "middle",
+            },
+            columnStyles: {
+              0: { cellWidth: 10 }, // No
+              1: { cellWidth: 30 }, // Order ID
+              2: { cellWidth: 25 }, // Picker
+              3: { cellWidth: 20 }, // SKU
+              4: { cellWidth: 50 }, // Product Name
+              5: { cellWidth: 20 }, // Variant
+              6: { cellWidth: 12 }, // Qty
+            },
+          });
+        } else {
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.text("Pick Order Details", 14, detailYPosition);
+
+          autoTable(doc, {
+            head: [
+              [
+                "No",
+                "Order ID",
+                "Picker",
+                "SKU",
+                "Product Name",
+                "Variant",
+                "Qty",
+              ],
+            ],
+            body: allPickOrderDetails.map((detail, index) => [
+              index + 1,
+              detail.order_id,
+              detail.picker_name,
+              detail.sku,
+              detail.product_name,
+              detail.variant,
+              detail.quantity,
+            ]),
+            startY: detailYPosition + 5,
+            theme: "grid",
+            styles: {
+              fontSize: 8,
+              cellPadding: 2,
+              halign: "center",
+              valign: "middle",
+              lineColor: [0, 0, 0],
+              lineWidth: 0.1,
+            },
+            headStyles: {
+              fillColor: [255, 255, 255],
+              textColor: 0,
+              lineColor: [0, 0, 0],
+              lineWidth: 0.1,
+              halign: "center",
+              valign: "middle",
+            },
+            columnStyles: {
+              0: { cellWidth: 10 }, // No
+              1: { cellWidth: 30 }, // Order ID
+              2: { cellWidth: 25 }, // Picker
+              3: { cellWidth: 20 }, // SKU
+              4: { cellWidth: 66 }, // Product Name
+              5: { cellWidth: 20 }, // Variant
+              6: { cellWidth: 12 }, // Qty
+            },
+          });
+        }
       }
 
       // Open in new tab for print preview
@@ -814,31 +842,114 @@ export default function BoxesCountTable() {
     }
   };
 
-  const toggleRow = (boxId: number) => {
-    setExpandedRows((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(boxId)) {
-        newSet.delete(boxId);
-      } else {
-        newSet.add(boxId);
-      }
-      return newSet;
-    });
+  // Render expanded row content
+  const renderExpandedContent = (pickOrderData: PickOrder) => {
+    const details = pickOrderData.pick_order_details || [];
+
+    if (details.length === 0) {
+      return null;
+    }
+
+    return (
+      <div>
+        <div className="p-4 bg-muted/30">
+          <div className="mt-3 pt-3 border-t">
+            <h4 className="text-sm font-semibold mb-3">Pick Order Details</h4>
+            <div className="space-y-3">
+              {details.map((detail) => (
+                <div
+                  key={detail.id}
+                  className="border rounded-lg p-4 bg-background"
+                >
+                  <div className="flex gap-4">
+                    {/* Product Image */}
+                    {detail.product?.image && (
+                      <div className="flex-shrink-0">
+                        <Image
+                          src={detail.product.image}
+                          alt={detail.product.name || "Product"}
+                          width={64}
+                          height={64}
+                          className="w-16 h-16 object-cover rounded-md border"
+                          onError={(e) => {
+                            e.currentTarget.src = "/images/placeholder.png";
+                          }}
+                        />
+                      </div>
+                    )}
+
+                    {/* Product Details */}
+                    <div className="flex-1 space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="font-medium text-sm">
+                            {detail.product_name}
+                          </div>
+                          {detail.sku && (
+                            <div className="text-xs text-muted-foreground font-mono">
+                              SKU: {detail.sku}
+                            </div>
+                          )}
+                          {detail.variant && detail.variant !== "-" && (
+                            <div className="text-xs text-muted-foreground">
+                              Variant: {detail.variant}
+                            </div>
+                          )}
+                        </div>
+                        <Badge variant="secondary" className="ml-2">
+                          Qty: {detail.quantity}
+                        </Badge>
+                      </div>
+
+                      {detail.product?.location && (
+                        <div className="text-xs text-muted-foreground">
+                          Location: {detail.product.location}
+                        </div>
+                      )}
+
+                      {detail.product?.barcode && (
+                        <div className="text-xs text-muted-foreground">
+                          Barcode: {detail.product.barcode}
+                        </div>
+                      )}
+
+                      <div className="text-xs text-muted-foreground">
+                        Added:{" "}
+                        {format(
+                          new Date(detail.created_at),
+                          "dd MMM yyyy HH:mm"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {details.length > 0 && (
+            <div className="mt-3 pt-3 border-t text-sm text-muted-foreground">
+              Total items:{" "}
+              {details.reduce((sum, detail) => sum + detail.quantity, 0)} in{" "}
+              {details.length} product{details.length === 1 ? "" : "s"}
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
-  const totalPages = Math.ceil(pagination.total / pagination.limit);
-
-  const columns: ColumnDef<BoxesCountReport>[] = [
+  const columns: ColumnDef<PickOrder>[] = [
     {
       id: "expand",
       header: () => (
         <div className="text-sm text-center font-semibold w-12"></div>
       ),
       cell: ({ row }) => {
-        const boxId = row.original.box_id;
-        const isExpanded = expandedRows.has(boxId);
-        const hasDetails =
-          row.original.details && row.original.details.length > 0;
+        const pickOrderData = row.original;
+        const details = pickOrderData.pick_order_details || [];
+        const hasDetails = details.length > 0;
+        const isExpanded = expandedRows.has(pickOrderData.id);
 
         if (!hasDetails) {
           return <div className="w-12"></div>;
@@ -846,7 +957,11 @@ export default function BoxesCountTable() {
 
         return (
           <div className="flex justify-start">
-            <Button onClick={() => toggleRow(boxId)} className="h-8 w-8 p-0">
+            <Button
+              onClick={() => toggleRowExpansion(pickOrderData.id)}
+              className="h-8 w-8 p-0"
+              variant="default"
+            >
               {isExpanded ? (
                 <ChevronDown className="h-4 w-4" />
               ) : (
@@ -858,57 +973,140 @@ export default function BoxesCountTable() {
       },
     },
     {
-      accessorKey: "box_code",
-      header: () => (
-        <div className="text-sm text-center font-semibold">Box Code</div>
-      ),
+      accessorKey: "id",
+      header: () => <div className="text-sm text-center font-semibold">ID</div>,
       cell: ({ row }) => (
         <div className="font-mono text-sm text-center">
-          {row.getValue("box_code")}
+          {row.getValue("id")}
         </div>
       ),
     },
     {
-      accessorKey: "box_name",
+      accessorKey: "created_at",
       header: () => (
-        <div className="text-sm text-center font-semibold">Box Name</div>
+        <div className="text-sm text-center font-semibold">Picked</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-sm text-center">{row.getValue("box_name")}</div>
-      ),
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("created_at"));
+        return (
+          <div className="text-xs text-muted-foreground text-center">
+            {format(date, "dd MMM yyyy")}
+            <br />
+            {format(date, "HH:mm:ss")}
+          </div>
+        );
+      },
     },
     {
-      accessorKey: "total_count",
+      accessorKey: "picker",
       header: () => (
-        <div className="text-sm text-center font-semibold">Total Count</div>
+        <div className="text-sm text-center font-semibold">Picker</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-sm text-center font-medium">
-          {row.getValue("total_count")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="text-sm">
+            {pickOrderData.picker ? (
+              <div className="text-center">
+                <div className="font-medium">
+                  {pickOrderData.picker.full_name}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  @{pickOrderData.picker.username}
+                </div>
+              </div>
+            ) : (
+              <span className="text-muted-foreground">-</span>
+            )}
+          </div>
+        );
+      },
     },
     {
-      accessorKey: "ribbon_count",
+      accessorKey: "order_id",
       header: () => (
-        <div className="text-sm text-center font-semibold">Ribbon Count</div>
+        <div className="text-sm text-center font-semibold">Order ID</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-sm text-center">
-          {row.getValue("ribbon_count")}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="font-mono text-sm text-center">
+            {pickOrderData.order?.order_id || "-"}
+          </div>
+        );
+      },
     },
     {
-      accessorKey: "online_count",
+      accessorKey: "tracking",
       header: () => (
-        <div className="text-sm text-center font-semibold">Online Count</div>
+        <div className="text-sm text-center font-semibold">Tracking</div>
       ),
-      cell: ({ row }) => (
-        <div className="text-sm text-center">
-          {row.getValue("online_count")}
-        </div>
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="font-mono text-sm text-center">
+            {pickOrderData.order?.tracking || "-"}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "channel",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Channel</div>
       ),
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="text-sm text-center">
+            {pickOrderData.order?.channel || "-"}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "store",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Store</div>
+      ),
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="text-sm text-center">
+            {pickOrderData.order?.store || "-"}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "status",
+      header: () => (
+        <div className="text-sm text-center font-semibold">Status</div>
+      ),
+      cell: ({ row }) => {
+        const pickOrderData = row.original;
+        return (
+          <div className="text-sm text-center">
+            <Badge variant="outline">
+              {pickOrderData.order?.status || "-"}
+            </Badge>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "updated_at",
+      header: () => <div className="text-sm font-semibold">Updated</div>,
+      cell: ({ row }) => {
+        const date = new Date(row.getValue("updated_at"));
+        return (
+          <div className="text-xs text-muted-foreground text-center">
+            {format(date, "dd MMM yyyy")}
+            <br />
+            {format(date, "HH:mm:ss")}
+          </div>
+        );
+      },
     },
   ];
 
@@ -935,18 +1133,20 @@ export default function BoxesCountTable() {
           <div className="flex justify-start gap-2 items-center">
             <form onSubmit={handleSearch} className="flex gap-2 items-center">
               <Input
-                placeholder="Search boxes..."
+                placeholder="Search pick orders..."
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="max-w-sm"
               />
             </form>
           </div>
+
+          {/* Date Range Picker */}
           <div className="flex justify-start gap-2 items-center">
             <DateRangePicker
               date={dateRange}
-              onDateChange={handleDateRangeChange}
-              className="max-w-sm"
+              onDateChange={setDateRange}
+              className="w-auto"
             />
           </div>
         </div>
@@ -1074,17 +1274,14 @@ export default function BoxesCountTable() {
                 >
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Loading boxes count reports...
+                    Loading pick orders...
                   </div>
                 </TableCell>
               </TableRow>
-            ) : (() => {
-                const rows = table.getRowModel()?.rows;
-                return rows && Array.isArray(rows) && rows.length > 0;
-              })() ? (
-              table.getRowModel().rows!.map((row) => {
-                const isExpanded = expandedRows.has(row.original.box_id);
-                const details = row.original.details || [];
+            ) : table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => {
+                const pickOrderData = row.original;
+                const isExpanded = expandedRows.has(pickOrderData.id);
 
                 return (
                   <React.Fragment key={row.id}>
@@ -1098,74 +1295,10 @@ export default function BoxesCountTable() {
                         </TableCell>
                       ))}
                     </TableRow>
-
-                    {/* Expanded row with details */}
-                    {isExpanded && details.length > 0 && (
+                    {isExpanded && (
                       <TableRow>
-                        <TableCell
-                          colSpan={columns.length}
-                          className="p-0 bg-muted/50"
-                        >
-                          <div className="p-4">
-                            <h4 className="font-semibold mb-3 text-sm">
-                              Box Details ({details.length} items)
-                            </h4>
-                            <div className="rounded-md border bg-background">
-                              <Table>
-                                <TableHeader className="border-b">
-                                  <TableRow>
-                                    <TableHead className="text-center">
-                                      Tracking
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                      Order ID
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                      Quantity
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                      User
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                      Source
-                                    </TableHead>
-                                    <TableHead className="text-center">
-                                      Created
-                                    </TableHead>
-                                  </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                  {details.map((detail, idx) => (
-                                    <TableRow key={idx}>
-                                      <TableCell className="text-center font-mono text-sm">
-                                        {detail.tracking}
-                                      </TableCell>
-                                      <TableCell className="text-center text-sm">
-                                        {detail.order_id}
-                                      </TableCell>
-                                      <TableCell className="text-center text-sm">
-                                        {detail.quantity}
-                                      </TableCell>
-                                      <TableCell className="text-center text-sm">
-                                        {detail.full_name}
-                                      </TableCell>
-                                      <TableCell className="text-center text-sm">
-                                        <span className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700">
-                                          {detail.source}
-                                        </span>
-                                      </TableCell>
-                                      <TableCell className="text-center text-sm">
-                                        {format(
-                                          new Date(detail.created_at),
-                                          "dd MMM yyyy - HH:mm:ss"
-                                        )}
-                                      </TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
-                            </div>
-                          </div>
+                        <TableCell colSpan={columns.length} className="p-0">
+                          {renderExpandedContent(pickOrderData)}
                         </TableCell>
                       </TableRow>
                     )}
@@ -1178,7 +1311,7 @@ export default function BoxesCountTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No boxes count reports found.
+                  No pick orders found.
                 </TableCell>
               </TableRow>
             )}
@@ -1191,7 +1324,7 @@ export default function BoxesCountTable() {
         <div className="text-sm text-muted-foreground">
           Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
           {Math.min(pagination.page * pagination.limit, pagination.total)} of{" "}
-          {pagination.total} boxes count reports
+          {pagination.total} pick orders
         </div>
         <div className="flex items-center gap-2">
           <Button
