@@ -68,6 +68,7 @@ export default function AppNavbar() {
   const { theme, setTheme } = useTheme();
   const { startTransition } = useThemeTransition();
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const { user, logout, hasAnyRole } = useAuth();
   const router = useRouter();
 
@@ -83,6 +84,14 @@ export default function AppNavbar() {
 
   useEffect(() => {
     setMounted(true);
+
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 10;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleThemeToggle = () => {
@@ -100,7 +109,13 @@ export default function AppNavbar() {
   }
 
   return (
-    <header className="flex h-16 justify-between items-center gap-2">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 flex h-16 justify-between items-center gap-2 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/80 backdrop-blur-md shadow-md border-b"
+          : "bg-transparent"
+      }`}
+    >
       <div className="flex items-center gap-2 px-4">
         <div className="font-bold">
           <Link href="/dashboard">LIVOTECH</Link>
